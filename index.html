@@ -232,6 +232,23 @@
   #tabBar button.on{background:var(--txt); color:#FFFEF6; border-color:var(--txt);}
   body.coach .wrap > :not(.topbar):not(#tabBar):not(#coachView){display:none !important;}
   body:not(.coach) #coachView{display:none !important;}
+  /* v12 내 서브(레시피+부적) 탭 */
+  body.recipe .wrap > :not(.topbar):not(#tabBar):not(#recipeView){display:none !important;}
+  body:not(.recipe) #recipeView{display:none !important;}
+  #recipeView .rcRow{margin-bottom:8px;}
+  #recipeView .rcLabel{font-size:11.5px; font-weight:700; color:var(--sub); margin-bottom:4px;}
+  #recipeView .rcChips{display:flex; flex-wrap:wrap; gap:5px;}
+  #recipeView .rcChips button{padding:7px 11px; font-size:12px; font-weight:700; border-radius:999px;
+    border:1.5px solid var(--line); background:var(--card2); color:var(--txt); cursor:pointer;}
+  #recipeView .rcChips button.on{background:var(--txt); color:#FFFEF6; border-color:var(--txt);}
+  #recipeView .rcNote{width:100%; padding:9px 11px; border-radius:9px; border:1.5px solid var(--line);
+    background:var(--card2); color:var(--txt); font-size:13px; font-family:inherit;}
+  #recipeView .rcStamp{font-size:10.5px; color:var(--sub); margin-top:6px;}
+  .charmItem{padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; margin-bottom:7px; background:var(--card2);}
+  .charmItem.star{border-color:#C79A2A; background:rgba(255,210,63,.12);}
+  .charmItem .cTxt{font-size:13px; line-height:1.5;}
+  .charmItem .cMeta{font-size:10.5px; color:var(--sub); margin-top:4px; display:flex; justify-content:space-between; align-items:center;}
+  .charmItem .cBtns button{border:none; background:none; cursor:pointer; font-size:13px; padding:2px 4px;}
   /* 랠리 모드 숨김 (코드 보존, UI만) — v10 서브 특화 */
   #stroke button:not([data-v="serve"]){display:none !important;}
   #coachView .cvCard{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:13px; margin-bottom:10px;}
@@ -306,11 +323,13 @@
   </div>
 
   <div id="tabBar">
-    <button id="tabCoach" class="on">🎯 서브 진단</button>
-    <button id="tabSim">🔬 서브 시뮬레이터</button>
+    <button id="tabCoach" class="on">🎯 진단</button>
+    <button id="tabSim">🔬 실험실</button>
+    <button id="tabRecipe">🧿 내 서브</button>
   </div>
 
   <section id="coachView">
+    <button id="charmStrip" style="display:none; width:100%; text-align:left; margin-bottom:8px; padding:8px 12px; border-radius:10px; border:1.5px solid #C79A2A; background:rgba(255,210,63,.14); font-size:12px; font-weight:600; color:var(--txt); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></button>
     <div class="cvCard">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;">
         <div style="font-size:14.5px; font-weight:800;">방금 친 서브, 어떻게 됐어요?</div>
@@ -393,9 +412,59 @@
       <div id="sessBars"></div>
       <div class="seqDots" id="seqDots"></div>
       <div id="patternBox"></div>
+      <div id="charmNudge" style="display:none; margin-top:9px; padding:9px 11px; border-radius:10px; background:rgba(255,210,63,.14); border:1.5px solid #C79A2A; font-size:12.5px; line-height:1.5;">🧿 오늘 잘 들어가네요! <b>지금 감각</b>을 부적으로 남겨볼까요? <button id="charmNudgeBtn" style="margin-left:6px; padding:4px 10px; border-radius:8px; border:1.5px solid var(--txt); background:var(--txt); color:#FFFEF6; font-size:11.5px; font-weight:700; cursor:pointer;">남기기</button></div>
     </div>
 
     <div class="foot" style="margin-top:2px;">결과 기록으로 <b>'어느 방향으로 틀렸는지'(물리)</b>까지는 알 수 있지만, 몸의 원인은 <b>가능성 그룹</b>으로만 짚어드려요 — 확정은 영상 촬영이 필요합니다. 코치 레슨을 대체하지 않아요. 근거: Elliott·Reid·Cross 등 영어권 연구 (출처 목록은 GitHub README).</div>
+  </section>
+
+  <!-- v12 내 서브 — 레시피(1st/2nd) + 부적 보관함 -->
+  <section id="recipeView">
+    <div class="cvCard">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px;">
+        <div style="font-size:14.5px; font-weight:800;">1️⃣ 퍼스트 서브 레시피</div>
+        <span class="rcStamp" id="stamp_r1"></span>
+      </div>
+      <div class="rcRow"><div class="rcLabel">어디 서서</div>
+        <div class="rcChips" data-rc="r1" data-f="pos"><button data-v="center">센터 마크 옆</button><button data-v="step">한두 걸음 바깥</button><button data-v="wide">와이드 쪽</button></div></div>
+      <div class="rcRow"><div class="rcLabel">공의 어디를</div>
+        <div class="rcChips" data-rc="r1" data-f="ball"><button data-v="back">뒤 정중앙</button><button data-v="top">12~1시</button><button data-v="side">2~3시 옆면</button><button data-v="brush">7→1시 쓸어올림</button></div></div>
+      <div class="rcRow"><div class="rcLabel">서브 종류</div>
+        <div class="rcChips" data-rc="r1" data-f="type"><button data-v="flat">🎯 플랫</button><button data-v="slice">↶ 슬라이스</button><button data-v="kick">↗ 킥</button></div></div>
+      <div class="rcRow"><div class="rcLabel">어떻게 + 마인드 (한 줄)</div>
+        <input class="rcNote" id="note_r1" maxlength="120" placeholder="예: 토스 높게-앞 · 최고점 직선 관통 · '창으로 던진다'만 생각"></div>
+    </div>
+
+    <div class="cvCard">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px;">
+        <div style="font-size:14.5px; font-weight:800;">2️⃣ 세컨드 서브 레시피</div>
+        <span class="rcStamp" id="stamp_r2"></span>
+      </div>
+      <div class="rcRow"><div class="rcLabel">어디 서서</div>
+        <div class="rcChips" data-rc="r2" data-f="pos"><button data-v="center">센터 마크 옆</button><button data-v="step">한두 걸음 바깥</button><button data-v="wide">와이드 쪽</button></div></div>
+      <div class="rcRow"><div class="rcLabel">공의 어디를</div>
+        <div class="rcChips" data-rc="r2" data-f="ball"><button data-v="back">뒤 정중앙</button><button data-v="top">12~1시</button><button data-v="side">2~3시 옆면</button><button data-v="brush">7→1시 쓸어올림</button></div></div>
+      <div class="rcRow"><div class="rcLabel">서브 종류</div>
+        <div class="rcChips" data-rc="r2" data-f="type"><button data-v="flat">🎯 플랫</button><button data-v="slice">↶ 슬라이스</button><button data-v="kick">↗ 킥</button></div></div>
+      <div class="rcRow"><div class="rcLabel">어떻게 + 마인드 (한 줄)</div>
+        <input class="rcNote" id="note_r2" maxlength="120" placeholder="예: 같은 자리 · 공 2~3시 깎기 · '스핀 듬뿍, 네트 위 높게'"></div>
+    </div>
+
+    <div class="cvCard">
+      <div style="font-size:14.5px; font-weight:800; margin-bottom:4px;">🧿 부적 보관함</div>
+      <div style="font-size:11px; color:var(--sub); margin-bottom:9px;">잘 들어간 날의 감각 스냅샷 — 그날 성공률이 도장으로 찍혀요</div>
+      <div id="charmInputRow" style="display:none; margin-bottom:9px;">
+        <input class="rcNote" id="charmInput" maxlength="120" placeholder="지금 감각 한 줄 — 예: 어깨 힘 빼고, 토스 잡으러 올라간다는 느낌">
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <button id="charmSaveBtn" style="flex:1; padding:9px; border-radius:9px; border:none; background:var(--txt); color:#FFFEF6; font-weight:800; font-size:13px; cursor:pointer;">🧿 부적으로 저장</button>
+          <button id="charmCancelBtn" style="padding:9px 14px; border-radius:9px; border:1.5px solid var(--line); background:var(--card2); color:var(--sub); font-size:12px; cursor:pointer;">취소</button>
+        </div>
+      </div>
+      <button id="charmNewBtn" style="width:100%; margin-bottom:9px; padding:9px; border-radius:9px; border:1.5px dashed #C79A2A; background:rgba(255,210,63,.10); color:var(--txt); font-weight:700; font-size:12.5px; cursor:pointer;">+ 지금 감각을 부적으로 남기기</button>
+      <div id="charmList"></div>
+    </div>
+
+    <div class="foot" style="margin-top:2px;">🧿 부적과 레시피는 '정답'이 아니라 <b>그날의 나를 소환하는 기록</b>이에요. 오늘 몸은 다를 수 있어요 — 안 되는 날엔 부적을 탓하지 말고 진단 탭으로.</div>
   </section>
 
   <div class="card mainCard">
@@ -4100,7 +4169,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     if(d.tip) html += `<div class="dTrust">${d.tip}</div>`;
     if(d.trust) html += `<div class="dTrust${d.group==="lateral"?" strong":""}">${d.trust}</div>`;
     html += `<div class="dBtns">`;
-    if(r==="good") html += `<button id="dCardBtn">📸 이 서브, 카드로 남기기</button>`;
+    if(r==="good") html += `<button id="dCharmBtn">🧿 부적 남기기</button><button id="dCardBtn">📸 카드로 남기기</button>`;
     else html += `<button id="dSimBtn">🔬 왜 그런지 시뮬로 보기</button>`;
     html += `<button id="dCloseBtn">닫기</button></div>`;
     const card = $("diagCard");
@@ -4123,6 +4192,8 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     });
     const cb = $("dCardBtn");
     if(cb) cb.addEventListener("click", ()=>{ switchTab(false); setTimeout(()=>$("openWinnerBtn").click(), 350); });
+    const chb = $("dCharmBtn");
+    if(chb) chb.addEventListener("click", ()=>{ switchTab("recipe"); setTimeout(openCharmInput, 100); });
     $("dCloseBtn").addEventListener("click", ()=>{ card.style.display="none"; });
     // 원리 보기 토글 (내용은 처음 열 때 1회 렌더)
     card.querySelectorAll(".mechToggle").forEach(btn => btn.addEventListener("click", ()=>{
@@ -4143,6 +4214,8 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     if(!s.length){
       $("sessSummary").textContent = "아직 기록이 없어요. 서브 치고 위 버튼 하나만 눌러보세요.";
       $("sessBars").innerHTML = ""; $("seqDots").innerHTML = ""; $("patternBox").style.display = "none";
+      if($("charmNudge")) $("charmNudge").style.display = "none";
+      renderCharmStrip();
       syncNth(); return;
     }
     const inCnt = s.filter(e=>e.r==="good"||e.r==="weak").length;
@@ -4170,6 +4243,14 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       pb.innerHTML = `<b>📊 패턴:</b> 최근 ${recent.length}구 중 ${top[1]}구 — ` + GROUP_MSG[top[0]];
       pb.style.display = "block";
     } else pb.style.display = "none";
+    // v12 조건부 부적 프롬프트 — 성공률 70%+ · 8구+ · 오늘 부적 없음 (패널 B: 조건부만)
+    const nudge = $("charmNudge");
+    if(nudge){
+      const today = new Date().toDateString();
+      const hasToday = CHARMS.some(c=>new Date(c.t).toDateString()===today);
+      nudge.style.display = (s.length>=8 && inCnt/s.length>=0.7 && !hasToday) ? "block" : "none";
+    }
+    renderCharmStrip();
     syncNth();
   }
 
@@ -4198,15 +4279,130 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     showToast("🆕 새 세션! 이전 기록은 보관돼요.");
   });
 
-  // ── 탭 전환
-  function switchTab(coach){
-    document.body.classList.toggle("coach", coach);
-    $("tabCoach").classList.toggle("on", coach);
-    $("tabSim").classList.toggle("on", !coach);
-    if(!coach && R.sim) render();
+  // ── 탭 전환 (v12: 진단/실험실/내서브 3탭 — boolean 인자는 하위 호환)
+  function switchTab(v){
+    const view = v===true ? "coach" : (v===false ? "sim" : v);
+    document.body.classList.toggle("coach", view==="coach");
+    document.body.classList.toggle("recipe", view==="recipe");
+    $("tabCoach").classList.toggle("on", view==="coach");
+    $("tabSim").classList.toggle("on", view==="sim");
+    $("tabRecipe").classList.toggle("on", view==="recipe");
+    if(view==="sim" && R.sim) render();
+    if(view==="recipe") renderRecipe();
   }
-  $("tabCoach").addEventListener("click", ()=>switchTab(true));
-  $("tabSim").addEventListener("click", ()=>switchTab(false));
+  $("tabCoach").addEventListener("click", ()=>switchTab("coach"));
+  $("tabSim").addEventListener("click", ()=>switchTab("sim"));
+  $("tabRecipe").addEventListener("click", ()=>switchTab("recipe"));
+
+  // ── v12 내 서브 레시피(1st/2nd) + 부적 보관함 (패널 7.01 승인: 칩+자유한줄·접이식 띠·기록 프레이밍)
+  let RECIPES = {};
+  try{ RECIPES = JSON.parse(localStorage.getItem("sk_recipes")||"{}"); }catch(e){}
+  let CHARMS = [];
+  try{ CHARMS = JSON.parse(localStorage.getItem("sk_charms")||"[]"); }catch(e){}
+  const saveRc = () => { try{ localStorage.setItem("sk_recipes", JSON.stringify(RECIPES)); }catch(e){} };
+  const saveCh = () => {
+    // 자동 정리: ⭐ 보존 + 최신순 30개 (패널 P1)
+    if(CHARMS.length > 30){
+      const stars = CHARMS.filter(c=>c.star);
+      const rest = CHARMS.filter(c=>!c.star).sort((a,b)=>b.t-a.t).slice(0, Math.max(0, 30-stars.length));
+      CHARMS = [...stars, ...rest].sort((a,b)=>a.t-b.t);
+    }
+    try{ localStorage.setItem("sk_charms", JSON.stringify(CHARMS)); }catch(e){}
+  };
+  const esc = s => String(s||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  function sessRate(){
+    const s = sess().filter(e=>e.r!=="toss");
+    if(!s.length) return null;
+    const inC = s.filter(e=>e.r==="good"||e.r==="weak").length;
+    return {n:s.length, rate:Math.round(inC/s.length*100)};
+  }
+  function stampTxt(o){
+    if(!o || !o.ts) return "아직 비어 있음";
+    const d = new Date(o.ts);
+    return `수정 ${d.getMonth()+1}/${d.getDate()}` + (o.rate!=null ? ` · 그날 성공률 ${o.rate}% (${o.n}구)` : "");
+  }
+  function touchRc(k){
+    const sr = sessRate();
+    RECIPES[k] = Object.assign(RECIPES[k]||{}, {ts:Date.now(), rate:sr?sr.rate:null, n:sr?sr.n:null});
+  }
+  function renderRecipe(){
+    ["r1","r2"].forEach(k=>{
+      const rc = RECIPES[k]||{};
+      document.querySelectorAll(`.rcChips[data-rc="${k}"]`).forEach(g=>{
+        g.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.v===rc[g.dataset.f]));
+      });
+      if($("note_"+k)) $("note_"+k).value = rc.note||"";
+      if($("stamp_"+k)) $("stamp_"+k).textContent = stampTxt(rc);
+    });
+    renderCharms();
+  }
+  function renderCharms(){
+    const list = $("charmList"); if(!list) return;
+    const sorted = [...CHARMS].sort((a,b)=>(b.star?1:0)-(a.star?1:0) || b.t-a.t);
+    list.innerHTML = sorted.length ? sorted.map(c=>{
+      const d = new Date(c.t);
+      const tn = ({flat:"플랫",slice:"슬라이스",kick:"킥"})[c.type]||"";
+      return `<div class="charmItem${c.star?" star":""}">
+        <div class="cTxt">${c.star?"⭐ ":""}${esc(c.txt)}</div>
+        <div class="cMeta"><span>${d.getMonth()+1}/${d.getDate()} · ${c.rate!=null?`성공률 ${c.rate}% (${c.n}구)`:"세션 기록 없음"}${tn?" · "+tn:""}</span>
+        <span class="cBtns"><button data-ct="${c.t}" data-act="star" title="즐겨찾기">${c.star?"⭐":"☆"}</button><button data-ct="${c.t}" data-act="del" title="삭제">✕</button></span></div>
+      </div>`;
+    }).join("") : `<div style="font-size:12px; color:var(--sub); line-height:1.6;">아직 부적이 없어요. 잘 들어간 날, 굿 서브 진단에서 <b>🧿 부적 남기기</b>를 눌러보세요.</div>`;
+    renderCharmStrip();
+  }
+  function renderCharmStrip(){
+    const st = $("charmStrip"); if(!st) return;
+    const best = [...CHARMS].sort((a,b)=>(b.star?1:0)-(a.star?1:0) || b.t-a.t)[0];
+    if(best){
+      st.style.display = "block";
+      st.textContent = `🧿 ${best.star?"⭐ ":""}${best.txt}` + (best.rate!=null ? ` — 성공률 ${best.rate}%의 그날` : "");
+    } else st.style.display = "none";
+  }
+  function openCharmInput(){
+    $("charmInputRow").style.display = "block";
+    $("charmNewBtn").style.display = "none";
+    $("charmInput").focus();
+  }
+  function closeCharmInput(){
+    $("charmInputRow").style.display = "none";
+    $("charmNewBtn").style.display = "block";
+    $("charmInput").value = "";
+  }
+  document.querySelectorAll("#recipeView .rcChips").forEach(g=>g.addEventListener("click", e=>{
+    const b = e.target.closest("button"); if(!b) return;
+    const k = g.dataset.rc, f = g.dataset.f;
+    RECIPES[k] = RECIPES[k]||{};
+    RECIPES[k][f] = (RECIPES[k][f]===b.dataset.v) ? null : b.dataset.v; // 재탭 = 해제
+    touchRc(k); saveRc(); renderRecipe();
+  }));
+  ["r1","r2"].forEach(k=>{
+    const inp = $("note_"+k); if(!inp) return;
+    inp.addEventListener("change", ()=>{
+      RECIPES[k] = RECIPES[k]||{};
+      RECIPES[k].note = inp.value.slice(0,120);
+      touchRc(k); saveRc(); renderRecipe();
+    });
+  });
+  $("charmNewBtn").addEventListener("click", openCharmInput);
+  $("charmCancelBtn").addEventListener("click", closeCharmInput);
+  $("charmSaveBtn").addEventListener("click", ()=>{
+    const txt = $("charmInput").value.trim();
+    if(!txt){ showToast("한 줄이라도 적어야 부적이 돼요 🙂"); return; }
+    const sr = sessRate();
+    CHARMS.push({t:Date.now(), txt, rate:sr?sr.rate:null, n:sr?sr.n:null, type:serveType, star:false});
+    saveCh(); closeCharmInput(); renderCharms();
+    showToast("🧿 부적 저장! 안 되는 날, 이 감각을 소환하세요.");
+  });
+  $("charmList").addEventListener("click", e=>{
+    const b = e.target.closest("button[data-ct]"); if(!b) return;
+    const t = +b.dataset.ct;
+    const c = CHARMS.find(x=>x.t===t); if(!c) return;
+    if(b.dataset.act==="star") c.star = !c.star;
+    else CHARMS = CHARMS.filter(x=>x.t!==t);
+    saveCh(); renderCharms();
+  });
+  $("charmStrip").addEventListener("click", ()=>switchTab("recipe"));
+  $("charmNudgeBtn").addEventListener("click", ()=>{ switchTab("recipe"); setTimeout(openCharmInput, 100); });
 
   // ── 초기화: 시뮬은 서브 모드로 고정 (랠리 모드는 v10에서 숨김 — 코드 보존)
   const serveBtn = document.querySelector('#stroke button[data-v="serve"]');
