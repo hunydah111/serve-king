@@ -1,0 +1,3424 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>테니스 타점 시뮬레이터 — 내 위닝샷, 누구급?</title>
+<meta name="description" content="라켓 타점·스윙으로 공 궤적 시뮬. 내 샷이 페더러·나달·알카라스 같은 누구와 비슷한지 위닝샷 카드로 만들어 친구한테 공유.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="🎾 내 위닝샷, 누구급?">
+<meta property="og:description" content="라켓 타점·스윙 시뮬레이터 + 위닝샷 카드 메이커. 친구한테 자랑하기.">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="🎾 내 위닝샷, 누구급?">
+<meta name="twitter:description" content="라켓 타점·스윙 시뮬레이터 + 위닝샷 카드 메이커">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%BE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* v8.0 ELSE 톤 (베이지·네이비·노란) */
+  :root{
+    --bg:#EFE6D2;              /* 베이지 배경 */
+    --card:#FFFEF6;            /* 오프화이트 카드 */
+    --card2:#FAF3E0;           /* 라이트 베이지 박스 */
+    --line:rgba(27,58,107,0.18); /* 네이비 라인 (옅게) */
+    --txt:#1B3A6B;             /* 메인 네이비 텍스트 */
+    --sub:rgba(27,58,107,0.65); /* 보조 네이비 텍스트 */
+    --accent:#FFD23F;          /* 노란 액센트 (선택 강조) */
+    --accent2:#1B3A6B;         /* 네이비 보조 액센트 */
+    --red:#FF6B6B; --green:#7FD14F;
+    --start:#7FD14F; --end:#FF6B6B; --orange:#D5621A;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--txt);
+    font-family:"Malgun Gothic","맑은 고딕",system-ui,-apple-system,sans-serif;}
+  .wrap{max-width:520px; margin:0 auto; padding:10px 12px 60px;}
+  .topbar{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;}
+  h1{font-size:18px; margin:2px 0 0; letter-spacing:-.5px;}
+  .tag{font-size:11px; color:var(--sub); margin:2px 0 0; line-height:1.3;}
+  .easyToggle{flex:none; font-size:12px; font-weight:700; padding:7px 10px; border-radius:9px;
+    border:1px solid var(--line); background:var(--card2); color:var(--sub); cursor:pointer; white-space:nowrap;}
+  .easyToggle.on{background:var(--accent2); color:#1a1400; border-color:var(--accent2);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px;}
+  .ctrlGrid{display:flex; gap:10px; margin-top:10px;}
+  .scenChip{padding:6px 10px; font-size:11.5px; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:18px; cursor:pointer; transition:.1s;}
+  .scenChip:hover{border-color:var(--accent2);}
+  .scenChip.on{background:var(--accent2); color:#1a1400; border-color:var(--accent2); font-weight:700;}
+  .ctrlCol{flex:1; display:flex; flex-direction:column; gap:5px; min-width:0;}
+  .ctrlGroupLabel{font-size:10.5px; color:var(--accent); font-weight:700; padding:2px 4px; border-bottom:1px solid var(--line); margin-bottom:2px;}
+  .ctrlRow{display:flex; align-items:center; gap:5px;}
+  .ctrlRowLabel{width:46px; font-size:10.5px; color:var(--sub); font-weight:600; flex:none;}
+  .ctrlRow .seg{flex:1; gap:3px;}
+  .ctrlRow .seg button{padding:6px 2px; font-size:11px;}
+  .strokeRow .seg button{font-size:13px;}
+  #ball{width:220px; height:220px;}
+  .label{font-size:12px; color:var(--sub); margin:0 0 7px; font-weight:600; display:flex; align-items:center; gap:5px;}
+  .q{display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%;
+    background:var(--line); color:var(--txt); font-size:10px; font-weight:700; cursor:pointer; flex:none;}
+  .seg{display:flex; gap:6px;}
+  .seg button{flex:1; padding:10px 4px; border:1px solid var(--line); background:var(--card2);
+    color:var(--sub); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:.12s;}
+  .seg button.on{background:var(--accent); color:#0c1a0c; border-color:var(--accent);}
+  .seg.sm button{font-size:12.5px; padding:8px 3px;}
+  .row{margin-bottom:10px;} .row:last-child{margin-bottom:0;}
+  .ballbox{display:flex; flex-direction:column; align-items:center; position:relative;}
+  #ball{touch-action:none; width:250px; height:250px; max-width:100%;}
+  .onboard{position:absolute; top:120px; left:50%; transform:translateX(-50%); pointer-events:none;
+    background:rgba(255,210,63,.95); color:#1a1400; font-size:12.5px; font-weight:800; padding:7px 12px;
+    border-radius:20px; animation:bob 1.1s ease-in-out infinite; box-shadow:0 3px 12px rgba(0,0,0,.4); z-index:5;}
+  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-7px);}}
+  .readout{display:flex; gap:8px; width:100%; margin-top:8px;}
+  .pill{flex:1; text-align:center; background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:8px 4px;}
+  .pill .big{font-size:14px; font-weight:700;}
+  .pill .sm{font-size:11px; color:var(--sub); margin-top:2px;}
+  .hint{font-size:11px; color:var(--sub); text-align:center; margin-top:8px; line-height:1.5;}
+  .dot{display:inline-block; width:9px; height:9px; border-radius:50%; vertical-align:middle;}
+  details{background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:12px; overflow:hidden;}
+  details>summary{list-style:none; cursor:pointer; padding:13px 14px; font-size:13.5px; font-weight:700;
+    display:flex; justify-content:space-between; align-items:center;}
+  details>summary::-webkit-details-marker{display:none;}
+  details>summary .chev{color:var(--sub); font-size:12px; transition:.15s;}
+  details[open]>summary .chev{transform:rotate(180deg);}
+  details .body{padding:0 12px 12px;}
+  .sliderrow{display:flex; align-items:center; gap:10px;}
+  .sliderrow input[type=range]{flex:1; accent-color:var(--accent);}
+  .sliderval{min-width:62px; text-align:right; font-size:13px; font-weight:700;}
+  .mini{font-size:10.5px; color:var(--sub); margin-top:5px; line-height:1.5;}
+  canvas.view{width:100%; height:auto; display:block; background:#0b1c14; border-radius:10px; border:1px solid var(--line);}
+  .viewlabel{font-size:11px; color:var(--sub); margin:8px 0 4px; display:flex; justify-content:space-between;}
+  .caption{font-size:10.5px; color:var(--sub); text-align:center; margin-top:5px;}
+  .verdict{margin-top:10px; border-radius:12px; padding:12px; text-align:center;}
+  .verdict.in{background:rgba(91,214,111,.13); border:1px solid var(--green);}
+  .verdict.out{background:rgba(255,107,94,.13); border:1px solid var(--red);}
+  .verdict .big{font-size:20px; font-weight:800;}
+  .verdict .coach{font-size:13px; margin-top:6px; line-height:1.55; color:var(--txt);}
+  .stats{display:flex; gap:6px; margin-top:10px;}
+  .stats .s{flex:1; background:var(--card2); border:1px solid var(--line); border-radius:9px; padding:7px 2px; text-align:center;}
+  .stats .s b{font-size:13px;} .stats .s span{font-size:10px; color:var(--sub); display:block; margin-top:2px;}
+  .incChip{font-size:11px; color:var(--orange); font-weight:700;}
+  .presets{display:flex; flex-wrap:wrap; gap:6px;}
+  .presets button{flex:1 1 30%; padding:9px 4px; font-size:12px; font-weight:600;
+    background:var(--card2); color:var(--txt); border:1px solid var(--line); border-radius:9px; cursor:pointer;}
+  .presets button:active{background:var(--accent2); color:#1a1400;}
+  .shareBtn{width:100%; margin-top:4px; padding:11px; border-radius:10px; border:1px solid var(--accent);
+    background:transparent; color:var(--accent); font-size:13px; font-weight:700; cursor:pointer;}
+  .foot{font-size:10.5px; color:var(--sub); line-height:1.6; margin-top:14px; text-align:center;}
+  .hide{display:none !important;}
+  /* toast help */
+  #toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); max-width:440px; width:calc(100% - 28px);
+    background:#0a141b; border:1px solid var(--accent); color:var(--txt); padding:12px 14px; border-radius:12px;
+    font-size:12.5px; line-height:1.6; box-shadow:0 6px 24px rgba(0,0,0,.5); z-index:50; cursor:pointer; display:none;}
+  #toast b{color:var(--accent2);}
+  /* beginner mode */
+  /* ─── Supanova: Winning Shot Card (Vantablack Luxe + Asymmetric Bento) ─── */
+  /* v8.0 ELSE 톤 모달 */
+  #winnerModal{position:fixed; inset:0; background:rgba(27,58,107,0.55); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(8px);}
+  #winnerModal.on{display:flex;}
+  .winCardOuter{
+    width:100%; max-width:420px; aspect-ratio:1/1;
+    background:#1B3A6B;
+    border-radius:24px; padding:6px;
+    box-shadow:0 30px 80px -20px rgba(27,58,107,0.5), 0 0 0 1px rgba(27,58,107,0.1);
+    position:relative; overflow:hidden;
+    font-family:"Pretendard Variable", Pretendard, -apple-system, sans-serif;
+  }
+  .winCardInner{
+    width:100%; height:100%;
+    background:#EFE6D2; border-radius:18px;
+    border:1px solid rgba(27,58,107,0.1);
+    position:relative; overflow:hidden;
+    display:grid; grid-template-rows:auto 1fr auto;
+    padding:18px 18px 16px;
+  }
+  /* 비대칭 텍스처 글로우 — ELSE 톤 옅게 */
+  .winGlow{position:absolute; pointer-events:none;}
+  .winGlow.g1{top:-40px; right:-30px; width:180px; height:180px;
+    background:radial-gradient(circle, rgba(255,210,63,0.30) 0%, transparent 70%); filter:blur(20px);}
+  .winGlow.g2{bottom:-30px; left:-20px; width:160px; height:160px;
+    background:radial-gradient(circle, rgba(255,182,193,0.30) 0%, transparent 70%); filter:blur(20px);}
+  /* 헤더 — 네이비 텍스트 */
+  .winHead{display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:1;}
+  .winBrand{font-size:11px; font-weight:800; letter-spacing:0.04em; color:#1B3A6B; text-transform:uppercase;}
+  .winDate{font-size:10.5px; color:rgba(27,58,107,0.6); font-weight:600;}
+  /* 메인 시각 */
+  .winVisual{position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; padding:8px 0;}
+  .winChar{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .winCharFace{width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#ffd23f,#ffa040); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 14px rgba(255,210,63,0.35); transition:transform .15s cubic-bezier(0.16,1,0.3,1); outline:none; border:2px solid #1B3A6B; -webkit-tap-highlight-color:transparent; position:relative;}
+  .winCharFace:hover{transform:scale(1.05) rotate(-3deg);}
+  .winCharFace:active{transform:scale(0.95);}
+  .winCharFace:focus, .winCharFace:focus-visible{outline:none;}
+  .winCharEmoji{font-size:26px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; line-height:1; display:block; transition:transform .15s cubic-bezier(0.16,1,0.3,1);}
+  .winCharEmoji:active{transform:scale(0.85);}
+  @keyframes hintPulseKf{ 0%{box-shadow:0 4px 14px rgba(255,210,63,0.35), 0 0 0 0 rgba(255,210,63,0.7);} 50%{box-shadow:0 4px 14px rgba(255,210,63,0.35), 0 0 0 14px rgba(255,210,63,0);} 100%{box-shadow:0 4px 14px rgba(255,210,63,0.35), 0 0 0 0 rgba(255,210,63,0);} }
+  .winCharFace.hintPulse{animation:hintPulseKf 1.1s cubic-bezier(0.16,1,0.3,1) 2;}
+  .winCharLabel{flex:1; min-width:0;}
+  .winCharName{font-size:13px; font-weight:800; color:#1B3A6B; line-height:1.3;}
+  .winCharSub{font-size:10.5px; color:rgba(27,58,107,0.6); line-height:1.3;}
+  .winCourt{width:100%; aspect-ratio:1.6/1; background:linear-gradient(135deg,#C49A6E,#A07F50); border-radius:12px; border:2px solid #1B3A6B; position:relative; overflow:hidden;}
+  /* 풋 — 멘트 + CTA (ELSE 톤 네이비 텍스트) */
+  .winFoot{position:relative; z-index:1;}
+  .winShotName{font-size:18px; font-weight:800; color:#1B3A6B; letter-spacing:-0.02em; line-height:1.25; margin-bottom:6px; word-break:keep-all;}
+  .winImpact{font-size:12.5px; color:#D5621A; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;}
+  .winStats{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;}
+  .winStat{font-size:11px; color:rgba(27,58,107,0.75);}
+  .winStat b{color:#1B3A6B; font-weight:800;}
+  .winCTA{display:flex; gap:8px;}
+  .winBtn{flex:1; padding:11px 12px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; border:none; transition:transform .15s cubic-bezier(0.16,1,0.3,1), background .15s;}
+  .winBtn.primary{background:#FFD23F; color:#1B3A6B; border:2px solid #1B3A6B;}
+  .winBtn.primary:hover{transform:translateY(-1px);}
+  .winBtn.ghost{background:transparent; color:#1B3A6B; border:2px solid #1B3A6B;}
+  .winBtn.ghost:hover{background:rgba(27,58,107,0.06);}
+  .winClose{position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; background:#FFFEF6; border:2px solid #1B3A6B; color:#1B3A6B; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; z-index:3;}
+  .winOpenBtn{width:100%; margin-top:8px; padding:13px; background:linear-gradient(135deg,#ffd23f,#ffa040); color:#1a1400; border:none; border-radius:10px; font-size:13.5px; font-weight:800; cursor:pointer; letter-spacing:-0.01em; transition:transform .15s cubic-bezier(0.16,1,0.3,1);}
+  @keyframes winBtnPulseKf{0%{box-shadow:0 0 0 0 rgba(255,210,63,0.55);}70%{box-shadow:0 0 0 12px rgba(255,210,63,0);}100%{box-shadow:0 0 0 0 rgba(255,210,63,0);}}
+  .winOpenBtn.shotReady{animation:winBtnPulseKf 1.3s cubic-bezier(0.16,1,0.3,1) 2;}
+  /* v7.17: 앞면/뒷면 토글 */
+  .winFront{display:contents;}
+  .winBack{display:none;}
+  .winCardInner.flipped .winFront{display:none;}
+  .winCardInner.flipped .winBack{display:flex; flex-direction:column; gap:10px;}
+  .winHeadRight{display:flex; align-items:center; gap:8px;}
+  /* v7.17: 레어도 배지 */
+  .winRarityBadge{display:inline-flex; align-items:center; gap:3px; padding:3px 9px; border-radius:999px; font-size:10.5px; font-weight:800; letter-spacing:-0.01em; border:none; cursor:pointer; background:#9d9da3; color:#0d0d12; transition:transform .15s cubic-bezier(0.16,1,0.3,1); box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+  .winRarityBadge:hover{transform:scale(1.05);}
+  .winRarityBadge:active{transform:scale(0.95);}
+  .winRarityBadge.tier-legend{box-shadow:0 0 12px rgba(255,210,63,0.55), 0 1px 3px rgba(0,0,0,0.3);}
+  .winRarityBadge.tier-epic{box-shadow:0 0 10px rgba(157,95,222,0.45), 0 1px 3px rgba(0,0,0,0.3);}
+  /* v8.0 ELSE 톤 — 시그니처 톤 + 뒷면 */
+  .winTone{font-size:12px; color:rgba(27,58,107,0.78); font-weight:700; margin:-4px 0 6px; letter-spacing:-0.01em;}
+  .winTone:empty{display:none;}
+  /* 뒷면 본문 — 베이지 톤 */
+  .winBackBody{display:flex; flex-direction:column; gap:11px; padding:6px 0; overflow-y:auto;}
+  .winBackSec{background:rgba(27,58,107,0.05); border:1.5px solid rgba(27,58,107,0.15); border-radius:10px; padding:10px 12px;}
+  .winBackSecTitle{font-size:10.5px; font-weight:800; color:rgba(27,58,107,0.6); letter-spacing:0.02em; margin-bottom:6px;}
+  .winBackRarityRow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
+  .winBackRarityBadge{display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:800; background:#9d9da3; color:#0d0d12;}
+  .winBackRarityScore{font-size:11.5px; color:rgba(27,58,107,0.85); font-weight:700;}
+  .winBackRarityScore b{color:#D5621A;}
+  .winBackRarityDist{font-size:10.5px; color:rgba(27,58,107,0.55);}
+  .winBackRarityBlurb{font-size:11.5px; color:rgba(27,58,107,0.75); line-height:1.5;}
+  .winBackMatchPlayer{font-size:13px; font-weight:800; color:#1B3A6B; margin-bottom:3px;}
+  .winBackMatchBasis{font-size:11px; color:rgba(27,58,107,0.7); line-height:1.55;}
+  .winBackInput{font-size:11px; color:rgba(27,58,107,0.78); line-height:1.55;}
+  .winBackInput b{color:#1B3A6B; font-weight:800;}
+  .winBackHowto{font-size:10.5px; color:rgba(27,58,107,0.65); line-height:1.55;}
+  .winBackHowto b{color:rgba(27,58,107,0.9); font-weight:800;}
+  .winBackCTA{margin-top:auto;}
+  /* v7.17: 액자(frame) 외곽 — 카드 outer에 클래스 적용 */
+  .winCardOuter{cursor:pointer;}
+  .winCardOuter.frame-clean{background:linear-gradient(135deg,#0a0a0e 0%,#13141c 60%,#0a0a0e 100%);}
+  .winCardOuter.frame-gold{background:linear-gradient(135deg,#ffd23f,#ffa040,#ffd23f); box-shadow:0 30px 80px -20px rgba(0,0,0,0.8), 0 0 24px rgba(255,210,63,0.3);}
+  .winCardOuter.frame-holo{background:linear-gradient(135deg,#ff7eb6,#9d5fde,#2db8a8,#ff9a3c); background-size:200% 200%; animation:holoShift 6s linear infinite; box-shadow:0 30px 80px -20px rgba(0,0,0,0.8), 0 0 24px rgba(157,95,222,0.3);}
+  .winCardOuter.frame-court{background:linear-gradient(135deg,#7fd14f,#1a8a3a); box-shadow:0 30px 80px -20px rgba(0,0,0,0.8), 0 0 18px rgba(127,209,79,0.25);}
+  .winCardOuter.frame-flag_kr{background:linear-gradient(135deg,#cd2e3a,#ffffff,#0047a0); box-shadow:0 30px 80px -20px rgba(0,0,0,0.8);}
+  .winCardOuter.frame-sunset{background:linear-gradient(135deg,#ff9a3c,#d54a2e,#9d5fde); box-shadow:0 30px 80px -20px rgba(0,0,0,0.8), 0 0 22px rgba(213,74,46,0.3);}
+  .winCardOuter.frame-midnight{background:linear-gradient(135deg,#3a6dd4,#1a3a8a,#0a0a0e); box-shadow:0 30px 80px -20px rgba(0,0,0,0.8), 0 0 18px rgba(127,159,255,0.25);}
+  @keyframes holoShift{0%{background-position:0% 0%;}50%{background-position:100% 100%;}100%{background-position:0% 0%;}}
+  body.easy .adv{display:none !important;}
+  body.easy .rpmNum{display:none;}
+  /* quiz mode */
+  body.quiz #verdict, body.quiz .stats, body.quiz #rpmRef, body.quiz #abBar,
+  body.quiz #side, body.quiz #top, body.quiz #sideCap {
+    filter: blur(14px); opacity:.4; pointer-events:none; transition:filter .25s, opacity .25s;
+  }
+  body.quiz.revealed #verdict, body.quiz.revealed .stats, body.quiz.revealed #rpmRef,
+  body.quiz.revealed #abBar, body.quiz.revealed #side, body.quiz.revealed #top,
+  body.quiz.revealed #sideCap { filter:none; opacity:1; pointer-events:auto; }
+  body:not(.quiz) #quizPanel{ display:none; }
+</style>
+</head>
+<body class="easy">
+<div class="wrap">
+  <div class="topbar" style="align-items:center;">
+    <h1>🎾 테니스 타점 시뮬레이터</h1>
+    <div style="display:flex; gap:5px; align-items:center;">
+      <button class="easyToggle" id="handBtn" style="font-size:11px; padding:5px 8px;">🤚 오른손</button>
+      <button class="easyToggle" id="quizBtn" style="font-size:11px; padding:5px 8px;">🎯 퀴즈</button>
+      <button class="easyToggle on" id="easyBtn" style="font-size:11px; padding:5px 8px;">⚙️ 라켓·전체</button>
+    </div>
+  </div>
+
+  <div class="card mainCard">
+    <div class="strokeRow" style="margin-bottom:8px;">
+      <div class="seg" id="stroke">
+        <button data-v="forehand" class="on">포핸드</button>
+        <button data-v="backhand">백핸드</button>
+        <button data-v="volley">발리</button>
+        <button data-v="serve">서브</button>
+      </div>
+    </div>
+    <!-- v7.21: 풀코트 미니코트 — 본인 위치(노란) + 목표 위치(빨간 별) 모두 찍기 -->
+    <div id="courtPosRow" style="margin-bottom:10px; padding:9px 11px; background:rgba(127,209,79,.06); border:1px solid rgba(127,209,79,.30); border-radius:9px;">
+      <div style="font-size:11.5px; color:var(--accent); font-weight:800; margin-bottom:5px;">📍🎯 코트 위치 <span style="color:var(--sub); font-weight:400; font-size:10.5px;">— 본인(왼쪽)·목표(오른쪽) 찍기/드래그</span></div>
+      <canvas id="miniCourt" width="360" height="130" style="width:100%; max-width:420px; display:block; margin:2px auto 6px; border-radius:8px; cursor:crosshair; touch-action:none;"></canvas>
+      <div style="display:flex; justify-content:space-between; font-size:10.5px; line-height:1.4; gap:8px; margin-bottom:6px;">
+        <div style="flex:1; min-width:0;"><span style="color:#ffd23f; font-weight:700;">📍 본인:</span> <span id="courtXLabel" style="color:#fff;">베이스라인</span></div>
+        <div style="flex:1; min-width:0; text-align:right;"><span style="color:#ff6b5e; font-weight:700;">🎯 목표:</span> <span id="targetLabel" style="color:#fff;">깊은 공 · 센터</span></div>
+      </div>
+      <div id="courtPresets" style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center;"></div>
+      <div id="courtPosAuto" style="display:none; font-size:11px; color:var(--sub); padding-top:5px; text-align:center;"></div>
+    </div>
+    <div class="ballbox" style="position:relative;">
+      <canvas id="ball" width="250" height="250"></canvas>
+      <div class="onboard" id="onboard">👆 스윙 길을 끌어 그려보세요</div>
+      <div id="ballLR" style="display:none; position:absolute; bottom:-2px; left:0; right:0; justify-content:space-between; padding:0 8px; font-size:10.5px; font-weight:700; color:var(--sub); pointer-events:none;">
+        <span id="lblLeft">← 내 왼쪽</span>
+        <span id="lblRight">내 오른쪽 →</span>
+      </div>
+    </div>
+    <div id="serveHint" style="display:none; margin-top:4px; padding:6px 10px; background:rgba(255,210,63,.06); border:1px solid rgba(255,210,63,.25); border-radius:8px; font-size:11.5px; color:var(--txt); line-height:1.5; text-align:center;"></div>
+    <div class="readout">
+      <div class="pill"><div class="big" id="spinType">톱스핀</div><div class="sm" id="spinRpm">~0 rpm</div></div>
+      <div class="pill"><div class="big" id="contactTxt">뒷면 중앙</div><div class="sm">맞는 부분</div></div>
+    </div>
+    <div id="scenarioBar" style="margin-top:8px; padding:8px 10px; background:rgba(255,210,63,.06); border:1px solid rgba(255,210,63,.3); border-radius:9px;">
+      <div style="font-size:11px; color:var(--accent2); font-weight:700; margin-bottom:3px;">🎬 오는 공 + 추천 자세 <span style="color:var(--sub); font-weight:400;">(원탭 셋업)</span></div>
+      <div style="font-size:10.5px; color:var(--sub); margin-bottom:6px;">↪ 칩 하나로 <b>오는 공 + 본인 swing 디폴트</b>까지 한 번에 세팅돼요</div>
+      <div id="scenarioChips" style="display:flex; flex-wrap:wrap; gap:5px;">
+        <button class="scenChip" data-sc="normal">🎾 허리 정타</button>
+        <button class="scenChip" data-sc="lowSlice">🐍 발 앞 슬라이스</button>
+        <button class="scenChip" data-sc="highTop">🏔 머리 위 톱스핀</button>
+        <button class="scenChip" data-sc="fast">⚡ 짧고 빠른 카운터</button>
+        <button class="scenChip" data-sc="deep">🏐 늦게 잡은 깊은 공</button>
+        <button class="scenChip" data-sc="setup">🎯 정타 셋업</button>
+      </div>
+    </div>
+    <div class="ctrlGrid">
+      <div class="ctrlCol">
+        <div class="ctrlGroupLabel">🎾 내 스윙</div>
+        <div class="ctrlRow groundRow"><span class="ctrlRowLabel">회전</span>
+          <div class="seg sm" id="strokeSpin"><button data-v="topspin">🌀 톱스핀</button><button data-v="flat" class="on">→ 정타</button><button data-v="slice">〰 슬라이스</button></div>
+        </div>
+        <div class="ctrlRow"><span class="ctrlRowLabel">세기</span>
+          <div class="seg sm" id="power"><button data-v="low">약</button><button data-v="mid" class="on">보통</button><button data-v="high">세게</button></div>
+        </div>
+        <div class="ctrlRow"><span class="ctrlRowLabel">면각</span>
+          <div class="seg sm" id="face"><button data-v="closed">닫힘</button><button data-v="flat" class="on">평평</button><button data-v="open">열림</button></div>
+        </div>
+        <div class="ctrlRow"><span class="ctrlRowLabel">방향</span>
+          <div class="seg sm" id="aim"><button data-v="left">←왼</button><button data-v="center" class="on">중앙</button><button data-v="right">오른→</button></div>
+        </div>
+        <div class="ctrlRow" style="border-top:1px dashed rgba(127,209,79,.18); padding-top:6px; margin-top:2px;"><span class="ctrlRowLabel">타점</span>
+          <div class="seg sm" id="contactPos"><button data-v="front">앞</button><button data-v="side" class="on">옆</button><button data-v="late">뒤</button></div>
+        </div>
+      </div>
+      <div class="ctrlCol">
+        <div class="ctrlGroupLabel" id="rightGroupLabel">🎾 상대 공</div>
+        <div class="ctrlRow incRow"><span class="ctrlRowLabel">속도</span>
+          <div class="seg sm" id="inSpeed"><button data-v="slow">느림</button><button data-v="mid" class="on">보통</button><button data-v="fast">빠름</button></div>
+        </div>
+        <div class="ctrlRow incRow"><span class="ctrlRowLabel">회전</span>
+          <div class="seg sm" id="inSpin"><button data-v="top">톱</button><button data-v="flat" class="on">플랫</button><button data-v="back">슬</button></div>
+        </div>
+        <div class="ctrlRow incRow"><span class="ctrlRowLabel">공 높이</span>
+          <canvas id="bounceWidget" width="170" height="60" style="touch-action:manipulation; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid var(--line); border-radius:6px;"></canvas>
+        </div>
+        <div class="ctrlRow serveRow hide"><span class="ctrlRowLabel">종류</span>
+          <div class="seg sm" id="serveType"><button data-v="flat" class="on">🎯 플랫</button><button data-v="slice">↶ 슬라이스</button><button data-v="kick">↗ 킥</button></div>
+        </div>
+        <div class="ctrlRow serveRow hide"><span class="ctrlRowLabel">토스</span>
+          <div class="seg sm" id="toss"><button data-v="low">낮음</button><button data-v="mid" class="on">보통</button><button data-v="high">높음</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details id="racketBox" class="adv">
+    <summary><span>🎾 내 라켓 설정 <span style="color:var(--sub);font-weight:400;" id="racketSummary"></span></span><span class="chev">▼</span></summary>
+    <div class="body">
+      <div class="row">
+        <div class="label">내 그립
+          <span class="q" data-help="라켓을 잡는 방식. 그립마다 자연스러운 라켓면 각도가 달라요.<br>· <b>콘티넨탈</b>: 서브·발리 위주, 슬라이스 친화<br>· <b>이스턴</b>: 평평·클래식<br>· <b>세미웨스턴</b>: 가장 흔한 동호인 그립<br>· <b>웨스턴</b>: 톱스핀에 강함<br>· <b>풀웨스턴</b>: 극단 톱스핀, 면이 닫혀있음<br><br><b>그립을 고르면 샷에 맞는 라켓면 각도가 자동 세팅돼요.</b> 면각은 직접 더 조정 가능. (그립 = 면각 결과이므로 물리 입력 중복 없음)">?</span>
+        </div>
+        <select id="grip" style="width:100%; padding:9px 10px; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:9px; font-size:13px;">
+          <option value="continental">콘티넨탈 (서브·발리·슬라이스)</option>
+          <option value="eastern">이스턴 (평평·클래식)</option>
+          <option value="semiwest" selected>세미웨스턴 (가장 흔함)</option>
+          <option value="western">웨스턴 (톱스핀↑)</option>
+          <option value="fullwest">풀웨스턴 (극단 톱스핀)</option>
+        </select>
+        <div class="mini">고르면 현재 샷의 라켓면 각도가 자동 세팅돼요.</div>
+      </div>
+      <div class="row">
+        <div class="label">라켓 모델 (선택하면 자동 입력)</div>
+        <select id="racketModel" style="width:100%; padding:9px 10px; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:9px; font-size:13px;">
+          <option value="">— 직접 설정 —</option>
+          <optgroup label="Wilson">
+            <option value="w-prostaff97">Pro Staff 97 (98·16×19)</option>
+            <option value="w-blade98-1619">Blade 98 16×19</option>
+            <option value="w-blade98-1820">Blade 98 18×20</option>
+            <option value="w-clash100">Clash 100 v3 (100·16×19)</option>
+            <option value="w-burn100">Burn 100 (100·16×19)</option>
+          </optgroup>
+          <optgroup label="Babolat">
+            <option value="b-puredrive">Pure Drive (100·16×19)</option>
+            <option value="b-pureaero">Pure Aero / 나달 (100·16×19)</option>
+            <option value="b-purestrike-1619">Pure Strike 98 16×19</option>
+            <option value="b-purestrike-1820">Pure Strike 98 18×20</option>
+          </optgroup>
+          <optgroup label="Head">
+            <option value="h-speedmp">Speed MP (100·16×19)</option>
+            <option value="h-speedpro">Speed Pro (100·18×20)</option>
+            <option value="h-radical">Radical MP (98·16×19)</option>
+            <option value="h-prestige">Prestige MP (98·18×20)</option>
+            <option value="h-gravity">Gravity Pro (100·18×20)</option>
+          </optgroup>
+          <optgroup label="Yonex">
+            <option value="y-ezone98">EZONE 98 (98·16×19)</option>
+            <option value="y-ezone100">EZONE 100 (100·16×19)</option>
+            <option value="y-vcore98">VCORE 98 (98·16×20)</option>
+            <option value="y-vcore100">VCORE 100 (100·16×19)</option>
+          </optgroup>
+          <optgroup label="Prince">
+            <option value="p-phantom">Phantom 100P (100·18×20)</option>
+            <option value="p-beast">Beast 100 (100·16×18)</option>
+          </optgroup>
+        </select>
+        <div class="mini">모델 모르면 비워두세요. 스펙은 제조사 공개 기준(2024-2026), 동일 모델 세대 차이는 ±1 정도.</div>
+      </div>
+      <div class="row">
+        <div class="label">헤드 사이즈 (라켓 머리 크기)
+          <span class="q" data-help="라켓 머리 면적(제곱인치). 클수록 파워·스위트스팟↑(관용성), 작을수록 컨트롤↑. 동호인은 보통 98~104.">?</span>
+        </div>
+        <div class="seg sm" id="head">
+          <button data-v="95">95</button><button data-v="98">98</button><button data-v="100" class="on">100</button><button data-v="105">105</button><button data-v="110">110</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="label">스트링 패턴 (줄 조밀도)
+          <span class="q" data-help="가로줄×세로줄 개수. 라켓 옆면에 줄이 몇 가닥인지예요.<br>· <b>16×19</b>처럼 가로줄 적으면(오픈) 스핀↑<br>· <b>18×20</b>처럼 촘촘하면 컨트롤·내구성↑<br>모르면 그냥 16×19(가장 흔함) 두세요.">?</span>
+        </div>
+        <div class="seg sm" id="pattern">
+          <button data-v="16x18">16×18</button><button data-v="16x19" class="on">16×19</button><button data-v="16x20">16×20</button><button data-v="18x20">18×20</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="label">텐션 (스트링 장력)
+          <span class="q" data-help="줄을 얼마나 팽팽하게 맸는지(파운드). 낮으면 살짝 파워↑, 높으면 컨트롤↑.<br>실제 파워 차이는 크지 않고 <b>타구감(느낌)</b>에 더 영향을 줘요. 모르면 50~52 두세요.">?</span>
+        </div>
+        <div class="sliderrow">
+          <input type="range" id="tension" min="40" max="68" step="1" value="52">
+          <span class="sliderval" id="tensionVal">52 lbs</span>
+        </div>
+      </div>
+      <details id="tensionBox" style="background:var(--card2); border-radius:10px; margin-top:8px;">
+        <summary style="padding:9px 12px; font-size:12px;"><span>🤔 텐션, 정말 파워에 영향 있어? <span style="color:var(--sub);font-weight:400;">(파워 vs 타구감)</span></span><span class="chev">▼</span></summary>
+        <div class="body" style="font-size:12px; line-height:1.7; padding:0 12px 10px;">
+          <p style="margin:0 0 8px;">시뮬은 텐션이 낮을수록 파워가 살짝 ↑로 잡았어요. 그런데 실측 연구를 보면:</p>
+          <ul style="margin:0 0 8px; padding-left:18px;">
+            <li>반발속도(COR) 차이는 전 범위에서 <b>약 0.02~0.03</b> — <b>측정상 파워 차이는 작아요</b></li>
+            <li>대신 공이 줄에 머무는 시간(dwell time)은 분명히 달라요 → <b>타구감(피드백·컨트롤감)이 확 달라짐</b></li>
+          </ul>
+          <p style="margin:0 0 8px;">정리: "낮은 텐션 = 파워↑"는 흔한 통념이지만, 측정상 코어 효과는 작고 <b>느낌 변화가 더 큼</b>. 텐션은 파워보다 <b>타구감 기준</b>으로 고르는 게 합리적이에요.</p>
+          <p style="margin:0; color:var(--sub); font-size:11px;">출처: <a href="https://twu.tennis-warehouse.com/learning_center/stringbeds.php" target="_blank" style="color:var(--accent2);">TWU – Energy Flow</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/16195027/" target="_blank" style="color:var(--accent2);">String tension & ball rebound</a></p>
+        </div>
+      </details>
+    </div>
+  </details>
+
+  <div class="card">
+    <div id="quizPanel" style="margin-bottom:10px; padding:12px; background:rgba(255,210,63,.08); border:1px solid var(--accent2); border-radius:10px;">
+      <div style="text-align:center; font-size:13.5px; font-weight:800; color:var(--accent2); margin-bottom:8px;">🎯 이 설정으로 치면 어디로?</div>
+      <div class="seg sm" style="flex-wrap:wrap; gap:6px;" id="quizChoices">
+        <button data-q="in_deep" style="flex:1 1 28%;">깊은 인</button>
+        <button data-q="in_mid" style="flex:1 1 28%;">짧은 인</button>
+        <button data-q="net" style="flex:1 1 28%;">네트</button>
+        <button data-q="long" style="flex:1 1 28%;">롱 아웃</button>
+        <button data-q="wide" style="flex:1 1 28%;">사이드 아웃</button>
+      </div>
+      <div id="quizFeedback" style="text-align:center; font-weight:800; font-size:14px; margin-top:10px; min-height:18px;"></div>
+      <div id="quizScore" style="text-align:center; color:var(--sub); font-size:11.5px; margin-top:4px;"></div>
+      <button id="quizShuffleBtn" style="width:100%; margin-top:8px; padding:11px; background:var(--accent2); border:1px solid var(--accent2); color:#1a1400; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer;">🔁 다음 문제 (🎲 무작위)</button>
+    </div>
+    <div class="viewlabel"><span>옆에서 본 궤적 (네트 넘는 높이)</span><span class="incChip" id="incChip"></span></div>
+    <div style="font-size:10.5px; color:var(--sub); padding:3px 0 5px; line-height:1.6;">
+      <b style="color:var(--txt);">🎨 선 색</b>: <span style="color:#ff5e3a">●</span>강한 톱스핀 · <span style="color:#ffa040">●</span>톱스핀 · <span style="color:#dfeebe">●</span>플랫 · <span style="color:#7fc8ff">●</span>슬라이스 · <span style="color:#3a8eff">●</span>강한 슬라이스<br>
+      <b style="color:var(--txt);">🎯 낙하점</b>: <span style="color:#5bd66f">●✓</span>인 · <span style="color:#ff6b5e">●✕</span>아웃 &nbsp;·&nbsp; <b style="color:var(--txt);">점선</b>=마진 영역
+    </div>
+    <canvas id="side" class="view" width="500" height="200"></canvas>
+    <div class="caption" id="sideCap"></div>
+    <div class="viewlabel"><span>위에서 본 코트 (공이 떨어지는 곳)</span><span></span></div>
+    <canvas id="top" class="view" width="500" height="300"></canvas>
+    <div class="verdict in" id="verdict">
+      <div class="big" id="vBig">—</div>
+      <div class="coach" id="vCoach"></div>
+    </div>
+    <div class="stats">
+      <div class="s"><b id="stNet">–</b><span>네트 여유</span></div>
+      <div class="s"><b id="stDist">–</b><span>낙하 거리</span></div>
+      <div class="s"><b id="stSpeed">–</b><span>스피드</span></div>
+      <div class="s"><b id="stSpin">–</b><span>회전</span></div>
+    </div>
+    <div id="historyBar" style="margin-top:8px; padding:8px 10px; background:var(--card2); border:1px solid var(--line); border-radius:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:11.5px; color:var(--sub); font-weight:600;">📌 비교 슬롯 <span id="slotCount" style="color:var(--accent2);"></span></span>
+        <div style="display:flex; gap:5px;">
+          <button id="overlayToggleBtn" style="padding:4px 8px; background:transparent; border:1px solid var(--line); color:var(--sub); border-radius:6px; font-size:11px; cursor:pointer;">👁 표시</button>
+          <button id="saveSlotBtn" style="padding:4px 10px; background:transparent; border:1px solid var(--accent2); color:var(--accent2); border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">+ 저장</button>
+        </div>
+      </div>
+      <div id="historySlots" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+      <div id="historyDiff" style="font-size:11px; color:var(--sub); margin-top:6px; line-height:1.5;"></div>
+    </div>
+  </div>
+
+  <details id="spinBox">
+    <summary><span>🤔 회전수, 어느 정도가 어느 정도? <span style="color:var(--sub);font-weight:400;">(왜 중요해?)</span></span><span class="chev">▼</span></summary>
+    <div class="body" style="font-size:12.5px; line-height:1.7;">
+      <p style="margin:0 0 8px;"><b>참고 회전수 (포핸드 톱스핀, 공개 데이터)</b></p>
+      <ul style="margin:0 0 8px; padding-left:18px;">
+        <li>프로 평균(ATP): <b>~2,850rpm</b>, 최대 ~3,500rpm</li>
+        <li>나달 평균 ~3,200rpm, 최고 ~4,900rpm (예외적)</li>
+        <li>페더러 ~2,500rpm · 조코비치 ~2,700rpm</li>
+        <li>아마추어 동호인: <b>1,000~2,500rpm</b></li>
+      </ul>
+      <p style="margin:0 0 8px;"><b>왜 중요해?</b> 회전이 많으면 마그누스 효과로 공이 빨리 떨어져서, <b>같은 힘으로 쳐도 코트 안에 들어가는 발사각 범위가 넓어져요</b>. 즉 "안전 마진"이 커지는 거. 톱스핀이 안전한 이유.</p>
+      <p style="margin:0; color:var(--sub); font-size:11.5px;">출처: <a href="https://mkokta.net/2021/04/20/monte-carlo-groundstrokes-spin-rates-and-velocities/" target="_blank" style="color:var(--accent2);">Monte Carlo ATP 데이터</a> · <a href="https://twu.tennis-warehouse.com/learning_center/aerodynamics2.php" target="_blank" style="color:var(--accent2);">TWU – Aerodynamics</a></p>
+    </div>
+  </details>
+
+  <details id="backspinBox">
+    <summary><span>🤔 "아래로 깎았는데 공이 더 길어진다?" <span style="color:var(--sub);font-weight:400;">(직관과 다른 물리)</span></span><span class="chev">▼</span></summary>
+    <div class="body" style="font-size:12.5px; line-height:1.7;">
+      <p style="margin:0 0 8px;">직관적으론 "아래로 깎으면 공도 아래로 (짧게)"가 자연. 그런데 실제로는:</p>
+      <ul style="margin:0 0 8px; padding-left:18px;">
+        <li>위→아래 깎기 = <b>백스핀(역회전)</b></li>
+        <li>백스핀 공기 회전이 <b>마그누스 양력(↑)</b>을 만듦</li>
+        <li>공이 바로 떨어지지 않고 <b>더 떠다니며 길게 나아감</b></li>
+        <li>그래서 그라운드 슬라이스가 *깊게* 들어오는 거예요</li>
+      </ul>
+      <p style="margin:0 0 8px;"><b>단, 서브는 다른 이야기:</b> 실제 서브에서 백스핀(위→아래 깎기)은 거의 안 침. 슬라이스/킥 서브의 진짜 swing은 <b>아래→위로 측면 brush</b>예요. 위젯에서 시작 핸들을 끝 핸들보다 <b>아래에</b> 놓아야 자연스러운 서브 동작.</p>
+      <p style="margin:0; color:var(--sub); font-size:11.5px;">출처: <a href="https://twu.tennis-warehouse.com/learning_center/aerodynamics2.php" target="_blank" style="color:var(--accent2);">TWU – Aerodynamics</a> · <a href="https://twu.tennis-warehouse.com/learning_center/spindemo.php" target="_blank" style="color:var(--accent2);">TWU – Spin Demo</a></p>
+    </div>
+  </details>
+
+  <details id="feelBox">
+    <summary><span>🤔 "느낌"으로 그렸는데 왜 결과가 맞아? <span style="color:var(--sub);font-weight:400;">(실제 접촉의 물리)</span></span><span class="chev">▼</span></summary>
+    <div class="body" style="font-size:12.5px; line-height:1.7;">
+      <p style="margin:0 0 8px;">맞아요. 라켓이 공의 한 지점에서 다른 지점까지 정말로 <b>긴 길을 쓸어 지나가지는 않습니다</b>. 실제로는:</p>
+      <ul style="margin:0 0 8px; padding-left:18px;">
+        <li>접촉 시간 <b>3~5밀리초</b> (1/250초, 거의 깜빡 사이)</li>
+        <li>그 사이 공이 스트링 위에서 미끄러지는 거리 <b>약 6cm</b> (2.5인치)</li>
+      </ul>
+      <p style="margin:0 0 8px;">그런데 <b>그 4ms 동안 일어나는 일</b>이 핵심이에요. <b>세로줄(mains)이 가로줄 위로 옆으로 밀려났다가, 공이 떠나기 전에 다시 튕겨 돌아오면서(string snapback)</b> 공에 회전을 추가로 줍니다. 마찰만으로는 설명 안 되던 톱스핀의 큰 부분이 이걸로 설명돼요 (Rod Cross 연구).</p>
+      <p style="margin:0 0 8px;"><b>즉:</b> 당신이 "공 뒷면을 위로 쓸어 올린다"고 <i>느끼는 그 방향</i>이 = 스트링이 옆으로 밀려나는 방향을 정하고 = 스냅백 방향과 회전 방향을 정합니다. 그래서 <b>긴 화살표의 느낌</b>과 <b>짧은 4ms 접촉의 실제</b>는 <b>같은 방향 신호</b>를 공유해요.</p>
+      <p style="margin:0; color:var(--sub); font-size:11.5px;">출처: <a href="https://twu.tennis-warehouse.com/learning_center/stringmovementPart2.php" target="_blank" style="color:var(--accent2);">TWU – String Snap-Back and Spin</a> · <a href="https://go.oncourtoffcourt.com/ball-contact-how-long-is-it/" target="_blank" style="color:var(--accent2);">Ball Contact Dwell Time</a></p>
+    </div>
+  </details>
+
+  <details id="playerMatchBox">
+    <summary><span>🤔 "OOO 같은" 멘트는 어떻게 정해진 거야? <span style="color:var(--sub);font-weight:400;">(매칭 기준 · 출처)</span></span><span class="chev">▼</span></summary>
+    <div class="body" style="font-size:12.5px; line-height:1.7;">
+      <p style="margin:0 0 8px;">위닝샷 카드에 뜨는 "<b>나달 같은</b>·<b>페더러 같은</b>" 멘트는 <b>당신이 친 시뮬 결과(rpm·속도·스핀종류·모드)</b>와 <b>각 선수의 공개 측정 데이터</b>를 비교해서 매칭한 거예요. "급(級)" 대신 "<b>같은</b>"으로 부드럽게 — 실측 평가가 아니라 한 샷의 특성 비교라서.</p>
+      <p style="margin:0 0 8px;"><b>매칭 기준 (간단):</b></p>
+      <ul style="margin:0 0 8px; padding-left:18px;">
+        <li><b>나달급</b>: 포핸드 rpm ≥ 3,200 (평균 3,200·최고 ~5,000)</li>
+        <li><b>페더러급 슬라이스</b>: 백핸드 슬라이스 rpm ≥ 2,500 (평균 3,700·최고 5,300)</li>
+        <li><b>페더러급 1st 서브</b>: 평균 193~201km/h 플랫 서브</li>
+        <li><b>알카라스급 포핸드</b>: rpm ~3,208 / 평균 78mph(~126km/h) / 최고 113mph(~182km/h)</li>
+        <li><b>알카라스급 드롭샷</b>: 경기당 ~2.83회·승률 67.7% (Tour 평균 3배 사용)</li>
+        <li><b>시너급 플랫</b>: rpm ~3,041 / 평균 126km/h / 네트 통과 FH 2cm·BH 5cm 더 낮음</li>
+        <li><b>조코비치급 양손 백핸드</b>: 통산 2nd 서브 리턴 승률 55.1% — 역대 최고 리터너</li>
+        <li><b>메드베데프급 서브</b>: 1st 서브 인 75.5% · 서브 게임 승률 84.4%</li>
+        <li><b>키리오스급 폭탄 서브</b>: ATP 최고 서브 속도 <b>244km/h (151mph, 2020 Acapulco)</b> 보유</li>
+        <li><b>키리오스급 언더암 서브</b>: ATP에서 가장 빈번하게 underarm serve 사용 — 그의 트릭샷 시그니처</li>
+        <li><b>아가시 같은 플랫 BH</b>: 라이저(rising ball) 자체는 시뮬 변수 없어 제외, 대신 <b>좁은 마진+깊은 플랫</b> 결과로 매칭. 1990년대 리턴의 신 — 라이즈볼로 상대 서브를 그대로 되돌려보냄 (⚠️ rpm·speed 공개 데이터 없음)</li>
+        <li><b>헤닌 같은 원핸드 BH</b>: <b>페더러와 공동 역대 1위</b> 원핸드 백핸드(Tennis.com 2017). 작은 체구(167cm)로 톱스핀 폭탄, McEnroe "남녀 통틀어 최고 BH" 평가 (⚠️ WTA 공개 rpm 없음, 정성 평판 기반)</li>
+        <li>⚠️ <b>샘프라스 2nd 킥서브 제외</b>: 4,600rpm 역대 최고 회전이지만 이 시뮬의 킥서브 rpm 상한(~2,400)이라 도달 불가 — 솔직 제외 (러닝 포핸드도 동일 이유)</li>
+      </ul>
+      <p style="margin:0 0 8px; color:var(--sub); font-size:11.5px;">📌 기준: <b>최빈값·언론 보도 평균 기준</b>이에요. 나달·메드베데프·조코비치 평균 km/h는 ATP가 일부만 공개해서 보도·해설 영상에서 가져왔어요. rpm 측정은 기관·연도별 ±10% 변동 가능 — 그래서 단정형 안 쓰고 "같은"으로 표현.</p>
+      <p style="margin:0; color:var(--sub); font-size:11.5px;">출처: <a href="https://www.atptour.com/en/news/alcaraz-2024-insights" target="_blank" style="color:var(--accent2);">ATP Insights – Alcaraz (2024)</a> · <a href="https://www.atptour.com/en/news/sinner-2024-insights" target="_blank" style="color:var(--accent2);">ATP Insights – Sinner (2024)</a> · <a href="https://www.atptour.com/en/news/djokovic-infosys-beyond-the-numbers-february-2023" target="_blank" style="color:var(--accent2);">ATP – Djokovic Return (2023)</a> · <a href="https://www.top-tennis-training.com/roger-federer-slice-backhand-analysis-how-to-knife-your-slice-like-federer/" target="_blank" style="color:var(--accent2);">Top Tennis Training – Federer Slice</a> · <a href="https://www.espn.com/tennis/story/_/id/41111494/us-open-2024-jannik-sinner-forehand-unique" target="_blank" style="color:var(--accent2);">ESPN – Sinner Forehand (2024)</a> · <a href="https://tennisone.tennisplayer.net/content/Lessons/yandell/samprasserve/sampras.htm" target="_blank" style="color:var(--accent2);">tennisplayer.net – Sampras Serve (Yandell)</a> · <a href="https://tennisinstruction.com/justine-henin-backhand-technique/" target="_blank" style="color:var(--accent2);">Tennis Instruction – Henin BH</a> · <a href="https://www.tennis.com/news/articles/who-s-no-1-roger-federer-and-justine-henin-atop-the-greatest-one-handed-backhand" target="_blank" style="color:var(--accent2);">Tennis.com – Greatest 1HBH (2017)</a></p>
+    </div>
+  </details>
+
+  <details id="howCalculatedBox">
+    <summary><span>🤔 회전·스피드, 어떻게 측정하는 거야? <span style="color:var(--sub);font-weight:400;">(시뮬 추정값 · 실측 X)</span></span><span class="chev">▼</span></summary>
+    <div class="body" style="font-size:12.5px; line-height:1.7;">
+      <p style="margin:0 0 8px;"><b>결론부터:</b> 화면에 뜨는 <b>km/h · rpm · 낙하지점</b>은 모두 <b>실측이 아니라 시뮬레이션 추정값</b>이에요. 당신이 입력한 값들을 물리식에 넣어 계산한 결과예요.</p>
+      <p style="margin:0 0 8px;"><b>입력 → 계산 흐름:</b></p>
+      <ul style="margin:0 0 8px; padding-left:18px;">
+        <li>스윙 세기 슬라이더 + 라켓 헤드·텐션 → <b>공 출발 속도</b></li>
+        <li>스윙 시작→끝 방향(아래→위 등) + 들어오는 공 회전 → <b>마그누스 회전수(rpm)</b></li>
+        <li>속도·회전·발사각을 <b>드래그(Cd 0.55)·마그누스(Cl 0.33)</b> 식에 넣어 수치적분 → <b>궤적·낙하지점</b></li>
+      </ul>
+      <p style="margin:0 0 8px;"><b>실측이 아니라는 뜻은:</b> 실제 라켓에 센서가 붙어 있지 않아요. "이 정도 세기로·이 방향으로 쳤다면 대략 이런 결과"라는 <b>코칭 감각용 추정</b>입니다.</p>
+      <p style="margin:0 0 8px;"><b>진짜 실측이 필요하면:</b> <a href="https://swing.tennis/" target="_blank" style="color:var(--accent2);">SwingVision</a> 같은 카메라 분석앱이나 라켓 센서(Babolat Play 등)를 써야 해요. 이 앱은 <b>"어디를 어떻게 치면 어떻게 되는지"</b>를 직관적으로 보여주는 용도예요.</p>
+      <p style="margin:0; color:var(--sub); font-size:11.5px;">물리 상수 출처: <a href="https://twu.tennis-warehouse.com/learning_center/aerodynamics2.php" target="_blank" style="color:var(--accent2);">TWU – Aerodynamics</a> (Cd 0.55, Cl 0.33은 공기 실험값)</p>
+    </div>
+  </details>
+
+  <div class="card">
+    <div class="label">빠르게 보기 (프리셋)</div>
+    <div class="presets" id="presets">
+      <button data-p="topFH">톱스핀 포핸드</button>
+      <button data-p="flatFH">플랫 드라이브</button>
+      <button data-p="sliceBH">슬라이스 백핸드</button>
+      <button data-p="volley">발리 펀치</button>
+      <button data-p="flatSV">플랫 서브</button>
+      <button data-p="kickSV">킥 서브</button>
+    </div>
+    <details style="margin-top:8px; background:rgba(255,107,94,.06); border:1px solid rgba(255,107,94,.25); border-radius:8px;">
+      <summary style="padding:7px 10px; font-size:12px; color:var(--accent2); font-weight:700;"><span>🔧 흔한 실수도 보고 싶다면 (네트·롱아웃)</span><span class="chev" style="font-size:10px;">▼</span></summary>
+      <div class="presets" style="padding:4px 0;" id="failPresets">
+        <button data-p="netTop">네트 (공 윗부분)</button>
+        <button data-p="longOut">롱 아웃 (평평+세게)</button>
+      </div>
+    </details>
+    <button class="shareBtn" id="shareBtn">🔗 이 설정 링크 복사 / 공유</button>
+    <button class="winOpenBtn" id="openWinnerBtn">📸 이 샷을 위닝샷 카드로</button>
+  </div>
+
+  <div class="foot">간이 물리 모델(공기저항+마그누스). 교육용. 정밀값 아님.</div>
+</div>
+<div id="toast"></div>
+<div id="winnerModal">
+  <div class="winCardOuter" id="winCardOuter">
+    <button class="winClose" id="winCloseBtn">✕</button>
+    <div class="winCardInner" id="winCardInner">
+      <div class="winGlow g1"></div>
+      <div class="winGlow g2"></div>
+      <!-- 앞면 -->
+      <div class="winFront" id="winFront">
+        <div class="winHead">
+          <div class="winBrand">🎾 위닝샷</div>
+          <div class="winHeadRight">
+            <button class="winRarityBadge" id="winRarityBadge" type="button" title="등급 산식 보기">🌱 새싹</button>
+            <div class="winDate" id="winDate"></div>
+          </div>
+        </div>
+        <div class="winVisual">
+          <div class="winChar">
+            <div class="winCharFace" id="winCharFace" title="배경 탭: 배경색 바꾸기"><span class="winCharEmoji" id="winCharEmoji" title="이모지 탭: 동물 바꾸기">🐰</span></div>
+            <div class="winCharLabel">
+              <div class="winCharName" id="winCharName">나의 위닝샷</div>
+              <div class="winCharSub" id="winCharSub">탭해서 이름 바꾸기</div>
+            </div>
+          </div>
+          <canvas id="winCourt" class="winCourt" width="500" height="312"></canvas>
+        </div>
+        <div class="winFoot">
+          <div class="winShotName" id="winShotName">샷 이름</div>
+          <div class="winImpact" id="winImpact"></div>
+          <div id="winTone" class="winTone"></div>
+          <div id="winBlurb" style="font-size:11px; color:var(--sub); opacity:0.78; margin:-4px 0 6px; font-style:italic; display:none;"></div>
+          <div class="winStats" id="winStats"></div>
+          <div style="font-size:10.5px; color:var(--sub); opacity:0.7; margin:-4px 0 10px;">※ 시뮬 추정값 · 샷 1개 매칭 (경기력 평가 아님)</div>
+          <div class="winCTA">
+            <button class="winBtn ghost" id="winFlipBtn" type="button" title="뒷면: 매칭 근거·등급 산식">🔄 뒷면</button>
+            <button class="winBtn ghost" id="winShareBtn">📤 공유</button>
+            <button class="winBtn primary" id="winDownloadBtn">📸 저장</button>
+          </div>
+        </div>
+      </div>
+      <!-- 뒷면 -->
+      <div class="winBack" id="winBack">
+        <div class="winHead">
+          <div class="winBrand">🎾 위닝샷 · 뒷면</div>
+          <div class="winHeadRight">
+            <div class="winDate" id="winDateBack"></div>
+          </div>
+        </div>
+        <div class="winBackBody">
+          <div class="winBackSec">
+            <div class="winBackSecTitle">🏆 레어도</div>
+            <div class="winBackRarityRow">
+              <span class="winBackRarityBadge" id="winBackRarityBadge">🌱 새싹</span>
+              <span class="winBackRarityScore"><b id="winBackRarityScore">0</b>/100점</span>
+              <span class="winBackRarityDist" id="winBackRarityDist">~30%</span>
+            </div>
+            <div class="winBackRarityBlurb" id="winBackRarityBlurb">기본 폼 잡는 중</div>
+          </div>
+          <div class="winBackSec" id="winBackMatchSec">
+            <div class="winBackSecTitle">🎯 매칭 근거</div>
+            <div class="winBackMatchPlayer" id="winBackMatchPlayer">선수 매칭 없음</div>
+            <div class="winBackMatchBasis" id="winBackMatchBasis">기본 코칭 멘트 — 선수 시그니처 임계값 미달</div>
+          </div>
+          <div class="winBackSec">
+            <div class="winBackSecTitle">📋 내 입력</div>
+            <div class="winBackInput" id="winBackInput">-</div>
+          </div>
+          <div class="winBackSec">
+            <div class="winBackSecTitle">🤔 어떻게 계산됐어?</div>
+            <div class="winBackHowto">
+              rpm·속도·마진은 <b>입력값 + 간이 물리식</b>(공기저항+마그누스) 추정값.<br>
+              선수 매칭은 ATP·TWU·Hawk-Eye 공개 데이터와 비교 — <b>실측 평가 아님</b>.
+            </div>
+          </div>
+        </div>
+        <div class="winCTA winBackCTA">
+          <button class="winBtn ghost" id="winUnflipBtn" type="button">🔄 앞면</button>
+          <button class="winBtn primary" id="winDownloadBothBtn">📸 양면 저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 등급 산식 모달 (P0-4) -->
+<div id="rarityInfoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:300; align-items:center; justify-content:center; padding:18px;">
+  <div style="background:#13141c; border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:18px; max-width:380px; width:100%; color:#fff;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div style="font-size:16px; font-weight:800;">🏆 등급은 어떻게 정해져?</div>
+      <button id="rarityInfoCloseBtn" type="button" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#fff; width:28px; height:28px; border-radius:50%; cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:11.5px; color:rgba(255,255,255,0.7); line-height:1.55; margin-bottom:12px;">
+      <b>점수 = 회전(0~40) + 안전마진(0~30) + 속도(0~20) + 모드 보너스(0~10)</b><br>
+      회전 1000→0점, 3500rpm→40점 · 마진 4~8°가 만점(좁으면 위험, 넓으면 페널티) · 속도 80→0, 180→20 · 발리/강서브 보너스.
+    </div>
+    <div id="rarityInfoTiers" style="display:flex; flex-direction:column; gap:6px;"></div>
+    <div style="font-size:10.5px; color:rgba(255,255,255,0.45); margin-top:10px; line-height:1.5;">
+      선수 매칭이 되면 최소 <b>🔵 고급</b> 보장 — 매칭 결과와 등급 인지부조화 방지.
+    </div>
+  </div>
+</div>
+<div id="welcomeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; align-items:center; justify-content:center; padding:18px;">
+  <div style="background:var(--card); border:1px solid var(--accent); border-radius:14px; padding:18px; max-width:380px; width:100%;">
+    <div style="font-size:18px; font-weight:800; margin-bottom:4px;">🎾 어떻게 시작할까요?</div>
+    <div style="font-size:12px; color:var(--sub); margin-bottom:14px;">언제든 우측 상단 토글로 바꿀 수 있어요.</div>
+    <button class="welcomeBtn" data-mode="easy" style="width:100%; padding:13px; background:var(--accent); color:#0c1a0c; border:none; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer; margin-bottom:8px;">🧪 쉽게 시작 <span style="font-weight:500; font-size:11px;">(꼭 필요한 것만)</span></button>
+    <button class="welcomeBtn" data-mode="full" style="width:100%; padding:13px; background:transparent; color:var(--accent2); border:1px solid var(--accent2); border-radius:10px; font-size:14px; font-weight:800; cursor:pointer;">⚙️ 모든 옵션 보기 <span style="font-weight:500; font-size:11px;">(라켓·그립·모델)</span></button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const S = {
+  stroke:"forehand", power:"mid", face:"flat", aim:"center",
+  inSpeed:"mid", inSpin:"flat", inHeight:"waist", toss:"mid",
+  contactPos:"side",
+  courtX:0, // v7.19: 본인 위치 깊이(m) — 0=베이스라인, +=코트 안쪽, -=뒤
+  courtY:0, // v7.20: 본인 위치 좌우(m) — 본인 시점 0=센터, +=오른쪽, -=왼쪽
+  targetX:20, // v7.21: 노리는 목표 깊이(m) — 상대 베이스라인 부근. 11.89=네트, 23.78=상대 베이스
+  targetY:0,  // v7.21: 목표 좌우(m) — 같은 좌표계
+  head:"100", pattern:"16x19", tension:52,
+  hand:"right", grip:"semiwest", serveType:"flat", strokeSpin:"flat",
+  swing:{ start:{x:108,y:185}, end:{x:140,y:55} }
+};
+function normalizeTargetX(v){ const n=typeof v==="number"?v:parseFloat(v); return isNaN(n)?20:n; }
+function normalizeTargetY(v){ const n=typeof v==="number"?v:parseFloat(v); return isNaN(n)?0:n; }
+function targetLabel(x, y, hand){
+  // 깊이
+  let depth;
+  if(x <= 12.5)      depth = "네트 부근";
+  else if(x <= 14.5) depth = "짧은 공";
+  else if(x <= 17)   depth = "서비스라인 부근";
+  else if(x <= 21)   depth = "보통 깊이";
+  else if(x <= 23.5) depth = "깊은 공";
+  else               depth = "베이스라인 근처";
+  // 좌우 — 상대 코트 듀스/애드 (본인 시점 +y=오른쪽 = 상대 코트 좌측 = 상대 듀스)
+  const a = Math.abs(y);
+  if(a < 0.4) return `상대 코트 센터 · ${depth}`;
+  const isRightSide = y > 0;
+  const isDeuce = (hand==="left") ? !isRightSide : isRightSide;
+  const side = isDeuce ? "듀스" : "애드";
+  let widthLabel;
+  if(a < 2)        widthLabel = "안쪽";
+  else if(a < 3.5) widthLabel = "사이드";
+  else             widthLabel = "코너/와이드";
+  return `상대 ${side} ${widthLabel} · ${depth}`;
+}
+// v7.19: 코트 위치 — 연속값(m). v7.18 문자열 호환을 위한 매핑 + 동적 라벨 함수
+const COURT_X_LEGACY = {approach:1.5, baseline:0, back:-1.5, deep:-3.0};
+function normalizeCourtX(v){
+  if(typeof v === "number") return v;
+  if(typeof v === "string"){
+    if(COURT_X_LEGACY[v] !== undefined) return COURT_X_LEGACY[v];
+    const n = parseFloat(v); if(!isNaN(n)) return n;
+  }
+  return 0;
+}
+function normalizeCourtY(v){ const n = typeof v==="number"?v:parseFloat(v); return isNaN(n)?0:n; }
+function courtXLabel(x){
+  if(x >= 9)    return `네트 부근 (${(11.89-x).toFixed(1)}m 앞 · 대시)`;
+  if(x >= 6.5)  return `미드코트 (베이스라인 안 ${x.toFixed(1)}m)`;
+  if(x >= 4.5)  return `서비스라인 부근 (어프로치)`;
+  if(x >= 2)    return `베이스라인 안 ${x.toFixed(1)}m (어프로치)`;
+  if(x >= 0.5)  return `베이스라인 안 ${x.toFixed(1)}m (라이즈볼)`;
+  if(x >= -0.5) return `베이스라인`;
+  if(x >= -2)   return `${(-x).toFixed(1)}m 뒤`;
+  if(x >= -3)   return `${(-x).toFixed(1)}m 뒤 (디펜스)`;
+  return `${(-x).toFixed(1)}m 뒤 (깊은 디펜스)`;
+}
+// v7.20: 좌우 라벨 (듀스/애드, 손잡이 반영)
+function courtYLabel(y, hand){
+  const a = Math.abs(y);
+  if(a < 0.4) return "센터";
+  // 오른손: 본인 시점 오른쪽(+y) = 듀스 코트 / 왼쪽(-y) = 애드 코트
+  // 왼손: 반대
+  const isRightSide = y > 0;
+  const isDeuce = (hand === "left") ? !isRightSide : isRightSide;
+  const side = isDeuce ? "듀스" : "애드";
+  if(a < 2)   return `${side} 안쪽`;
+  if(a < 3.5) return `${side} 사이드`;
+  if(a < 4.5) return `${side} 와이드`;
+  return `${side} 와이드 디펜스`;
+}
+function courtFullLabel(x, y, hand){
+  const xPart = courtXLabel(x);
+  const yPart = courtYLabel(y, hand);
+  // 센터일 때는 깊이만 표시(중복 없음), 아니면 "{사이드} {깊이}" 형식
+  if(yPart === "센터") return xPart;
+  // 깊이가 "베이스라인"이면 "{사이드} 베이스라인" 식
+  return `${yPart} · ${xPart}`;
+}
+// v7.20: 빠른 프리셋 — 2D 좌표
+const COURT_PRESETS = [
+  {x:0,    y:0,    label:"🎾 센터 베이스"},
+  {x:-2,   y:3,    label:"↩ 듀스 와이드 디펜스"},
+  {x:-2,   y:-3,   label:"↩ 애드 와이드 디펜스"},
+  {x:3,    y:0,    label:"🏃 어프로치(센터)"},
+  {x:5,    y:1.5,  label:"🏃 듀스 어프로치"},
+  {x:9,    y:0,    label:"🥅 네트 대시"}
+];
+const BW=250, C={x:125,y:125}, BR=86, HR=17;
+let touched=false;
+
+const PHY={g:9.81,m:0.057,r:0.033,rho:1.21,Cd:0.55,clk:1.0,Clmax:0.33}; PHY.A=Math.PI*PHY.r*PHY.r;
+const NET_ABS=11.89, NET_H=0.91, SVC_ABS=18.29, BASE_ABS=23.77, HALF_W=4.115;
+
+function simulate(speed, angleDeg, h0, omega, Dnet){
+  const {g,m,A,rho,Cd,clk,r,Clmax}=PHY;
+  let ang=angleDeg*Math.PI/180, vx=speed*Math.cos(ang), vz=speed*Math.sin(ang);
+  let x=0, z=h0, t=0, dt=0.002, zAtNet=null, pts=[{x:0,z:h0}], last=0;
+  while(t<7){
+    let v=Math.hypot(vx,vz); if(v<0.01) break;
+    let ux=vx/v, uz=vz/v;
+    let Fd=0.5*rho*Cd*A*v*v, ax=-(Fd/m)*ux, az=-(Fd/m)*uz-g;
+    let Cl=Math.min(Clmax, clk*r*Math.abs(omega)/v), Fm=0.5*rho*Cl*A*v*v, s=Math.sign(omega);
+    ax+=(Fm/m)*s*uz; az+=(Fm/m)*s*(-ux);
+    let xp=x, zp=z;
+    vx+=ax*dt; vz+=az*dt; x+=vx*dt; z+=vz*dt; t+=dt;
+    if(xp<Dnet && x>=Dnet){ let f=(Dnet-xp)/(x-xp); zAtNet=zp+f*(z-zp); }
+    if(t-last>=0.012){ pts.push({x,z}); last=t; }
+    if(z<=0){ let f=zp/(zp-z), xl=xp+f*(x-xp); pts.push({x:xl,z:0});
+      return {xLand:xl, zAtNet, vLand:Math.hypot(vx,vz), peak:Math.max.apply(null,pts.map(p=>p.z)), flight:t, pts}; }
+  }
+  return {xLand:x, zAtNet, vLand:Math.hypot(vx,vz), peak:Math.max.apply(null,pts.map(p=>p.z)), flight:t, pts};
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+function strokeGeo(){
+  const volley = S.stroke==="volley";
+  const serve  = S.stroke==="serve";
+  // v7.19: 그라운드는 S.courtX(연속 m값), 발리는 네트 앞 4.5m 자동, 서브는 베이스라인 자동
+  const off = (volley || serve) ? 0 : clamp(normalizeCourtX(S.courtX), -4, 10);
+  return {Dnet: volley?4.5:(11.89 - off), xHit: volley?7.39:off, volley};
+}
+
+function derive(){
+  const sw=S.swing;
+  const dx=sw.end.x-sw.start.x, dyUp=sw.start.y-sw.end.y;
+  const vert=clamp(dyUp/BR,-1.8,1.8), horiz=clamp(dx/BR,-1.8,1.8);
+  const midY=(sw.start.y+sw.end.y)/2, contactVert=clamp((C.y-midY)/BR,-1.4,1.4);
+  const isServe=S.stroke==="serve", isVolley=S.stroke==="volley";
+  const faceAdj={closed:-5,flat:0,open:6}[S.face];
+  const headMult={"95":0.95,"98":0.98,"100":1.0,"105":1.03,"110":1.06}[S.head];
+  const tensionMult=1+(52-S.tension)*0.0015;   // 텐션 파워효과 현실화(작게)
+  const spinMult={"16x18":1.08,"16x19":1.0,"16x20":0.94,"18x19":0.97,"18x20":0.85}[S.pattern];
+  let omega=clamp(vert*230,-210,380)*spinMult;
+  // 들어오는 공 회전 → 내 회전 커플링(상대 톱스핀이 강하면 내 톱스핀이 덜 먹힘)
+  if(!isServe){ if(S.inSpin==="top") omega-=55; else if(S.inSpin==="back") omega+=25; }
+  omega=clamp(omega,-260,420);
+  const inS={slow:12,mid:20,fast:28}[S.inSpeed];
+  const inSpinAdj = isServe?0:({top:4,flat:0,back:-2.5}[S.inSpin]);
+  let h0;
+  if(isServe) h0={low:2.45,mid:2.65,high:2.85}[S.toss];
+  else if(isVolley) h0={low:0.75,waist:1.05,high:1.45,head:1.80}[S.inHeight];
+  else h0={low:0.65,waist:0.95,high:1.35,head:1.65}[S.inHeight];
+  let base, swingSpeed;
+  if(isServe){
+    // 종류별 base 보정 — 킥은 더 내려야 박스 안 (위로 brush + 머리 위 토스 보상)
+    base = {flat:-6, slice:-6, kick:-8}[S.serveType||"flat"];
+    swingSpeed={low:35,mid:45,high:52}[S.power];
+  }
+  else if(isVolley){ base=3; swingSpeed={low:9,mid:13,high:17}[S.power]; }
+  else { base=8; swingSpeed={low:18,mid:24,high:31}[S.power]; }
+  let speed=swingSpeed; if(!isServe) speed+=0.3*inS;
+  speed*=headMult*tensionMult;
+  const cvW=isServe?10:(isVolley?12:16);
+  let angle=base + (isServe?faceAdj*0.6:faceAdj) + vert*4 - contactVert*cvW + inSpinAdj;
+  // 타점 신체 위치 (앞/옆/뒤) — 패널 Top 1
+  const cpMul = {front:{a:1.5, o:1.10, s:1.04},
+                 side: {a:0,   o:1.0,  s:1.0},
+                 late: {a:-1.5,o:0.82, s:0.94}}[S.contactPos];
+  omega *= cpMul.o; angle += cpMul.a; speed *= cpMul.s;
+  omega = clamp(omega, -260, 420);
+  // v7.21: aim 칩 대신 targetY를 lateral 보정에 사용 (연속값). 기존 S.aim는 폴백
+  const targetYn = normalizeTargetY(S.targetY);
+  const aimLat = (typeof S.aim === "string" && !isFinite(targetYn))
+    ? ({left:-2.8,center:0,right:2.8}[S.aim] || 0)
+    : clamp(targetYn, -4.0, 4.0);
+  const handSign = S.hand==="left" ? -1 : 1;
+  const lateral=clamp(aimLat + horiz*1.6*handSign, -6, 6);
+  const {Dnet,xHit,volley}=strokeGeo();
+  return {vert,horiz,contactVert,omega,angle,speed,h0,isServe,isVolley,volley,lateral,Dnet,xHit};
+}
+
+function isInbounds(d, sim){
+  const cleared = sim.zAtNet!=null && sim.zAtNet>NET_H;
+  if(!cleared) return false;
+  const absLand = d.xHit + sim.xLand;
+  if(d.isServe) return absLand>NET_ABS && absLand<=SVC_ABS;
+  return absLand>=NET_ABS && absLand<=BASE_ABS;
+}
+function computeMargin(d){
+  let lo=null, hi=null, loSim=null, hiSim=null;
+  for(let a=-15; a<=25; a+=1){
+    const sm=simulate(d.speed,a,d.h0,d.omega,d.Dnet);
+    if(isInbounds(d,sm)){ if(lo===null){ lo=a; loSim=sm; } hi=a; hiSim=sm; }
+  }
+  return {lo,hi,loSim,hiSim};
+}
+
+let R={}, history=[], overlayVisible=true;
+const SLOT_COLORS=["#ffd23f","#ff9d3c","#b95eff","#5eccff","#ff5e9e"];
+const MAX_SLOTS=5;
+function strokeName(stroke){return {forehand:"포핸드",backhand:"백핸드",volley:"발리",serve:"서브"}[stroke];}
+function updateServeHint(){
+  const sh=document.getElementById("serveHint"); if(!sh) return;
+  if(S.stroke!=="serve"){ sh.style.display="none"; return; }
+  const lefty=S.hand==="left";
+  const hints={
+    flat:"<b>🎯 플랫</b><br>· <b>어디</b>: 공의 정수리(가운데 위)<br>· <b>라켓 동작</b>: 위 → 아래로 직진 (공을 누름)<br>· <b>결과</b>: 회전 없음, 직선 비행",
+    slice:"<b>↶ 슬라이스</b><br>· <b>어디</b>: 공의 옆면 "+(lefty?"왼쪽":"오른쪽")+"<br>· <b>라켓 동작</b>: 아래 → 위·"+(lefty?"오른→왼":"왼→오른")+"으로 측면 brush<br>· <b>결과</b>: 옆 회전, 받는 사람 "+(lefty?"오른쪽":"왼쪽")+"으로 휨",
+    kick:"<b>↗ 킥서브</b><br>· <b>어디</b>: 공의 아래 "+(lefty?"오른쪽":"왼쪽")+"<br>· <b>라켓 동작</b>: 아래 → 위로 강하게 긁어 올림<br>· <b>결과</b>: 위·옆 회전, 바운드 후 점프"
+  };
+  const sw=S.swing, badSwing = sw.start.y < sw.end.y;
+  let html = hints[S.serveType||"flat"];
+  if(badSwing) html += '<br><span style="color:#ff9d3c">⚠️ 지금 swing이 <b>위→아래</b>예요. 실제 서브는 <b>아래→위로 brush</b>해야 자연스러워요. <b>시작(초록)을 끝(빨강)보다 아래에</b> 놓으세요.</span>';
+  sh.innerHTML = html;
+  sh.style.display="block";
+}
+function maybeResetQuizOnInput(){ if(typeof quizMode!=="undefined" && quizMode && quizAnswered) resetQuizReveal(); }
+function compute(){
+  maybeResetQuizOnInput();
+  const d=derive();
+  const sim=simulate(d.speed,d.angle,d.h0,d.omega,d.Dnet);
+  const absLand=d.xHit+sim.xLand;
+  const cleared=sim.zAtNet!=null && sim.zAtNet>NET_H;
+  const netCm=sim.zAtNet!=null?(sim.zAtNet-NET_H)*100:-100;
+  const sideOut=Math.abs(d.lateral)>HALF_W;
+  const rpm=Math.round(Math.abs(d.omega)*60/(2*Math.PI));
+  const spinUp=d.omega>60, spinDown=d.omega<-60, hitTop=d.contactVert>0.35;
+  const inTop=!d.isServe&&S.inSpin==="top", inBack=!d.isServe&&S.inSpin==="back";
+  let status="in", big="", coach="";
+  function incHint(kind){
+    if(kind==="long"&&inTop) return " 상대 톱스핀이 튀어올라 더 길게 떴어요 — 면을 살짝 덮고 감아치면 잡혀요.";
+    if(kind==="net"&&inBack) return " 상대 슬라이스가 낮게 깔려온 공이라, 면을 열고 밑을 받쳐 올려야 넘어가요.";
+    return "";
+  }
+  if(d.isServe){
+    if(!cleared){ status="out"; big="네트 — 폴트";
+      coach = hitTop ? "공 윗부분을 때려서 네트로 꽂혔어요. 토스를 더 높이고 공의 뒤쪽을 위로 긁어 올려보세요."
+                     : "네트에 못 미쳤어요. 토스(타점)를 높이거나 살짝 위로 보내 여유를 두세요."; }
+    else if(absLand>SVC_ABS){ status="out"; big="롱 폴트 — 박스 넘김";
+      coach = spinUp ? "거의 다 왔어요. 회전을 조금 더 넣거나 면을 살짝 덮으면(닫힘) 박스 안으로 들어와요."
+                     : "조금 길어요. 톱스핀(아래→위로 긁기)을 넣으면 같은 힘에도 박스 안에 뚝 떨어져요."; }
+    else if(sideOut){ status="out"; big="와이드 폴트"; coach="좌우로 박스를 벗어났어요. 조준을 안쪽으로 좁혀보세요."; }
+    else { status="in"; big="서비스 박스 인! 굿 서브";
+      const lefty=S.hand==="left";
+      const tossHint={
+        flat:"💡 플랫: 토스를 본인 머리 약간 앞·정중앙으로.",
+        slice:"💡 슬라이스: 토스를 본인 "+(lefty?"왼쪽":"오른쪽")+" 앞으로. 라켓이 공 1~2시를 좌→우로 긁어요.",
+        kick:"💡 킥서브: 토스를 본인 머리 위·살짝 "+(lefty?"오른쪽":"왼쪽")+" 뒤로. 라켓이 공 7~8시를 위로↗ 긁어 올려요."
+      }[S.serveType]||"";
+      coach = "네트 위 "+Math.round(netCm)+"cm로 안정적으로 넘겼어요. "+(spinUp?"킥성 회전이 박스 안에 잡아줬네요.":"깔끔한 서브예요.")+(tossHint?"\n"+tossHint:""); }
+  } else if(d.isVolley){
+    if(!cleared){ status="out"; big="네트";
+      coach = "발리가 네트에 걸렸어요. 휘두르지 말고 면을 살짝 열어 앞에서 단단히 막아(펀치) 보세요."+incHint("net"); }
+    else if(absLand>BASE_ABS){ status="out"; big="롱 — 베이스라인 넘김";
+      coach = "발리가 길었어요. 발리는 백스윙 없이 짧게 막으면 코트 안에 떨어져요."+incHint("long"); }
+    else if(sideOut){ status="out"; big="사이드 아웃"; coach="좌우로 벗어났어요. 라켓면이 향하는 방향을 코트 안쪽으로."; }
+    else { status="in";
+      if(absLand<15){ big="짧은 앵글 발리"; coach="네트 앞 짧게 떨궜어요 — 상대가 뒤에 있으면 위닝 발리. 발리는 백스윙 없이 면 각도로만 컨트롤하는 게 핵심."; }
+      else { big="깊은 발리, 인"; coach="깊고 단단한 발리. 네트 위 "+Math.round(netCm)+"cm + 베이스라인 근처라 상대가 받기 어려워요. <b>발리 핵심</b>: 휘두르지 말고 면을 앞에서 단단히 막는 펀치."; }
+    }
+  } else {
+    if(!cleared){ status="out"; big="네트";
+      coach = (hitTop ? "공의 윗부분을 때려서 네트로 꽂혔어요. 공의 뒤~아래를 위로 쓸어올려 보세요."
+             : spinUp ? "회전은 좋은데 궤적이 너무 낮았어요. 네트 위로 한 뼘~두 뼘(1~2m) 여유를 두고 쳐보세요."
+             : "궤적이 너무 낮아요. 면을 살짝 열거나 톱스핀을 넣어 네트 위 여유를 두세요.")+incHint("net"); }
+    else if(absLand>BASE_ABS){ status="out"; big="백 아웃 — 너무 길어요";
+      coach = ((!spinUp) ? "평평하게 세게만 치면 길게 나가요. 톱스핀을 넣으면 같은 힘에도 코트 안으로 뚝 떨어져요."
+                        : "힘은 충분해요. 회전을 조금 더 넣거나 살짝 짧게 노리면 들어와요.")+incHint("long"); }
+    else if(sideOut){ status="out"; big="사이드 아웃"; coach="사이드라인 밖으로 나갔어요. 조준을 코트 안쪽으로."; }
+    else { status="in";
+      if(absLand>=21.5){ big="깊은 굿샷! 베이스라인 근처"; coach=(spinDown?"낮게 깔린 슬라이스가 깊숙이 들어갔어요. ":"")+"네트 여유 "+Math.round(netCm)+"cm + 깊은 낙하. 상대를 밀어내는 이상적인 공이에요."; }
+      else if(absLand>=18.29){ big="좋은 깊이, 인"; coach=spinUp?"톱스핀이 잘 걸려 안전하게 깊이 들어갔어요.":spinDown?"낮게 깔린 슬라이스가 깊이 들어갔어요.":"안정적으로 들어간 굿샷."; }
+      else { big="짧은 볼 (서비스라인 안쪽)"; coach=spinDown?"슬라이스는 낮고 짧게 떨어져요 — 드롭/어프로치에 좋아요.":"살짝 짧아요. 더 깊게 보내려면 세게 치거나 궤적을 조금 높여보세요."; }
+    }
+  }
+  const margin = drag ? (R.margin||null) : computeMargin(d);
+  R={d,sim,status,big,coach,netCm,rpm,cleared,sideOut,absLand,margin};
+  render(); updateServeHint();
+}
+
+// 사람 옆 공 높이 위젯
+const BOUNCE_LEVELS=[
+  {v:"head",  label:"머리", yFrac:0.18},
+  {v:"high",  label:"어깨", yFrac:0.34},
+  {v:"waist", label:"허리", yFrac:0.55},
+  {v:"low",   label:"무릎", yFrac:0.78}
+];
+function drawBounce(){
+  const cv=document.getElementById("bounceWidget"); if(!cv) return;
+  const W=170, H=60;
+  const dpr=window.devicePixelRatio||1;
+  cv.width=W*dpr; cv.height=H*dpr;
+  // dpr 배율이 CSS 크기로 새지 않게 고정 + 좁은 셀에선 비율 유지 축소 (모바일 가로 오버플로 원인)
+  cv.style.width=W+"px"; cv.style.maxWidth="100%"; cv.style.height="auto"; cv.style.minWidth="0"; cv.style.flexShrink="1";
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  // 사람 stick figure 왼쪽
+  const px=22, hy=10, fy=H-6;
+  ctx.strokeStyle="#9fb4c2"; ctx.lineWidth=1.8; ctx.lineCap="round";
+  // 머리
+  ctx.beginPath(); ctx.arc(px, hy+5, 4, 0, 7); ctx.stroke();
+  // 몸통
+  ctx.beginPath(); ctx.moveTo(px, hy+9); ctx.lineTo(px, hy+30); ctx.stroke();
+  // 팔 (라켓 든 손은 오른쪽)
+  ctx.beginPath(); ctx.moveTo(px, hy+13); ctx.lineTo(px-7, hy+22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px, hy+13); ctx.lineTo(px+8, hy+20); ctx.stroke();
+  // 다리
+  ctx.beginPath(); ctx.moveTo(px, hy+30); ctx.lineTo(px-5, fy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px, hy+30); ctx.lineTo(px+5, fy); ctx.stroke();
+  // 공 높이 dot 4개
+  ctx.font="10px sans-serif"; ctx.textBaseline="middle"; ctx.textAlign="left";
+  BOUNCE_LEVELS.forEach(lvl=>{
+    const y = hy + lvl.yFrac*(fy-hy);
+    const cx = px+30;
+    const sel = S.inHeight===lvl.v;
+    ctx.fillStyle=sel?"#ffd23f":"rgba(150,170,180,0.4)";
+    ctx.strokeStyle=sel?"#fff":"rgba(150,170,180,0.6)";
+    ctx.lineWidth=sel?2:1;
+    ctx.beginPath(); ctx.arc(cx, y, sel?7:5, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=sel?"#fff":"#9fb4c2";
+    ctx.font=sel?"bold 10px sans-serif":"10px sans-serif";
+    ctx.fillText(lvl.label, cx+12, y);
+  });
+}
+function dpiCanvas(cv,cssW,cssH){
+  const dpr=window.devicePixelRatio||1; cv.width=cssW*dpr; cv.height=cssH*dpr;
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); return ctx;
+}
+function drawBall(){
+  const cv=document.getElementById("ball"), ctx=dpiCanvas(cv,BW,BW);
+  ctx.clearRect(0,0,BW,BW);
+  if(S.stroke==="serve"){ drawBallTop(ctx); return; }
+  ctx.fillStyle="#c9da3f"; ctx.beginPath(); ctx.arc(C.x,C.y,BR,0,7); ctx.fill();
+  ctx.strokeStyle="#aebd33"; ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle="#f4ffce"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(C.x-BR*0.55,C.y, BR*1.15, -0.9,0.9); ctx.stroke();
+  ctx.beginPath(); ctx.arc(C.x+BR*0.55,C.y, BR*1.15, Math.PI-0.9,Math.PI+0.9); ctx.stroke();
+  ctx.strokeStyle="rgba(0,0,0,.12)"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(C.x-BR,C.y); ctx.lineTo(C.x+BR,C.y); ctx.moveTo(C.x,C.y-BR); ctx.lineTo(C.x,C.y+BR); ctx.stroke();
+  const a=S.swing.start, b=S.swing.end;
+  ctx.strokeStyle="#1b2b12"; ctx.lineWidth=5; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  const ang=Math.atan2(b.y-a.y,b.x-a.x);
+  ctx.fillStyle="#1b2b12"; ctx.beginPath(); ctx.moveTo(b.x,b.y);
+  ctx.lineTo(b.x-14*Math.cos(ang-0.4), b.y-14*Math.sin(ang-0.4));
+  ctx.lineTo(b.x-14*Math.cos(ang+0.4), b.y-14*Math.sin(ang+0.4)); ctx.closePath(); ctx.fill();
+  handle(ctx,a.x,a.y,"#5bd66f","시작"); handle(ctx,b.x,b.y,"#ff6b5e","끝");
+}
+function drawBallTop(ctx){
+  // 베이스: "라켓 들어 본 공 옆면" 시점 (코칭 시계 = 공 정면 보기)
+  ctx.fillStyle="#d8e056"; ctx.beginPath(); ctx.arc(C.x,C.y,BR,0,7); ctx.fill();
+  ctx.strokeStyle="#9fad2e"; ctx.lineWidth=2; ctx.stroke();
+  // 영역 색칠 — 오른손잡이 기준: 1~2시 슬라이스, 12시 플랫, 7~8시 킥
+  // 왼손잡이 모드면 좌우 반전
+  const lefty = S.hand==="left";
+  function wedge(start,end,color){
+    ctx.fillStyle=color; ctx.beginPath();
+    ctx.moveTo(C.x,C.y); ctx.arc(C.x,C.y,BR,start,end); ctx.closePath(); ctx.fill();
+  }
+  // 캔버스 각도: 0rad=3시(오른쪽), -PI/2=12시(상단), PI=9시(왼쪽), PI/2=6시(하단)
+  // 12시 플랫(11~1시): -PI*2/3 ~ -PI/3 정도
+  // 종류 선택에 따라 그 영역만 채도↑, 나머지 옅게
+  const st = S.serveType||"flat";
+  const aFlat = st==="flat"?0.45:0.10;
+  const aSlice= st==="slice"?0.50:0.08;
+  const aKick = st==="kick"?0.50:0.08;
+  wedge(-Math.PI*5/12, -Math.PI*7/12 + 2*Math.PI, "rgba(220,220,220,"+aFlat+")"); // 12시 플랫
+  if(!lefty){
+    wedge(-Math.PI/3, Math.PI/12, "rgba(127,200,255,"+aSlice+")"); // 1~3시 슬라이스
+    wedge(Math.PI*7/12, Math.PI*4/3, "rgba(255,160,64,"+aKick+")"); // 7~9시 킥
+  } else {
+    wedge(-Math.PI*11/12, -Math.PI*2/3, "rgba(127,200,255,"+aSlice+")"); // 9~11시 슬라이스
+    wedge(-Math.PI/12, Math.PI*5/12, "rgba(255,160,64,"+aKick+")"); // 3~5시 킥
+  }
+  // 십자 가이드
+  ctx.strokeStyle="rgba(0,0,0,.22)"; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(C.x-BR,C.y); ctx.lineTo(C.x+BR,C.y); ctx.moveTo(C.x,C.y-BR); ctx.lineTo(C.x,C.y+BR); ctx.stroke();
+  ctx.setLineDash([]);
+  // 종류별 핸들 가능 영역 박스 (점선)
+  const rs=getRegion("start"), re=getRegion("end");
+  if(rs && re){
+    ctx.strokeStyle="rgba(127,209,79,0.55)"; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+    ctx.strokeRect(rs.x[0], rs.y[0], rs.x[1]-rs.x[0], rs.y[1]-rs.y[0]);
+    ctx.strokeStyle="rgba(255,107,94,0.55)";
+    ctx.strokeRect(re.x[0], re.y[0], re.x[1]-re.x[0], re.y[1]-re.y[0]);
+    ctx.setLineDash([]);
+  }
+  // (라벨은 화살표 위에 마지막으로 그림)
+  // (시점 표시 — 좌/우 라벨이 대체)
+  // 스윙 화살표
+  const a=S.swing.start, b=S.swing.end;
+  ctx.strokeStyle="#1b2b12"; ctx.lineWidth=5; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  const ang=Math.atan2(b.y-a.y,b.x-a.x);
+  ctx.fillStyle="#1b2b12"; ctx.beginPath(); ctx.moveTo(b.x,b.y);
+  ctx.lineTo(b.x-14*Math.cos(ang-0.4), b.y-14*Math.sin(ang-0.4));
+  ctx.lineTo(b.x-14*Math.cos(ang+0.4), b.y-14*Math.sin(ang+0.4)); ctx.closePath(); ctx.fill();
+  handle(ctx,a.x,a.y,"#5bd66f","시작"); handle(ctx,b.x,b.y,"#ff6b5e","끝");
+  // 라벨 — 화살표·핸들 위에 outline+fill로 가독성 확보
+  ctx.font="bold 11px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.lineWidth=3; ctx.strokeStyle="rgba(255,255,255,0.85)";
+  function lbl(txt,x,y,col,sz){ if(sz) ctx.font="bold "+sz+"px sans-serif"; ctx.strokeText(txt,x,y); ctx.fillStyle=col; ctx.fillText(txt,x,y); }
+  const lefty2 = S.hand==="left";
+  // 풀텍스트 라벨 + "공의 어디(좌우 포함)" 부제 — 화살표 제거, 정보 깔끔히
+  ctx.font="bold 10px sans-serif";
+  lbl("플랫", C.x, C.y - BR*0.6, "rgba(40,40,40,1)");
+  ctx.font="9px sans-serif";
+  lbl("정수리", C.x, C.y - BR*0.45, "rgba(60,60,60,0.85)");
+  const slX = C.x + (lefty2?-1:1)*BR*0.38, slY = C.y - BR*0.3;
+  const kiX = C.x + (lefty2?1:-1)*BR*0.38, kiY = C.y + BR*0.3;
+  ctx.font="bold 10px sans-serif";
+  lbl("슬라이스", slX, slY-6, "rgba(20,80,180,1)");
+  lbl("킥서브", kiX, kiY-6, "rgba(180,80,20,1)");
+  ctx.font="9px sans-serif";
+  lbl("옆면", slX, slY+7, "rgba(20,80,180,0.85)");
+  lbl("아래", kiX, kiY+7, "rgba(180,80,20,0.85)");
+}
+function handle(ctx,x,y,col,txt){
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,HR,0,7); ctx.fill();
+  ctx.strokeStyle="#fff"; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.fillStyle="#0b1620"; ctx.font="bold 9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(txt,x,y);
+}
+function drawSide(){
+  const cv=document.getElementById("side"), W=cv.clientWidth||500, H=200, ctx=dpiCanvas(cv,W,H);
+  ctx.clearRect(0,0,W,H);
+  const padL=8, padR=8, padB=22, padT=10;
+  const Dnet=R.d.Dnet, farBase=Dnet+11.89, farSvc=Dnet+6.40;
+  const xMax=farBase+1.5, zMax=Math.max(3.2,(R.sim?R.sim.peak:2)+0.4);
+  const X=x=>padL+(x/xMax)*(W-padL-padR), Z=z=>H-padB-(z/zMax)*(H-padB-padT);
+  ctx.strokeStyle="#3f5d4a"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(0),Z(0)); ctx.lineTo(X(xMax),Z(0)); ctx.stroke();
+  ctx.font="9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="top";
+  function vline(x,col,label){ ctx.strokeStyle=col; ctx.setLineDash([3,3]); ctx.beginPath();
+    ctx.moveTo(X(x),Z(0)); ctx.lineTo(X(x),padT); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=col; ctx.fillText(label,X(x),Z(0)+4); }
+  vline(farSvc,"#4a6b7d","서비스라인"); vline(farBase,"#7d6b4a","베이스라인");
+  ctx.strokeStyle="#bcdfe8"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(X(Dnet),Z(0)); ctx.lineTo(X(Dnet),Z(NET_H)); ctx.stroke();
+  ctx.fillStyle="#bcdfe8"; ctx.fillText("네트",X(Dnet),Z(NET_H)-12);
+  // 히스토리 슬롯 trajectory 오버레이 (같은 샷 종류일 때만 옆면에 표시)
+  if(overlayVisible) history.forEach((s,i)=>{
+    if(s.d.Dnet!==R.d.Dnet) return;
+    ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.setLineDash([6,3]); ctx.globalAlpha=0.75;
+    ctx.beginPath();
+    s.pts.forEach((p,j)=>{ const px=X(p.x),pz=Z(p.z); j?ctx.lineTo(px,pz):ctx.moveTo(px,pz);});
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+    const last=s.pts[s.pts.length-1];
+    ctx.fillStyle=s.color; ctx.beginPath(); ctx.arc(X(last.x),Z(last.z),5,0,7); ctx.fill();
+    ctx.fillStyle="#0b1620"; ctx.font="bold 8px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(""+(i+1), X(last.x), Z(last.z));
+  });
+  // 안전 마진 영역 (fill + 경계 점선 + 라벨)
+  if(R.margin && R.margin.loSim && R.margin.hiSim){
+    // fill (연한 초록)
+    ctx.fillStyle="rgba(91,214,111,.10)";
+    ctx.beginPath();
+    R.margin.hiSim.pts.forEach((p,i)=>{ const px=X(p.x),pz=Z(p.z); i?ctx.lineTo(px,pz):ctx.moveTo(px,pz);});
+    for(let i=R.margin.loSim.pts.length-1;i>=0;i--){ const p=R.margin.loSim.pts[i]; ctx.lineTo(X(p.x),Z(p.z));}
+    ctx.closePath(); ctx.fill();
+    // 경계 점선
+    ctx.strokeStyle="rgba(91,214,111,.55)"; ctx.lineWidth=1.8; ctx.setLineDash([5,3]);
+    [R.margin.loSim, R.margin.hiSim].forEach(sm=>{
+      ctx.beginPath();
+      sm.pts.forEach((p,i)=>{ const px=X(p.x),pz=Z(p.z); i?ctx.lineTo(px,pz):ctx.moveTo(px,pz);});
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    // "IN 영역" 라벨
+    const hiMid = R.margin.hiSim.pts[Math.floor(R.margin.hiSim.pts.length*0.35)];
+    if(hiMid){ ctx.fillStyle="rgba(91,214,111,.85)"; ctx.font="bold 10px sans-serif"; ctx.textAlign="left"; ctx.fillText("◆ IN 영역", X(hiMid.x)+5, Z(hiMid.z)-5); }
+  }
+  if(R.sim){
+    const inb=R.status==="in";
+    // 회전 강도에 따른 라인 색 (톱스핀: 주황→빨강, 슬라이스: 하늘→파랑, 플랫: 옅은 흰)
+    const o=R.d.omega;
+    let lineColor;
+    if(o>250) lineColor="#ff5e3a"; else if(o>120) lineColor="#ffa040";
+    else if(o<-250) lineColor="#3a8eff"; else if(o<-120) lineColor="#7fc8ff";
+    else lineColor="#dfeebe";
+    ctx.strokeStyle=lineColor; ctx.lineWidth=3.2; ctx.lineCap="round";
+    if(!inb) ctx.setLineDash([6,4]);   // OUT은 점선
+    ctx.beginPath();
+    R.sim.pts.forEach((p,i)=>{ const px=X(p.x),pz=Z(p.z); i?ctx.lineTo(px,pz):ctx.moveTo(px,pz);}); ctx.stroke();
+    ctx.setLineDash([]);
+    const f=R.sim.pts[0], l=R.sim.pts[R.sim.pts.length-1];
+    ctx.fillStyle="#ffd23f"; ctx.beginPath(); ctx.arc(X(f.x),Z(f.z),4,0,7); ctx.fill();
+    ctx.fillStyle=inb?"#5bd66f":"#ff6b5e"; ctx.beginPath(); ctx.arc(X(l.x),Z(l.z),6,0,7); ctx.fill();
+    // 색맹 보조 — IN=✓ / OUT=✕
+    ctx.fillStyle="#0b1620"; ctx.font="bold 8px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(inb?"✓":"✕", X(l.x), Z(l.z));
+  }
+}
+function drawTop(){
+  const cv=document.getElementById("top"), W=cv.clientWidth||500, H=300, ctx=dpiCanvas(cv,W,H);
+  ctx.clearRect(0,0,W,H);
+  const courtW=Math.min(W-44,150), courtL=H-30, cx=W/2, top=15, bottom=15+courtL;
+  const Yd=d=>bottom-(d/BASE_ABS)*courtL, Xl=l=>cx+(l/HALF_W)*(courtW/2);
+  ctx.fillStyle="#16493a"; ctx.fillRect(cx-courtW/2,top,courtW,courtL);
+  ctx.strokeStyle="#bfe9d6"; ctx.lineWidth=2; ctx.strokeRect(cx-courtW/2,top,courtW,courtL);
+  ctx.strokeStyle="#eaffff"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx-courtW/2,Yd(NET_ABS)); ctx.lineTo(cx+courtW/2,Yd(NET_ABS)); ctx.stroke();
+  ctx.strokeStyle="#7fb8a3"; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(cx-courtW/2,Yd(SVC_ABS)); ctx.lineTo(cx+courtW/2,Yd(SVC_ABS)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-courtW/2,Yd(BASE_ABS-18.29)); ctx.lineTo(cx+courtW/2,Yd(BASE_ABS-18.29)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,Yd(NET_ABS)); ctx.lineTo(cx,Yd(SVC_ABS)); ctx.stroke();
+  ctx.fillStyle="#bfe9d6"; ctx.font="9px sans-serif"; ctx.textAlign="center";
+  // 왼손잡이는 본인 시점에서 듀스가 자기 왼쪽 baseline 위치 — 라벨 좌우 swap
+  if(S.hand==="left"){ ctx.fillText("듀스(왼)", cx-courtW/4, Yd((NET_ABS+SVC_ABS)/2)); ctx.fillText("애드(오른)", cx+courtW/4, Yd((NET_ABS+SVC_ABS)/2)); }
+  else { ctx.fillText("듀스(오른)", cx+courtW/4, Yd((NET_ABS+SVC_ABS)/2)); ctx.fillText("애드(왼)", cx-courtW/4, Yd((NET_ABS+SVC_ABS)/2)); }
+  ctx.fillStyle="#9fd8c2"; ctx.fillText("상대 코트 (목표)", cx, top+8);
+  ctx.fillStyle="#6f9c8c"; ctx.fillText("서비스라인", cx, Yd(SVC_ABS)+3); ctx.fillText("베이스라인", cx, top+18);
+  ctx.textAlign="left"; ctx.fillStyle="#86b3a3"; ctx.fillText("내 코트", cx-courtW/2+4, bottom-12);
+  // 히스토리 슬롯 — 위 코트 낙하지점
+  if(overlayVisible) history.forEach((s,i)=>{
+    const lxA=Xl(clamp(s.d.lateral,-HALF_W*1.15,HALF_W*1.15)), lyA=Yd(Math.min(s.absLand,BASE_ABS*1.06));
+    ctx.fillStyle=s.color; ctx.beginPath(); ctx.arc(lxA,lyA,7,0,7); ctx.fill();
+    ctx.strokeStyle="#0b1620"; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle="#0b1620"; ctx.font="bold 9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(""+(i+1),lxA,lyA);
+  });
+  if(R.sim){
+    const inb=R.status==="in", xHit=R.d.xHit;
+    // v7.20: 본인 lateral 반영 (발리/서브는 0)
+    const myCY = (S.stroke==="volley"||S.stroke==="serve") ? 0 : normalizeCourtY(S.courtY);
+    const myDotX = Xl(clamp(myCY,-HALF_W*1.15,HALF_W*1.15));
+    ctx.fillStyle="#ffd23f"; ctx.beginPath(); ctx.arc(myDotX,Yd(xHit),5,0,7); ctx.fill();
+    const lx=Xl(clamp(R.d.lateral,-HALF_W*1.15,HALF_W*1.15)), ly=Yd(Math.min(R.absLand,BASE_ABS*1.06));
+    ctx.fillStyle=inb?"#5bd66f":"#ff6b5e"; ctx.beginPath(); ctx.arc(lx,ly,8,0,7); ctx.fill();
+    ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
+    // 색맹 보조 — IN=✓ / OUT=✕
+    ctx.fillStyle="#0b1620"; ctx.font="bold 9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(inb?"✓":"✕",lx,ly);
+  }
+}
+function spinWordTxt(){
+  const o=R.d.omega, rpm=R.rpm;
+  if(Math.abs(o)<120) return "플랫";
+  const lvl = rpm<1500?"약한":rpm<2500?"보통":rpm<3500?"강한":"매우 강한";
+  return (o>0?"톱스핀":"백스핀")+"·"+lvl;
+}
+function netWordTxt(){
+  if(!R.cleared) return "걸림";
+  const cm=R.netCm; return cm<15?"빠듯":cm<45?"적당":cm<100?"여유":"높음";
+}
+function render(){
+  drawBall(); drawSide(); drawTop(); drawBounce();
+  const spinUp=R.d.omega>60, spinDown=R.d.omega<-60;
+  document.getElementById("spinType").textContent = spinUp?"톱스핀":spinDown?"슬라이스":"플랫";
+  document.getElementById("spinRpm").innerHTML = '<span class="rpmNum">~'+R.rpm+' rpm</span>';
+  const cv=R.d.contactVert, hz=R.d.horiz;
+  let ct = cv>0.35?"공의 윗부분":cv<-0.35?"공의 아랫부분":"뒷면 중앙";
+  if(Math.abs(hz)>0.6) ct += hz>0?" · 오른쪽":" · 왼쪽";
+  document.getElementById("contactTxt").textContent=ct;
+  const kmhEl=document.getElementById("kmhBig"); if(kmhEl) kmhEl.textContent=Math.round(R.d.speed*3.6);
+  const v=document.getElementById("verdict");
+  v.className="verdict "+(R.status==="in"?"in":"out");
+  document.getElementById("vBig").textContent=R.big;
+  document.getElementById("vCoach").textContent=R.coach;
+  document.getElementById("stNet").textContent = R.cleared?(netWordTxt()+" "+Math.round(R.netCm)+"cm"):"걸림";
+  document.getElementById("stDist").textContent = R.absLand.toFixed(1)+"m";
+  document.getElementById("stSpeed").textContent = Math.round(R.d.speed*3.6)+"km/h";
+  // 회전 stat + 기준점 한 줄 inline
+  let spinTxt = spinWordTxt();
+  if(!document.body.classList.contains("easy") && R.rpm>0){
+    spinTxt += " "+R.rpm+"rpm";
+    // 기준점 짧게: 톱스핀 / 슬라이스에 따라
+    if(R.d.omega>120) spinTxt += " · 프로 ~2,850 / 아마 ~1,400";
+    else if(R.d.omega<-120) spinTxt += " · 아마 슬라이스 ~1,500";
+  }
+  document.getElementById("stSpin").innerHTML = spinTxt;
+  let cap = "최고 높이 "+R.sim.peak.toFixed(1)+"m · 비행 "+R.sim.flight.toFixed(1)+"초";
+  if(R.margin && R.margin.lo!=null && R.margin.hi!=null){
+    const width=(R.margin.hi-R.margin.lo);
+    cap += " · 🛡 안전 마진 "+width.toFixed(0)+"° (이 설정에서 IN되는 발사각 폭)";
+  } else { cap += " · 🛡 안전 마진 0° (이 설정으론 들어갈 수 없음)"; }
+  document.getElementById("sideCap").textContent = cap;
+  const chip=document.getElementById("incChip");
+  if(R.d.isServe){ chip.textContent=""; }
+  else { const sp={slow:"느린",mid:"보통",fast:"빠른"}[S.inSpeed], spin={top:"톱스핀",flat:"플랫",back:"슬라이스"}[S.inSpin];
+    chip.textContent="들어온 공: "+sp+"·"+spin; }
+  document.getElementById("racketSummary").textContent = "("+S.head+" · "+S.pattern+" · "+S.tension+"lbs)";
+  // rpmRef 제거됨 — 정보는 🤔 회전수 카드에 있음
+  // inSpinNote 제거됨 — 정보는 verdict coach에 흡수
+  updateHistoryUI();
+  // 메인 동선: IN + 굿샷이면 위닝샷 버튼 1회 펄스 (가챠 동기 자극)
+  maybePulseWinnerBtn();
+}
+function maybePulseWinnerBtn(){
+  if(!R || R.status!=="in") return;
+  const btn=document.getElementById("openWinnerBtn"); if(!btn) return;
+  // 같은 샷에선 한 번만 펄스 (스팸 방지) — 시뮬값 변할 때마다 다시 가능
+  const sig = `${Math.round(R.d.speed*100)}_${R.rpm}_${R.absLand?R.absLand.toFixed(1):0}`;
+  if(btn.dataset.lastPulseSig === sig) return;
+  btn.dataset.lastPulseSig = sig;
+  btn.classList.remove("shotReady");
+  void btn.offsetWidth; // 강제 reflow → 애니 재시작
+  btn.classList.add("shotReady");
+  setTimeout(()=>btn.classList.remove("shotReady"), 2800);
+}
+function updateHistoryUI(){
+  const slots=document.getElementById("historySlots");
+  slots.innerHTML="";
+  if(history.length===0){
+    slots.innerHTML='<div style="color:var(--sub); font-size:11px; padding:3px 4px;">현재 샷을 저장해 다른 샷과 비교해 보세요</div>';
+  } else {
+    history.forEach((s,i)=>{
+      const div=document.createElement("div");
+      div.title="클릭=불러와서 다시 치기 / 더블클릭=이름 수정 / ✕=삭제";
+      div.style.cssText=`display:flex; align-items:center; gap:6px; padding:5px 9px; background:rgba(255,255,255,.04); border:1px solid ${s.color}; border-radius:7px; font-size:11px; cursor:pointer;`;
+      div.dataset.idx=i;
+      div.classList.add("slotCard");
+      div.innerHTML=`<span style="color:${s.color}; font-weight:700;">${i+1}</span><span style="color:var(--txt); flex:1;">${s.time} <b>${s.name}</b></span><span style="color:var(--sub); font-size:10px;">${s.absLand.toFixed(1)}m·${s.rpm}rpm</span><button class="pinSlot" data-idx="${i}" title="잠금/해제 (덮어쓰기 보호)" style="background:transparent; border:none; color:${s.pinned?'var(--accent2)':'var(--sub)'}; cursor:pointer; padding:6px 8px; font-size:14px; min-width:32px; min-height:32px;">${s.pinned?'🔒':'🔓'}</button><button class="rmSlot" data-idx="${i}" style="background:transparent; border:none; color:var(--sub); cursor:pointer; padding:6px 8px; font-size:14px; min-width:32px; min-height:32px;">✕</button>`;
+      slots.appendChild(div);
+    });
+  }
+  document.getElementById("slotCount").textContent = history.length>0?`(${history.length}/${MAX_SLOTS})`:"";
+  document.getElementById("saveSlotBtn").disabled = history.length>=MAX_SLOTS;
+  // 단일 슬롯일 때 차이 자동 계산
+  const diff=document.getElementById("historyDiff");
+  if(history.length===1 && R.sim){
+    const s=history[0];
+    const dRpm=R.rpm-s.rpm, dDist=R.absLand-s.absLand;
+    const Bw=R.margin?(R.margin.hi-R.margin.lo):0, dMarg=Bw-s.marginWidth;
+    const fmt=(n,unit)=>(n>0?"+":"")+(unit==="m"?n.toFixed(1):Math.round(n))+unit;
+    diff.innerHTML=`<b style="color:${s.color}">${s.strokeName}(${s.time})</b> 대비 현재: 회전 <b>${fmt(dRpm,"rpm")}</b> · 낙하 <b>${fmt(dDist,"m")}</b> · 마진 <b>${fmt(dMarg,"°")}</b>`;
+  } else if(history.length>1){
+    diff.innerHTML=`<span style="color:var(--sub);">${history.length}개 비교 중. 단일 슬롯만 두면 현재 샷과 자동 차이 비교돼요.</span>`;
+  } else diff.textContent="";
+}
+document.getElementById("overlayToggleBtn").addEventListener("click",function(){
+  overlayVisible=!overlayVisible;
+  this.textContent = overlayVisible?"👁 표시":"🚫 숨김";
+  this.style.color = overlayVisible?"var(--sub)":"var(--accent2)";
+  render();
+});
+document.getElementById("saveSlotBtn").addEventListener("click",()=>{
+  if(!R.sim) return;
+  let displaced=false;
+  if(history.length>=MAX_SLOTS){
+    // 잠겨있지 않은 가장 오래된 슬롯 찾기
+    const idx = history.findIndex(s=>!s.pinned);
+    if(idx<0){ showToast("⚠️ 모든 슬롯이 🔒잠금 상태예요. 하나를 풀거나 ✕로 삭제해야 새로 저장돼요."); return; }
+    history.splice(idx,1); displaced=true;
+  }
+  const slot={
+    pts:R.sim.pts.slice(), d:Object.assign({},R.d),
+    status:R.status, absLand:R.absLand, rpm:R.rpm, big:R.big,
+    marginWidth:R.margin?(R.margin.hi-R.margin.lo):0,
+    strokeName:strokeName(S.stroke),
+    name:strokeName(S.stroke),
+    time:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+    state:JSON.parse(JSON.stringify(S))
+  };
+  history.push(slot);
+  history.forEach((s,i)=>s.color=SLOT_COLORS[i]);
+  if(displaced) showToast("⚠️ 가장 오래된 1번 슬롯을 새 샷으로 교체했어요. (최대 5개)");
+  // 첫 슬롯 저장 시 핀 안내 1회
+  try{
+    if(history.length===1 && !localStorage.getItem("tts_pin_intro")){
+      showToast("💡 슬롯 카드의 <b>🔒</b>를 누르면 잠겨서 자동 덮어쓰기에서 <b>보호</b>돼요. 더블클릭으로 <b>이름</b>도 바꿀 수 있어요.");
+      localStorage.setItem("tts_pin_intro","1");
+    }
+  }catch(e){}
+  render();
+});
+function loadSlot(idx){
+  const s=history[idx]; if(!s||!s.state) return;
+  Object.keys(s.state).forEach(k=>{
+    if(k==="swing") S.swing={start:Object.assign({},s.state.swing.start),end:Object.assign({},s.state.swing.end)};
+    else S[k]=s.state[k];
+  });
+  ["stroke","power","face","aim","contactPos","inSpeed","inSpin","inHeight","toss","head","pattern"].forEach(id=>syncSeg(id,S[id]));
+  S.courtX = normalizeCourtX(s.state.courtX);
+  S.courtY = normalizeCourtY(s.state.courtY);
+  S.targetX = normalizeTargetX(s.state.targetX); // v7.21
+  S.targetY = normalizeTargetY(s.state.targetY); // v7.21
+  syncCourtXUI(); // v7.19~21
+  const g=document.getElementById("grip"); if(g) g.value=S.grip;
+  const tEl2=document.getElementById("tension"); if(tEl2){ tEl2.value=S.tension; document.getElementById("tensionVal").textContent=S.tension+" lbs"; }
+  const hb=document.getElementById("handBtn"); hb.textContent=S.hand==="right"?"🤚 오른손":"🤚 왼손"; hb.classList.toggle("on",S.hand==="left");
+  touched=true; const ob=document.getElementById("onboard"); if(ob) ob.style.display="none";
+  syncStrokeUI(); compute();
+  showToast(`🔄 슬롯 ${idx+1} "${s.name}" 불러와서 다시 칠 수 있어요. (히스토리는 그대로 비교용)`);
+}
+function renameSlot(idx){
+  const s=history[idx]; if(!s) return;
+  const nm=prompt("슬롯 이름 (예: 크로스 톱스핀 연습)", s.name);
+  if(nm===null) return;
+  s.name = nm.trim() || s.strokeName;
+  render();
+}
+document.getElementById("historySlots").addEventListener("click",e=>{
+  const rm=e.target.closest(".rmSlot");
+  if(rm){ e.stopPropagation(); const idx=+rm.dataset.idx; history.splice(idx,1); history.forEach((s,i)=>s.color=SLOT_COLORS[i]); render(); return; }
+  const pin=e.target.closest(".pinSlot");
+  if(pin){ e.stopPropagation(); history[+pin.dataset.idx].pinned=!history[+pin.dataset.idx].pinned; render(); return; }
+  const card=e.target.closest(".slotCard");
+  if(card) loadSlot(+card.dataset.idx);
+});
+document.getElementById("historySlots").addEventListener("dblclick",e=>{
+  const card=e.target.closest(".slotCard"); if(!card) return;
+  e.stopPropagation(); renameSlot(+card.dataset.idx);
+});
+
+// help toast
+const toast=document.getElementById("toast");
+let toastTimer=null;
+function showToast(html){ toast.innerHTML=html; toast.style.display="block"; clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.style.display="none",7000); }
+toast.addEventListener("click",()=>toast.style.display="none");
+document.addEventListener("click",e=>{ const q=e.target.closest(".q"); if(q){ e.stopPropagation(); showToast(q.dataset.help); } });
+
+// ball handles
+const ballCv=document.getElementById("ball");
+let drag=null;
+function ptFromEvent(e){
+  const rect=ballCv.getBoundingClientRect(), sx=BW/rect.width, sy=BW/rect.height;
+  const cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left, cy=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+  return {x:clamp(cx*sx,4,BW-4), y:clamp(cy*sy,4,BW-4)};
+}
+function near(p,h){return Math.hypot(p.x-h.x,p.y-h.y)<36;}
+function hideOnboard(){ if(!touched){ touched=true; const o=document.getElementById("onboard"); if(o) o.style.display="none"; } }
+function onDown(e){ e.preventDefault(); hideOnboard(); const p=ptFromEvent(e);
+  if(near(p,S.swing.end)) drag="end"; else if(near(p,S.swing.start)) drag="start";
+  else { S.swing.start={x:p.x,y:p.y}; drag="end"; S.swing.end={x:p.x,y:p.y}; } onMove(e); }
+function onMove(e){
+  if(!drag) return; e.preventDefault();
+  const p=ptFromEvent(e);
+  // 서브 모드 + 종류 선택 시: 핸들이 종류별 영역 안에서만 이동 (강한 제한)
+  if(S.stroke==="serve"){
+    const r=getRegion(drag);
+    if(r){ p.x=clamp(p.x, r.x[0], r.x[1]); p.y=clamp(p.y, r.y[0], r.y[1]); }
+  }
+  S.swing[drag]={x:p.x,y:p.y}; compute();
+}
+function onUp(){ drag=null; }
+ballCv.addEventListener("mousedown",onDown); ballCv.addEventListener("touchstart",onDown,{passive:false});
+window.addEventListener("mousemove",onMove); window.addEventListener("touchmove",onMove,{passive:false});
+window.addEventListener("mouseup",onUp); window.addEventListener("touchend",onUp);
+
+// segmented
+function seg(id,key){
+  document.getElementById(id).addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    [...e.currentTarget.children].forEach(c=>c.classList.remove("on")); b.classList.add("on");
+    S[key]=b.dataset.v;
+    if(key==="stroke"){
+      if(S.grip && GRIP_FACE[S.grip]){ S.face = GRIP_FACE[S.grip][S.stroke]; syncSeg("face", S.face); }
+      syncStrokeUI();
+    }
+    compute(); });
+}
+["stroke","power","face","aim","inSpeed","inSpin","toss","contactPos","head","pattern"].forEach(id=>seg(id,id));
+// v7.21: 풀코트 미니코트 — 본인 위치 + 목표(상대 코트) 동시 입력
+// 좌표계: x = -4~+25m (왼쪽 본인 뒤 ~ 오른쪽 상대 베이스 + 약간), y = -5~+5m
+const MC_DIMS = {xMin:-4, xMax:25, yMin:-5, yMax:5};
+function drawMiniCourt(){
+  const cv = document.getElementById("miniCourt"); if(!cv) return;
+  const W = cv.width, H = cv.height;
+  const ctx = cv.getContext("2d");
+  ctx.clearRect(0,0,W,H);
+  const xR = MC_DIMS.xMax - MC_DIMS.xMin, yR = MC_DIMS.yMax - MC_DIMS.yMin;
+  const Px = x => ((x - MC_DIMS.xMin) / xR) * W;
+  const Py = y => ((y - MC_DIMS.yMin) / yR) * H;
+  // 배경
+  ctx.fillStyle = "#0d1812"; ctx.fillRect(0,0,W,H);
+  // 왼쪽 본인 베이스라인 뒤 영역 (음영)
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.fillRect(0, 0, Px(0), H);
+  // 오른쪽 상대 베이스라인 뒤 영역 (음영)
+  ctx.fillRect(Px(23.78), 0, W-Px(23.78), H);
+  // 풀코트 본체 (본인 베이스라인 ~ 상대 베이스라인, 단식 폭)
+  const courtL = Px(0), courtR = Px(23.78), courtT = Py(-4.115), courtB = Py(4.115);
+  ctx.fillStyle = "#16493a";
+  ctx.fillRect(courtL, courtT, courtR-courtL, courtB-courtT);
+  ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 1.4;
+  ctx.strokeRect(courtL, courtT, courtR-courtL, courtB-courtT);
+  // 서비스라인 양쪽 (본인 5.49m, 상대 18.29m)
+  ctx.strokeStyle = "rgba(255,255,255,0.30)"; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(Px(5.49), courtT); ctx.lineTo(Px(5.49), courtB);
+  ctx.moveTo(Px(18.29), courtT); ctx.lineTo(Px(18.29), courtB);
+  // 센터 마크 (양쪽 서비스라인 사이만)
+  ctx.moveTo(Px(5.49), Py(0)); ctx.lineTo(Px(18.29), Py(0));
+  ctx.stroke();
+  // 네트 (중앙)
+  ctx.strokeStyle = "#bcdfe8"; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(Px(11.89), courtT-4); ctx.lineTo(Px(11.89), courtB+4); ctx.stroke();
+  // 깊이 라벨 (아래)
+  ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "8.5px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("내 베이스", Px(0), Py(4.6));
+  ctx.fillText("네트", Px(11.89), Py(4.6));
+  ctx.fillText("상대 베이스", Px(23.78), Py(4.6));
+  // 듀스/애드 (본인 시점)
+  const isLefty = S.hand === "left";
+  ctx.fillStyle = "rgba(127,209,79,0.5)"; ctx.font="bold 8.5px sans-serif";
+  ctx.fillText(isLefty ? "듀스" : "애드", (courtL+Px(11.89))/2, courtT - 6);
+  ctx.fillText(isLefty ? "애드" : "듀스", (courtL+Px(11.89))/2, courtB + 11);
+  // 영역 헤더 (작게)
+  ctx.fillStyle = "rgba(255,210,63,0.35)"; ctx.font="bold 8.5px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("📍 내 영역", (courtL+Px(11.89))/2, courtT + 8);
+  ctx.fillStyle = "rgba(255,107,94,0.45)";
+  ctx.fillText("🎯 노리는 곳", (Px(11.89)+courtR)/2, courtT + 8);
+  // 본인 dot (노란)
+  const myCX = normalizeCourtX(S.courtX), myCY = normalizeCourtY(S.courtY);
+  const myDX = Px(myCX), myDY = Py(myCY);
+  if(myCX < -0.3){
+    ctx.strokeStyle = "rgba(255,210,63,0.5)"; ctx.setLineDash([3,3]); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(myDX, myDY); ctx.lineTo(Px(0), myDY); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.shadowColor = "#ffd23f"; ctx.shadowBlur = 8;
+  ctx.fillStyle = "#ffd23f";
+  ctx.beginPath(); ctx.arc(myDX, myDY, 6.5, 0, 7); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.8; ctx.stroke();
+  // 목표 dot (빨간/주황) — 별 모양으로 구분
+  const tx = normalizeTargetX(S.targetX), ty = normalizeTargetY(S.targetY);
+  const tDX = Px(tx), tDY = Py(ty);
+  ctx.shadowColor = "#ff6b5e"; ctx.shadowBlur = 8;
+  ctx.fillStyle = "#ff6b5e";
+  // 별 모양 (5각, 작게)
+  ctx.beginPath();
+  for(let i=0; i<10; i++){
+    const a = i * Math.PI / 5 - Math.PI/2;
+    const r = i%2===0 ? 7 : 3.2;
+    const px = tDX + r*Math.cos(a), py = tDY + r*Math.sin(a);
+    i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+  }
+  ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.4; ctx.stroke();
+  // 본인→목표 점선 가이드 라인 (의도)
+  ctx.strokeStyle = "rgba(255,255,255,0.18)"; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(myDX, myDY); ctx.lineTo(tDX, tDY); ctx.stroke();
+  ctx.setLineDash([]);
+  cv._Px = Px; cv._Py = Py;
+}
+function syncCourtXUI(){
+  const lb = document.getElementById("courtXLabel");
+  if(lb) lb.textContent = courtFullLabel(normalizeCourtX(S.courtX), normalizeCourtY(S.courtY), S.hand);
+  const tl = document.getElementById("targetLabel");
+  if(tl) tl.textContent = targetLabel(normalizeTargetX(S.targetX), normalizeTargetY(S.targetY), S.hand);
+  drawMiniCourt();
+}
+// v7.21: 미니코트 클릭 자동 분기 — 네트(11.89m) 기준 왼쪽=본인, 오른쪽=목표
+(function setupMiniCourt(){
+  const cv = document.getElementById("miniCourt"); if(!cv) return;
+  let dragging = false;
+  let dragMode = null; // "self" or "target"
+  function ptFromEvt(e){
+    const r = cv.getBoundingClientRect();
+    const cx = (e.touches?e.touches[0].clientX:e.clientX) - r.left;
+    const cy = (e.touches?e.touches[0].clientY:e.clientY) - r.top;
+    const px = cx * (cv.width / r.width);
+    const py = cy * (cv.height / r.height);
+    const xR = MC_DIMS.xMax - MC_DIMS.xMin, yR = MC_DIMS.yMax - MC_DIMS.yMin;
+    const x = MC_DIMS.xMin + (px / cv.width) * xR;
+    const y = MC_DIMS.yMin + (py / cv.height) * yR;
+    return {x, y};
+  }
+  function pickMode(p){
+    // 두 dot 중 가까운 쪽 우선, 아니면 네트 기준 분기
+    const dxSelf = Math.hypot(p.x - normalizeCourtX(S.courtX), p.y - normalizeCourtY(S.courtY));
+    const dxTgt  = Math.hypot(p.x - normalizeTargetX(S.targetX), p.y - normalizeTargetY(S.targetY));
+    if(dxSelf < 1.8 && dxSelf < dxTgt) return "self";
+    if(dxTgt < 1.8 && dxTgt < dxSelf) return "target";
+    return p.x < 11.89 ? "self" : "target";
+  }
+  function apply(p, mode){
+    const isAuto = (S.stroke==="serve" || S.stroke==="volley");
+    if(mode==="self"){
+      if(isAuto) return; // 발리/서브는 본인 위치 자동
+      S.courtX = clamp(p.x, -4, 10);
+      S.courtY = clamp(p.y, -4.5, 4.5);
+    } else {
+      S.targetX = clamp(p.x, 11.89, 25);
+      S.targetY = clamp(p.y, -4.5, 4.5);
+    }
+    syncCourtXUI();
+    compute();
+  }
+  cv.addEventListener("pointerdown",(e)=>{
+    e.preventDefault(); dragging=true; cv.setPointerCapture?.(e.pointerId);
+    const p = ptFromEvt(e); dragMode = pickMode(p); apply(p, dragMode);
+  });
+  cv.addEventListener("pointermove",(e)=>{
+    if(!dragging) return; e.preventDefault();
+    apply(ptFromEvt(e), dragMode);
+  });
+  cv.addEventListener("pointerup", ()=>{ dragging=false; dragMode=null; });
+  cv.addEventListener("pointercancel", ()=>{ dragging=false; dragMode=null; });
+})();
+// 빠른 프리셋 칩 렌더 — 2D
+function renderCourtPresets(){
+  const wrap = document.getElementById("courtPresets"); if(!wrap) return;
+  wrap.innerHTML = COURT_PRESETS.map(p=>(
+    `<button type="button" class="courtPreChip" data-x="${p.x}" data-y="${p.y}" style="padding:4px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:var(--txt); border-radius:999px; font-size:11px; font-weight:600; cursor:pointer;">${p.label}</button>`
+  )).join("");
+}
+renderCourtPresets();
+document.getElementById("courtPresets").addEventListener("click",(e)=>{
+  const b = e.target.closest(".courtPreChip"); if(!b) return;
+  S.courtX = parseFloat(b.dataset.x);
+  S.courtY = parseFloat(b.dataset.y);
+  syncCourtXUI();
+  compute();
+});
+// 그라운드/발리 회전 종류 빠른 토글 — 선택 시 swing 자동 디폴트
+const STROKE_SWINGS = {
+  topspin: {start:[105,178], end:[135,52], face:"flat", power:"mid"},
+  flat:    {start:[110,128], end:[140,122], face:"flat", power:"mid"},
+  slice:   {start:[120,82],  end:[140,135], face:"open", power:"low"}  // 면 열기 + 공 윗부분 contact, 약하게
+};
+document.getElementById("strokeSpin").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  b.classList.add("on");
+  S.strokeSpin=b.dataset.v;
+  const sw=STROKE_SWINGS[S.strokeSpin]; if(!sw) return;
+  S.swing.start={x:sw.start[0], y:sw.start[1]};
+  S.swing.end={x:sw.end[0], y:sw.end[1]};
+  if(sw.face){ S.face=sw.face; syncSeg("face",sw.face); }
+  if(sw.power){ S.power=sw.power; syncSeg("power",sw.power); }
+  touched=true;
+  const ob=document.getElementById("onboard"); if(ob) ob.style.display="none";
+  compute();
+});
+// 서브 종류 토글 — 선택 시 swing 디폴트 자동 이동
+const SERVE_SWINGS = {
+  flat:  {start:[135,200], end:[115,55]},
+  slice: {start:[105,165], end:[195,70]},
+  kick:  {start:[85,180],  end:[160,85]}
+};
+// 종류별 핸들 가능 영역 (오른손잡이 기준 — 왼손은 좌우 반전)
+// {x:[min,max], y:[min,max]} 시작·끝 핸들 박스
+const SERVE_REGIONS_R = {
+  flat:  {start:{x:[100,150], y:[160,215]}, end:{x:[100,150], y:[40,90]}},
+  slice: {start:{x:[40,135],  y:[140,215]}, end:{x:[160,225], y:[40,115]}},
+  kick:  {start:{x:[25,130],  y:[155,225]}, end:{x:[155,225], y:[40,115]}}
+};
+function mirrorRegion(r){
+  const m=v=>BW-v;
+  return {x:[m(r.x[1]), m(r.x[0])], y:r.y};
+}
+function getRegion(handle){
+  const t=S.serveType||"flat", base=SERVE_REGIONS_R[t]; if(!base) return null;
+  const r=base[handle]; if(!r) return null;
+  return S.hand==="left"? mirrorRegion(r) : r;
+}
+function applyServeType(t){
+  const sw=SERVE_SWINGS[t]; if(!sw) return;
+  const lefty=S.hand==="left";
+  // 왼손잡이는 좌우 반전 (x = BW - x)
+  S.swing.start = lefty? {x:BW-sw.start[0], y:sw.start[1]} : {x:sw.start[0], y:sw.start[1]};
+  S.swing.end   = lefty? {x:BW-sw.end[0],   y:sw.end[1]}   : {x:sw.end[0],   y:sw.end[1]};
+}
+document.getElementById("serveType").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  b.classList.add("on");
+  S.serveType=b.dataset.v;
+  applyServeType(S.serveType);
+  touched=true;
+  const ob=document.getElementById("onboard"); if(ob) ob.style.display="none";
+  syncStrokeUI(); compute();
+});
+// 공 높이 위젯 클릭 핸들러
+document.getElementById("bounceWidget").addEventListener("click",function(e){
+  const rect=this.getBoundingClientRect();
+  const W=170, H=60, hy=10, fy=H-6;
+  const y = (e.clientY-rect.top) * (H/rect.height);
+  // 가장 가까운 레벨 찾기
+  let best=BOUNCE_LEVELS[0], bestD=999;
+  BOUNCE_LEVELS.forEach(lvl=>{
+    const ly = hy + lvl.yFrac*(fy-hy);
+    const d=Math.abs(ly-y);
+    if(d<bestD){ bestD=d; best=lvl; }
+  });
+  S.inHeight=best.v; compute();
+});
+function syncSeg(id,val){ const el=document.getElementById(id); if(!el||!el.children||!el.children.length) return; [...el.children].forEach(c=>c.classList.toggle("on",c.dataset.v===val)); }
+function syncStrokeUI(){
+  const serve=S.stroke==="serve";
+  const volley=S.stroke==="volley";
+  document.querySelectorAll(".incRow").forEach(r=>r.classList.toggle("hide",serve));
+  document.querySelectorAll(".serveRow").forEach(r=>r.classList.toggle("hide",!serve));
+  document.querySelectorAll(".groundRow").forEach(r=>r.classList.toggle("hide",serve));
+  const lab=document.getElementById("rightGroupLabel"); if(lab) lab.textContent = serve?"🎾 서브 옵션":"🎾 상대 공";
+  const sc=document.getElementById("scenarioBar"); if(sc) sc.style.display = serve?"none":"block";
+  const lr=document.getElementById("ballLR");
+  if(lr){ lr.style.display = serve?"flex":"none"; }
+  // v7.20: 코트 위치 — 발리/서브 모드는 자동 (미니코트·프리셋 숨기고 안내)
+  const miniCv    = document.getElementById("miniCourt");
+  const courtLab  = document.getElementById("courtXLabel");
+  const courtPre  = document.getElementById("courtPresets");
+  const autoMsg   = document.getElementById("courtPosAuto");
+  const hideCourt = (h)=>{
+    [miniCv, courtPre].forEach(el=>{ if(el) el.style.display = h?"none":""; });
+    if(courtLab) courtLab.style.opacity = h?"0.5":"1";
+  };
+  if(serve){
+    hideCourt(true);
+    autoMsg.style.display="block";
+    autoMsg.innerHTML = "🎾 <b>자동: 베이스라인</b> (서브는 규칙상 베이스라인에서)";
+    if(courtLab) courtLab.textContent = "베이스라인 (자동)";
+  } else if(volley){
+    hideCourt(true);
+    autoMsg.style.display="block";
+    autoMsg.innerHTML = "🎾 <b>자동: 네트 앞 4.5m</b> (발리 모드)";
+    if(courtLab) courtLab.textContent = "네트 앞 4.5m (자동)";
+  } else {
+    hideCourt(false);
+    autoMsg.style.display="none";
+    syncCourtXUI();
+  }
+  // 좌/우는 본인 시점 — 손잡이 무관 (라벨 고정)
+  updateServeHint();
+  if(serve){
+    try{
+      if(!localStorage.getItem("tts_serveview_intro2")){
+        const lefty=S.hand==="left";
+        showToast("🎾 <b>서브 모드</b> — 공 위젯이 <b>"+(lefty?"왼손잡이 ":"")+"서버 시점</b>(라켓 들어 본 공 옆면)으로 바뀌었어요.<br><span style='color:#ddd'>● 12시 = 플랫</span><br><span style='color:#7fc8ff'>● "+(lefty?"10~11":"1~2")+"시(본인 시점 "+(lefty?"왼쪽 위":"오른쪽 위")+") = 슬라이스</span><br><span style='color:#ffa040'>● "+(lefty?"4~5":"7~8")+"시(본인 시점 "+(lefty?"오른쪽 아래":"왼쪽 아래")+") = 킥/콘서브</span>");
+        localStorage.setItem("tts_serveview_intro2","1");
+      }
+    }catch(e){}
+  }
+}
+const SCENARIOS = {
+  normal:   {inSpeed:"mid",  inSpin:"flat", inHeight:"waist", contactPos:"side",  strokeSpin:"flat"},
+  lowSlice: {inSpeed:"slow", inSpin:"back", inHeight:"low",   contactPos:"side",  strokeSpin:"slice"},
+  highTop:  {inSpeed:"fast", inSpin:"top",  inHeight:"head",  contactPos:"late",  strokeSpin:"topspin"},
+  fast:     {inSpeed:"fast", inSpin:"flat", inHeight:"waist", contactPos:"front", strokeSpin:"flat"},
+  deep:     {inSpeed:"mid",  inSpin:"top",  inHeight:"high",  contactPos:"late",  strokeSpin:"topspin"},
+  setup:    {inSpeed:"mid",  inSpin:"flat", inHeight:"waist", contactPos:"front", strokeSpin:"topspin"}
+};
+document.getElementById("scenarioChips").addEventListener("click",e=>{
+  const b=e.target.closest(".scenChip"); if(!b) return;
+  const sc=SCENARIOS[b.dataset.sc]; if(!sc) return;
+  Object.keys(sc).forEach(k=>S[k]=sc[k]);
+  ["inSpeed","inSpin","contactPos"].forEach(id=>syncSeg(id,S[id]));
+  // strokeSpin + 자동 swing 디폴트
+  if(sc.strokeSpin){
+    syncSeg("strokeSpin", sc.strokeSpin);
+    const sw=STROKE_SWINGS[sc.strokeSpin];
+    if(sw){
+      S.swing.start={x:sw.start[0], y:sw.start[1]};
+      S.swing.end={x:sw.end[0], y:sw.end[1]};
+      if(sw.face){ S.face=sw.face; syncSeg("face",sw.face); }
+      if(sw.power){ S.power=sw.power; syncSeg("power",sw.power); }
+    }
+  }
+  [...document.getElementById("scenarioChips").children].forEach(c=>c.classList.remove("on"));
+  b.classList.add("on");
+  touched=true;
+  const ob=document.getElementById("onboard"); if(ob) ob.style.display="none";
+  compute();
+});
+const tEl=document.getElementById("tension");
+tEl.addEventListener("input",()=>{ S.tension=+tEl.value; document.getElementById("tensionVal").textContent=S.tension+" lbs"; compute(); });
+const RACKETS = {
+  "w-prostaff97":{head:"98",pattern:"16x19"}, "w-blade98-1619":{head:"98",pattern:"16x19"}, "w-blade98-1820":{head:"98",pattern:"18x20"},
+  "w-clash100":{head:"100",pattern:"16x19"}, "w-burn100":{head:"100",pattern:"16x19"},
+  "b-puredrive":{head:"100",pattern:"16x19"}, "b-pureaero":{head:"100",pattern:"16x19"},
+  "b-purestrike-1619":{head:"98",pattern:"16x19"}, "b-purestrike-1820":{head:"98",pattern:"18x20"},
+  "h-speedmp":{head:"100",pattern:"16x19"}, "h-speedpro":{head:"100",pattern:"18x20"},
+  "h-radical":{head:"98",pattern:"16x19"}, "h-prestige":{head:"98",pattern:"18x20"}, "h-gravity":{head:"100",pattern:"18x20"},
+  "y-ezone98":{head:"98",pattern:"16x19"}, "y-ezone100":{head:"100",pattern:"16x19"},
+  "y-vcore98":{head:"98",pattern:"16x20"}, "y-vcore100":{head:"100",pattern:"16x19"},
+  "p-phantom":{head:"100",pattern:"18x20"}, "p-beast":{head:"100",pattern:"16x18"}
+};
+const GRIP_FACE = {
+  continental: { forehand:"open", backhand:"open", volley:"open", serve:"flat" },
+  eastern:     { forehand:"flat", backhand:"flat", volley:"open", serve:"flat" },
+  semiwest:    { forehand:"flat", backhand:"flat", volley:"open", serve:"flat" },
+  western:     { forehand:"closed", backhand:"flat", volley:"open", serve:"flat" },
+  fullwest:    { forehand:"closed", backhand:"closed", volley:"open", serve:"flat" }
+};
+document.getElementById("grip").addEventListener("change", e=>{
+  S.grip = e.target.value;
+  const newFace = GRIP_FACE[S.grip][S.stroke];
+  S.face = newFace;
+  syncSeg("face", newFace);
+  compute();
+});
+document.getElementById("racketModel").addEventListener("change",e=>{
+  const m=RACKETS[e.target.value]; if(!m) return;
+  S.head=m.head; S.pattern=m.pattern;
+  syncSeg("head",m.head); syncSeg("pattern",m.pattern);
+  compute();
+});
+
+// 퀴즈 모드
+let quizMode=false, quizScore={r:0,t:0}, quizAnswered=false, quizRevealTimer=null;
+const quizBtn=document.getElementById("quizBtn");
+function quizCategory(big){
+  if(big.includes("네트")) return "net";
+  if(big.includes("롱") || big.includes("백 아웃") || big.includes("백아웃")) return "long";
+  if(big.includes("사이드") || big.includes("와이드")) return "wide";
+  if(big.includes("짧") || big.includes("앵글")) return "in_mid";
+  return "in_deep";
+}
+function resetQuizReveal(){
+  document.body.classList.remove("revealed");
+  document.getElementById("quizFeedback").textContent="";
+  quizAnswered=false;
+  if(quizRevealTimer){ clearTimeout(quizRevealTimer); quizRevealTimer=null; }
+}
+function updateQuizScore(){
+  const total=quizScore.t, right=quizScore.r;
+  const pct = total>0?Math.round(right/total*100):0;
+  document.getElementById("quizScore").textContent = total>0?`맞춘 횟수: ${right}/${total} (${pct}%)`:"";
+  quizBtn.textContent = quizMode ? `🎯 퀴즈 ${right}/${total}` : "🎯 퀴즈";
+}
+quizBtn.addEventListener("click",function(){
+  quizMode=!quizMode;
+  document.body.classList.toggle("quiz",quizMode);
+  this.classList.toggle("on",quizMode);
+  resetQuizReveal();
+  if(!quizMode){ quizScore={r:0,t:0}; }
+  updateQuizScore();
+});
+document.getElementById("quizShuffleBtn").addEventListener("click",function(){
+  if(!quizMode) return;
+  const keys=Object.keys(PRE), pick=keys[Math.floor(Math.random()*keys.length)];
+  document.querySelector("button[data-p='"+pick+"']").click();
+});
+document.getElementById("quizChoices").addEventListener("click",function(e){
+  const b=e.target.closest("button"); if(!b || !quizMode || quizAnswered) return;
+  const ans=b.dataset.q, actual=quizCategory(R.big), right=(ans===actual);
+  quizScore.t++; if(right) quizScore.r++;
+  quizAnswered=true;
+  document.body.classList.add("revealed");
+  const fb=document.getElementById("quizFeedback");
+  fb.innerHTML = right?'<span style="color:var(--green)">✅ 정답! — '+R.big+'</span>'
+                      :'<span style="color:var(--red)">❌ 땡! 정답은 「'+R.big+'」</span>';
+  updateQuizScore();
+  // 자동 5초 리셋 제거 (패널 권고) — 명시 "다시 풀기" 버튼 사용
+});
+
+// 왼손/오른손 토글
+document.getElementById("handBtn").addEventListener("click",function(){
+  S.hand = S.hand==="right" ? "left" : "right";
+  this.textContent = S.hand==="right" ? "🤚 오른손" : "🤚 왼손";
+  this.classList.toggle("on", S.hand==="left");
+  if(S.hand==="left") showToast("🤚 <b>왼손잡이 모드</b>로 바꿨어요. 사이드스핀 방향과 듀스/애드 라벨이 본인 시점에 맞게 반전돼요.");
+  compute();
+});
+// beginner mode (기본: easy ON, 패널 P0 반영)
+document.getElementById("easyBtn").addEventListener("click",function(){
+  document.body.classList.toggle("easy"); this.classList.toggle("on", document.body.classList.contains("easy"));
+  this.textContent = document.body.classList.contains("easy")?"⚙️ 전체 보기":"🧪 쉽게 보기";
+  if(R.sim) render();
+});
+
+// presets
+const PRE={
+  topFH:{stroke:"forehand",power:"mid",face:"flat",aim:"center",inSpin:"flat",inHeight:"waist", sw:[[108,185],[140,52]]},
+  flatFH:{stroke:"forehand",power:"mid",face:"flat",aim:"center",inSpin:"flat",inHeight:"waist", sw:[[100,124],[148,122]]},
+  sliceBH:{stroke:"backhand",power:"low",face:"flat",aim:"center",inSpin:"flat",inHeight:"waist", sw:[[118,86],[140,162]]},
+  volley:{stroke:"volley",power:"mid",face:"open",aim:"center",inSpin:"flat",inHeight:"waist", sw:[[120,100],[138,156]]},
+  flatSV:{stroke:"serve",power:"mid",face:"flat",aim:"right",toss:"mid", sw:[[112,134],[138,122]]},
+  kickSV:{stroke:"serve",power:"low",face:"open",aim:"left",toss:"low", sw:[[112,176],[134,84]]},
+  netTop:{stroke:"forehand",power:"mid",face:"flat",aim:"center",inSpin:"flat",inHeight:"waist", sw:[[104,72],[146,96]]},
+  longOut:{stroke:"forehand",power:"high",face:"open",aim:"center",inSpin:"flat",inHeight:"waist", sw:[[100,124],[148,122]]}
+};
+function handlePreset(e){
+  const b=e.target.closest("button"); if(!b) return; const p=PRE[b.dataset.p]; if(!p) return;
+  S.contactPos = p.contactPos || "side";
+  Object.keys(p).forEach(k=>{ if(k!=="sw") S[k]=p[k]; });
+  S.swing.start={x:p.sw[0][0],y:p.sw[0][1]}; S.swing.end={x:p.sw[1][0],y:p.sw[1][1]};
+  ["stroke","power","face","aim","contactPos"].forEach(id=>syncSeg(id,S[id]));
+  ["inSpin","inHeight","toss"].forEach(id=>{ if(p[id]) syncSeg(id,p[id]); });
+  hideOnboard(); syncStrokeUI(); compute();
+}
+document.getElementById("presets").addEventListener("click",handlePreset);
+document.getElementById("failPresets").addEventListener("click",handlePreset);
+
+// share / URL state
+function encodeState(){
+  const o={st:S.stroke,p:S.power,f:S.face,a:S.aim,is:S.inSpeed,isp:S.inSpin,ih:S.inHeight,to:S.toss,
+    hd:S.head,pt:S.pattern,tn:S.tension,cx:S.courtX, cy:S.courtY,
+    tx:S.targetX, ty:S.targetY, /* v7.18~v7.21 */
+    sw:[S.swing.start.x|0,S.swing.start.y|0,S.swing.end.x|0,S.swing.end.y|0]};
+  return btoa(encodeURIComponent(JSON.stringify(o)));
+}
+function applyState(str){
+  try{ const o=JSON.parse(decodeURIComponent(atob(str)));
+    S.stroke=o.st; S.power=o.p; S.face=o.f; S.aim=o.a; S.inSpeed=o.is; S.inSpin=o.isp; S.inHeight=o.ih; S.toss=o.to;
+    S.head=o.hd; S.pattern=o.pt; S.tension=o.tn;
+    if(o.cx !== undefined) S.courtX = normalizeCourtX(o.cx);
+    if(o.cy !== undefined) S.courtY = normalizeCourtY(o.cy);
+    if(o.tx !== undefined) S.targetX = normalizeTargetX(o.tx); // v7.21
+    if(o.ty !== undefined) S.targetY = normalizeTargetY(o.ty); // v7.21
+    S.swing.start={x:o.sw[0],y:o.sw[1]}; S.swing.end={x:o.sw[2],y:o.sw[3]};
+    ["stroke","power","face","aim","inSpeed","inSpin","inHeight","toss","head","pattern"].forEach(id=>syncSeg(id,S[id]));
+    syncCourtXUI(); // v7.19~21
+    tEl.value=S.tension; document.getElementById("tensionVal").textContent=S.tension+" lbs"; touched=true;
+    const ob=document.getElementById("onboard"); if(ob) ob.style.display="none";
+  }catch(err){}
+}
+function buildInsight(){
+  const name = strokeName(S.stroke);
+  const r = R.rpm;
+  const marg = R.margin ? (R.margin.hi-R.margin.lo) : 0;
+  let nuance="";
+  if(r>=2800 && r<=3500) nuance=" (프로 평균 근처!)";
+  else if(r>3500) nuance=" (프로 최상위급 회전)";
+  else if(r>0 && r<800) nuance=" (회전 거의 없음)";
+  const speed = Math.round(R.d.speed*3.6);
+  return `🎯 오늘의 ${name} 포인트 — ${R.big}\n· 회전 ${r}rpm${nuance} · 스피드 ${speed}km/h\n· 안전마진 ${marg}° · 낙하 ${R.absLand.toFixed(1)}m\n💡 ${R.coach}`;
+}
+document.getElementById("shareBtn").addEventListener("click",async function(){
+  const url=location.origin+location.pathname+"#"+encodeState();
+  const insight=buildInsight();
+  const shareText = insight + "\n\n👉 직접 해보기:";
+  try{
+    if(navigator.share){ await navigator.share({title:"테니스 타점 시뮬레이터", text:shareText, url}); showToast("📤 공유 완료! 카톡·메신저에 <b>코칭 메시지+링크</b>가 함께 들어갔어요."); }
+    else { await navigator.clipboard.writeText(shareText+"\n"+url); showToast("📋 <b>코칭 메시지+링크</b> 복사 완료! 카톡·메신저에 그대로 붙여넣으세요.<br><br><span style='color:var(--accent2); font-size:11px;'>"+insight.replace(/\n/g,"<br>")+"</span>"); }
+  }catch(e){ try{ await navigator.clipboard.writeText(shareText+"\n"+url); showToast("📋 복사 완료! 카톡·메신저에 붙여넣으세요."); }catch(_){ showToast("링크: "+url); } }
+});
+
+// ─── Supanova 위닝샷 카드 ───
+const WIN_CHARS = ["🐰","🐱","🐶","🐻","🐼","🦊"];
+let winCharIdx = 0;
+// 아바타 배경 그라데이션 — 탭 사이클 (히든 이스터에그)
+const WIN_BGS = [
+  ["#ffd23f","#ffa040"],  // 골든 (기본)
+  ["#ff7eb6","#ff3d8a"],  // 핑크 상큼
+  ["#9d5fde","#5a2e8a"],  // 퍼플
+  ["#2db8a8","#0f5e58"],  // 민트
+  ["#3a6dd4","#1a3a8a"],  // 블루
+  ["#7be07b","#1a8a3a"],  // 라임 그린
+  ["#ff9a3c","#d54a2e"]   // 선셋
+];
+let winBgIdx = 0;
+const COURT_THEMES = [
+  {a:"#C49A6E", b:"#A07F50"},  // v8.0 점토 (ELSE 기본)
+  {a:"#1d4736", b:"#0f2e22"},  // 하드 그린 (이스터에그)
+  {a:"#ff7eb6", b:"#b03d6e"},  // pink
+  {a:"#9d5fde", b:"#5a2e8a"},  // purple
+  {a:"#2db8a8", b:"#0f5e58"},  // teal
+  {a:"#3a6dd4", b:"#1a3a8a"}   // navy
+];
+let courtThemeIdx = 0;
+// ─── 루키 시그니처 매칭 (리서치 2026-05-26: ATP/TWU/Hawk-Eye 기반) ───
+// 멘트 형식 "OOO 같은 ___샷" — 시뮬 추정값이지 실측 비교가 아니라는 정직 라벨 ("급"보다 부드러운 톤).
+function playerMatch(){
+  const r=R.rpm, marg=R.margin?(R.margin.hi-R.margin.lo):0;
+  const speed=Math.round(R.d.speed*3.6);
+  const land=R.absLand, mode=S.stroke, omega=R.d.omega;
+  const inb=R.status==="in";
+  if(!inb) return null;
+  const spin = mode==="serve" ? (S.serveType||"flat") : (S.strokeSpin||"flat");
+
+  // ─── P1: 서브 모드 (서브가 다른 그라운드 멘트 다 이김) ───
+  if(mode==="serve"){
+    // 키리오스 폭탄 서브 — ATP 최고 기록 244km/h(2020 Acapulco) 보유자, 메드베데프보다 위
+    if(speed>=210) return "💣 키리오스 같은 폭탄 서브 — 244km/h 영역 (괴짜 한 방)";
+    if(speed>=195 && marg<=5) return "🎯 메드베데프 같은 코너 플랫 서브 — 속도+정확도 톱티어";
+    if(speed>=185 && spin==="flat") return "🚀 페더러 같은 정밀 1st 서브 — 평균 193km/h 구간";
+    // ⚠️ 샘프라스 2nd 킥(4,600rpm)은 시뮬 킥서브 rpm 상한(~2,400)에 막혀 도달 불가 → 솔직 제외 (P0-3 검증, 2026-05-26)
+    if(spin==="kick" && r>=1800) return "⛰ 알카라스 같은 높이 튀는 킥서브 — 받는 사람 어깨 위";
+    if(spin==="slice") return "↶ 페더러 같은 슬라이스 서브 — 옆으로 휘는 한 방";
+    // 키리오스 언더암 서브 — 속도 낮은 플랫 서브 = 그의 트릭샷 시그니처
+    if(speed<=130 && spin==="flat") return "🎭 키리오스 같은 언더암 서브 — 트릭샷 시그니처 (장난 한 끗)";
+    return "💪 잘 들어간 서브";
+  }
+
+  // ─── P4 특수: 드롭샷 (속도 매우 낮음 + 짧은 낙하) ───
+  if(mode==="forehand" && speed<=45 && land<12)
+    return "🪶 알카라스 같은 포핸드 드롭샷 — 경기당 ~3회·승률 68%";
+
+  // ─── P2 극값 (단일 변수가 ATP 평균을 크게 넘김) ───
+  // 나달: rpm≥3200 헤비 톱스핀 (평균 3,200·최고 ~5,000)
+  if(mode==="forehand" && r>=3200 && (spin==="topspin"||omega>200))
+    return "🌀 나달 같은 헤비 톱스핀 포핸드 — 평균 3,200rpm 영역";
+  // 페더러: 슬라이스 BH (평균 3,700·최고 5,300rpm)
+  if(mode==="backhand" && spin==="slice" && r>=2500)
+    return "🔪 페더러 같은 너클 슬라이스 백핸드 — 낮게 깔리는 그 슬라이스";
+  // 알카라스: 폭발 포핸드 (최고 ~182km/h Indian Wells 2025)
+  if(mode==="forehand" && speed>=170)
+    return "💥 알카라스 같은 폭발 포핸드 — 인디안웰스 113mph 영역";
+
+  // ─── P3 조합형 ───
+  // 알카라스: 파워+스핀 콤보 (rpm ~3,208 / speed ~126km/h Tour 평균보다 +5mph)
+  // ★ topspin 명시로 시너(flat)와 충돌 방지
+  if(mode==="forehand" && r>=3000 && r<3300 && speed>=120 && spin==="topspin")
+    return "🔥 알카라스 파워+스핀 콤보 — 회전+속도 둘 다 잡음";
+  // 아가시: 플랫 딥 BH 리턴 — 마진≤2.5(시너 4°와 분기, 동호인 도달 가능 범위로 완화 P0-4)
+  if(mode==="backhand" && spin==="flat" && speed>=110 && marg<=2.5 && land>=6)
+    return "🎯 아가시 같은 플랫 백핸드 — 풀스윙 없이 라인 위로";
+  // 시너: 플랫 클린 (rpm ~3,041 / speed ~126km/h, 네트 통과 2~5cm 더 낮음)
+  if((mode==="forehand"||mode==="backhand") && spin==="flat" && speed>=125 && marg<=4)
+    return "⚡ 시너 같은 플랫 클린 스트라이크 — 네트 살짝 위, 칼날 코스";
+  // 헤닌: 원핸드 BH 톱스핀 — 좁은 마진(≤2°)으로 조코비치(≤6°)와 분기, 조코비치보다 먼저 검사
+  if(mode==="backhand" && spin==="topspin" && r>=2000 && land>=6.5 && marg<=2)
+    return "🌹 헤닌 같은 원핸드 백핸드 — 작은 체구에서 나오는 톱스핀 폭탄";
+  // 조코비치: 양손 BH 깊은 (BH topspin + 깊은 + 마진 좁음 = 깊고 정확)
+  if(mode==="backhand" && spin==="topspin" && land>=10 && marg<=6)
+    return "🎯 조코비치 같은 양손 백핸드 — 깊고 정확한 톱티어 리턴";
+  // 페더러: 발리 (네트 앞 단호)
+  if(mode==="volley" && marg<=5)
+    return "🎾 페더러 같은 단단한 발리 — 네트 앞 칼끝 펀치";
+
+  // ─── 폴백: 일반 코칭 멘트 (선수 매칭 안 됨) ───
+  if(r>=3000) return "🔥 프로 평균 회전 — 페더러·나달 사이";
+  if(marg>=7) return "🛡 안전마진 "+marg+"° — 안정적인 한 방";
+  if(speed>=150) return "🚀 프로급 속도";
+  if(marg<=2) return "⚡ 칼날 정확도 — 5cm 안";
+  if(omega<-150) return "🐍 낮게 깔린 슬라이스";
+  return "💪 잘 들어간 한 방";
+}
+function impactMessage(){
+  const inb=R.status==="in";
+  if(!inb && R.big.includes("네트")) return "💧 한 끗만 더 위로 — 다음엔 잡힌다";
+  if(!inb && R.big.includes("아웃")) return "⚡ 힘은 좋아 — 회전 한 스푼만";
+  return playerMatch() || "💪 잘 들어간 한 방";
+}
+// 선수별 한 줄 소개 — 초보·1년차가 "OOO이 누구지?" 안 되게 (P0-1)
+const PLAYER_BLURB = {
+  "페더러":"올타임 그레이트 · 슬라이스·서브의 정수",
+  "나달":"클레이 황제 · 헤비 톱스핀 끝판왕",
+  "조코비치":"리턴·코트 커버리지 역대 1위",
+  "알카라스":"21세에 메이저 4승 · 변칙의 천재",
+  "시너":"세계 1위(2024~) · 플랫 클린 볼스트라이커",
+  "메드베데프":"US오픈 챔피언 · 코너 정확도 마스터",
+  "키리오스":"244km/h 서브 기록 · 트릭샷의 황제",
+  "아가시":"1990년대 리턴의 신 · 라이즈볼 원조",
+  "헤닌":"역대 1위 원핸드 백핸드(페더러와 공동)"
+};
+function impactBlurb(msg){
+  if(!msg) return "";
+  for(const name of Object.keys(PLAYER_BLURB)){
+    if(msg.includes(name)) return PLAYER_BLURB[name];
+  }
+  return "";
+}
+// ─── v7.17: 선수별 시그니처 멘트 풀 (P0-7 톤 검열: 비하·욕설 X, P1 무작위 픽업) ───
+// 톤 가이드: 페더러=우아정밀 / 나달=끈기헤비 / 조코비치=완벽주의 / 알카라스=폭발쇼맨 /
+//            시너=깔끔차분 / 메드베데프=영리전략 / 키리오스=장난도발(선 지킴) /
+//            아가시=결단라인 / 헤닌=강단·작은체구큰스윙
+const PLAYER_TONES = {
+  "페더러":["✨ 우아하다, 칼날같이","🎼 클래식 그 자체","🪶 정밀의 미학","👑 챔피언의 자세","🕊 흐르듯 부드럽게"],
+  "나달":["🦾 끈기의 헤비","🌀 클레이 황제 모드","💪 절대 안 죽는 한 방","🔁 한 점씩 깎아내는 집념","🌋 헤비 톱스핀 폭격"],
+  "조코비치":["🎯 완벽주의자의 답","🛡 흔들림 없는 리턴","🧱 벽 같은 백핸드","♟ 코트의 체스 마스터","📏 깊이·정확 다 잡음"],
+  "알카라스":["🔥 폭발한다, 신예답게","🎢 변칙의 천재","💨 21세, 이게 가능?","🎪 코트의 쇼맨","⚡ 파워+스핀 콤보"],
+  "시너":["⚡ 깔끔, 군더더기 없음","🪒 칼날 코스","🧊 차분한 폭력","📐 자처럼 정확","🎯 네트 살짝 위"],
+  "메드베데프":["🧠 영리한 코너 타격","📊 데이터로 이기는 샷","🤖 효율 100%","🎯 코너 정확도 마스터","📌 라인 옆 그대로"],
+  "키리오스":["💥 무대 폭탄","🎭 트릭샷의 황제","🎲 예측 불가 한 방","🌪 폭주 모드","🎪 쇼타임 한 방"],
+  "아가시":["🎯 라이즈볼 시대 부활","📍 라인 위 그대로","💼 결단의 한 방","🎩 베이스라인 학파","🔥 1990년대 리턴왕"],
+  "헤닌":["🌹 작은 체구, 큰 스윙","🎻 원핸드 폭탄","💎 역대 1위 BH","🇧🇪 벨기에 클래식","🪻 우아한 강단"]
+};
+function pickTone(playerName){
+  const pool = PLAYER_TONES[playerName];
+  if(!pool || !pool.length) return "";
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function extractPlayerName(msg){
+  if(!msg) return "";
+  for(const name of Object.keys(PLAYER_TONES)){ if(msg.includes(name)) return name; }
+  return "";
+}
+// ─── v7.17: 선수 매칭 근거 (뒷면 PNG · P0-5: 출처 연도 포함) ───
+const MATCH_BASIS = {
+  "페더러":{
+    serve:"1st 서브 평균 193km/h, 정확도 톱티어 (ATP 2017)",
+    slice:"슬라이스 BH 평균 3,700rpm·최고 5,300rpm (TWU 측정)",
+    volley:"네트 플레이 성공률 71% (ATP Insights 2019)",
+    _default:"1HBH·서브·발리 모두 톱티어 (TWU·ATP)"
+  },
+  "나달":"포핸드 평균 회전 3,200rpm, 최고 ~5,000rpm (Hawk-Eye 2010~2013)",
+  "조코비치":"양손 BH 평균 깊이 8.2m, 리턴 IN률 87% (ATP 2021)",
+  "알카라스":{
+    power:"포핸드 최고 ~182km/h (인디안웰스 2025 측정)",
+    combo:"평균 rpm 3,208 + 속도 ATP 평균 +5mph (Tennis Abstract 2024)",
+    drop:"드롭샷 경기당 ~3회·승률 68% (Match Charting Project)",
+    kick:"킥서브 어깨 위 바운드 (~1.6m+, 평균 195km/h)",
+    _default:"파워·스핀·변칙 모두 톱티어 (ATP 2024)"
+  },
+  "시너":"포핸드·BH 평균 rpm 3,041·속도 ~126km/h (ATP 2024)",
+  "메드베데프":"1st 서브 평균 200km/h, 코너 정확도 톱티어 (US오픈 2021)",
+  "키리오스":"244km/h 1st 서브 보유 (2020 아카풀코) + 언더암 시그니처",
+  "아가시":"플랫 BH 리턴, 라이즈볼 원조 (1990년대 ATP)",
+  "헤닌":"원핸드 BH 역대 공동 1위 (페더러와), 165cm 체구의 톱스핀 폭탄"
+};
+function getMatchBasis(impMsg){
+  const name = extractPlayerName(impMsg);
+  if(!name) return "";
+  const b = MATCH_BASIS[name];
+  if(!b) return "";
+  if(typeof b === "string") return b;
+  // 객체 — 모드 키워드 매칭
+  if(impMsg.includes("서브") && b.serve) return b.serve;
+  if(impMsg.includes("발리") && b.volley) return b.volley;
+  if(impMsg.includes("슬라이스") && b.slice) return b.slice;
+  if(impMsg.includes("드롭") && b.drop) return b.drop;
+  if(impMsg.includes("킥") && b.kick) return b.kick;
+  if(impMsg.includes("폭발") && b.power) return b.power;
+  if(impMsg.includes("콤보") && b.combo) return b.combo;
+  return b._default || Object.values(b).find(v=>typeof v==="string") || "";
+}
+// ─── v7.17: 액자(frame) 7종 — 히든 이스터에그 (P0-3 디폴트=무난·단색) ───
+const FRAMES = [
+  {id:"clean",    name:"미니멀",     stroke:"rgba(255,255,255,0.10)", glow:null,        gradient:null},
+  {id:"gold",     name:"골든 트로피", stroke:"#ffd23f",                glow:"#ffd23f",   gradient:["#ffd23f","#ffa040","#ffd23f"]},
+  {id:"holo",     name:"홀로그램",    stroke:"#9d5fde",                glow:"#9d5fde",   gradient:["#ff7eb6","#9d5fde","#2db8a8","#ff9a3c"]},
+  {id:"court",    name:"코트 라인",   stroke:"#7fd14f",                glow:"#7fd14f",   gradient:null},
+  {id:"flag_kr",  name:"태극",        stroke:"#cd2e3a",                glow:"#cd2e3a",   gradient:["#cd2e3a","#ffffff","#0047a0"]},
+  {id:"sunset",   name:"선셋",        stroke:"#ff9a3c",                glow:"#d54a2e",   gradient:["#ff9a3c","#d54a2e","#9d5fde"]},
+  {id:"midnight", name:"미드나잇",    stroke:"#7f9fff",                glow:"#3a6dd4",   gradient:null}
+];
+let frameIdx = 0;
+// ─── v7.17: 레어도(Rarity) 5등급 (P0-1·P0-2·P0-4·P0-8) ───
+//   P0-1: 최하 등급명 "연습"→"새싹" (부정어 회피, 초보 진통제)
+//   P0-2: 등급별 한 줄 설명 ("동호인 상위 N%")
+//   P0-4: 점수 산식 + 컷오프 모달로 정직 노출
+//   P0-8: 선수 매칭이면 최소 "고급" 보장 (인지부조화 방지)
+const RARITY_TIERS = [
+  {id:"sprout", name:"새싹", minScore:0,  emoji:"🌱", blurb:"기본 폼 잡는 중 — 자세는 깔끔",  badgeBg:"#7fd14f", badgeFg:"#0c1a0c", dist:"~30%"},
+  {id:"common", name:"일반", minScore:35, emoji:"⚪", blurb:"일반 동호인 평균 — 안정적",      badgeBg:"#9d9da3", badgeFg:"#0d0d12", dist:"~40%"},
+  {id:"rare",   name:"고급", minScore:55, emoji:"🔵", blurb:"동호인 상위 30% — 잘 친 한 방",  badgeBg:"#3a8dd4", badgeFg:"#fff",    dist:"~20%"},
+  {id:"epic",   name:"희귀", minScore:75, emoji:"💎", blurb:"동호인 상위 10% — 코치급",        badgeBg:"#9d5fde", badgeFg:"#fff",    dist:"~8%"},
+  {id:"legend", name:"전설", minScore:90, emoji:"🌟", blurb:"프로 영역 — 이건 진짜 위닝샷",   badgeBg:"#ffd23f", badgeFg:"#1a1400", dist:"~2%"}
+];
+function computeRarityScore(){
+  if(!R || R.status!=="in") return 0;
+  const rpm=R.rpm||0, speed=Math.round((R.d.speed||0)*3.6);
+  const marg=R.margin?(R.margin.hi-R.margin.lo):0;
+  // rpm 점수 (0~40): 1000→0, 3500→40 선형
+  const rpmS = Math.max(0, Math.min(40, (rpm-1000)/2500*40));
+  // 마진 점수 (0~30): 4~8°가 30점, 1.5° 미만은 칼날(위험)이라 15, 너무 넓으면 페널티
+  let margS;
+  if(marg<1.5) margS = 15;
+  else if(marg<=8) margS = 30;
+  else if(marg<=12) margS = 22;
+  else margS = 10;
+  // 속도 점수 (0~20): 80km/h→0, 180→20
+  const spdS = Math.max(0, Math.min(20, (speed-80)/100*20));
+  // 모드 보너스
+  let modeS = 0;
+  if(R.d.isVolley) modeS += 4;
+  if(S.stroke==="serve" && speed>=180) modeS += 6;
+  return Math.round(rpmS + margS + spdS + modeS);
+}
+function getRarity(matched){
+  const s = computeRarityScore();
+  let tier = RARITY_TIERS[0];
+  for(const t of RARITY_TIERS){ if(s >= t.minScore) tier = t; }
+  if(matched){
+    const idx = RARITY_TIERS.findIndex(t=>t.id===tier.id);
+    if(idx < 2) tier = RARITY_TIERS[2]; // P0-8: 선수 매칭 시 최소 "고급"
+  }
+  return {tier, score:s};
+}
+function openWinner(){
+  if(!R.sim) return;
+  // 날짜
+  const d=new Date(), pad=n=>String(n).padStart(2,'0');
+  document.getElementById("winDate").textContent = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
+  // 샷 이름 — verdict 기반 임팩트 멘트
+  let shotName, charSub;
+  const big=R.big, inb=R.status==="in", spinUp=R.d.omega>60, spinDown=R.d.omega<-60;
+  if(inb){
+    if(big.includes("깊은") && spinUp) { shotName="깊고 묵직한 톱스핀 위너"; charSub="상대를 베이스라인 뒤로 밀어버린 한 방"; }
+    else if(big.includes("깊은")) { shotName="깊숙한 코너 위너"; charSub="라인 끝까지 밀어붙인 결정타"; }
+    else if(spinDown) { shotName="낮게 깔린 슬라이스"; charSub="상대 발 앞에 떨궈 받기 어렵게"; }
+    else if(big.includes("발리")) { shotName="단단한 발리 마무리"; charSub="네트 앞 단호한 펀치"; }
+    else if(big.includes("서비스 박스 인")) { shotName= R.d.omega>120?"강력한 킥서브 에이스":"꽂아넣은 플랫 서브"; charSub="서비스 박스 안쪽 위닝"; }
+    else { shotName="굿샷, 인"; charSub="기본기 깔끔한 한 방"; }
+  } else { shotName=big; charSub="다시 해보자, 한끗 차이"; }
+  document.getElementById("winShotName").textContent = shotName;
+  document.getElementById("winCharName").textContent = "나의 위닝샷";
+  document.getElementById("winCharSub").textContent = charSub;
+  // 스탯 한 줄
+  const speed=Math.round(R.d.speed*3.6), marg=R.margin?(R.margin.hi-R.margin.lo):0;
+  document.getElementById("winStats").innerHTML =
+    `<span class="winStat">스피드 <b>${speed}km/h</b></span>`+
+    `<span class="winStat">회전 <b>${R.rpm}</b>rpm</span>`+
+    `<span class="winStat">안전마진 <b>${marg}°</b></span>`+
+    `<span class="winStat">낙하 <b>${R.absLand.toFixed(1)}</b>m</span>`;
+  // 임팩트 한 줄 + 선수 한줄 소개 (P0-1)
+  const imp=impactMessage();
+  document.getElementById("winImpact").textContent = imp;
+  const blurbEl=document.getElementById("winBlurb");
+  if(blurbEl){
+    const b=impactBlurb(imp);
+    blurbEl.textContent = b;
+    blurbEl.style.display = b ? "block" : "none";
+  }
+  // ─── v7.17: 시그니처 톤 + 레어도 + 뒷면 바인딩 ───
+  const matchedPlayer = extractPlayerName(imp);
+  document.getElementById("winTone").textContent = matchedPlayer ? pickTone(matchedPlayer) : "";
+  const rar = getRarity(!!matchedPlayer);
+  const rb = document.getElementById("winRarityBadge");
+  rb.textContent = `${rar.tier.emoji} ${rar.tier.name}`;
+  rb.style.background = rar.tier.badgeBg;
+  rb.style.color = rar.tier.badgeFg;
+  rb.className = "winRarityBadge tier-"+rar.tier.id;
+  rb.dataset.tier = rar.tier.id;
+  // 뒷면 채우기
+  document.getElementById("winDateBack").textContent = document.getElementById("winDate").textContent;
+  const bb = document.getElementById("winBackRarityBadge");
+  bb.textContent = `${rar.tier.emoji} ${rar.tier.name}`;
+  bb.style.background = rar.tier.badgeBg;
+  bb.style.color = rar.tier.badgeFg;
+  document.getElementById("winBackRarityScore").textContent = rar.score;
+  document.getElementById("winBackRarityDist").textContent = "동호인 "+rar.tier.dist;
+  document.getElementById("winBackRarityBlurb").textContent = rar.tier.blurb;
+  document.getElementById("winBackMatchPlayer").textContent = matchedPlayer ? `${matchedPlayer} 같은 한 방` : "선수 매칭 없음";
+  document.getElementById("winBackMatchBasis").textContent = matchedPlayer ? (getMatchBasis(imp)||"매칭 근거 데이터 없음") : "기본 코칭 멘트 — 선수 시그니처 임계값 미달";
+  // 내 입력 요약 — 회전은 실제 omega 기반(궤적과 일치, 사용자 표면 입력보다 정확)
+  const modeLabel = {forehand:"포핸드", backhand:"백핸드", volley:"발리", serve:"서브"}[S.stroke] || S.stroke;
+  let spinLabel;
+  if(S.stroke==="serve"){
+    spinLabel = {topspin:"톱스핀", flat:"플랫", slice:"슬라이스", kick:"킥", twist:"트위스트"}[S.serveType||"flat"] || "플랫";
+  } else {
+    const om = R.d.omega || 0;
+    spinLabel = om > 80 ? "톱스핀" : om < -80 ? "슬라이스" : "플랫";
+  }
+  const handLabel = S.hand==="left"?"왼손":"오른손";
+  // v7.20: 코트 위치 — 깊이+좌우 동적 라벨 (발리/서브는 자동)
+  let courtLabelTxt;
+  if(S.stroke==="volley") courtLabelTxt = "네트 앞 4.5m (발리)";
+  else if(S.stroke==="serve") courtLabelTxt = "베이스라인 (서브)";
+  else courtLabelTxt = courtFullLabel(normalizeCourtX(S.courtX), normalizeCourtY(S.courtY), S.hand);
+  document.getElementById("winBackInput").innerHTML =
+    `<b>📍 ${courtLabelTxt}</b><br>`+
+    `<b>${modeLabel}</b> · ${spinLabel} · ${handLabel}<br>`+
+    `라켓 <b>${S.head}sq</b> · ${S.pattern} · <b>${S.tension}lbs</b>`;
+  // 앞면으로 초기화 + 액자 적용
+  document.getElementById("winCardInner").classList.remove("flipped");
+  applyFrame();
+  // 코트 그리기 — 위에서 본 풀코트 + 궤적
+  drawWinCourt();
+  document.getElementById("winnerModal").classList.add("on");
+  // 첫 진입 시: 이스터에그 발견성 — 1회만 펄스 + 토스트 (P0 패널 1번)
+  if(!localStorage.getItem("tts_avatar_hint")){
+    setTimeout(()=>{
+      const face=document.getElementById("winCharFace");
+      if(face){ face.classList.add("hintPulse"); setTimeout(()=>face.classList.remove("hintPulse"),2200); }
+      showToast("💡 동물·배경 따로 바꿔보세요 — <b>가운데 이모지</b>=동물, <b>외곽 원</b>=배경");
+      localStorage.setItem("tts_avatar_hint","1");
+    }, 600);
+  }
+}
+function drawWinCourt(){
+  const cv=document.getElementById("winCourt");
+  const W=cv.clientWidth||500, H=cv.clientHeight||312;
+  const dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  // v7.18: 베이스라인 뒤 위치도 보이도록 왼쪽 padding 확대
+  const padL=60, padR=20, padT=18, padB=18;
+  const courtW=W-padL-padR, courtH=H-padT-padB;
+  const cx=padL, cy=padT;
+  // 코트 면 — 테마 그라디언트로 깊이감 (히든: 코트 클릭 시 색 순환)
+  const t=COURT_THEMES[courtThemeIdx];
+  const gradC = ctx.createLinearGradient(cx, cy, cx, cy+courtH);
+  gradC.addColorStop(0, t.a); gradC.addColorStop(1, t.b);
+  ctx.fillStyle=gradC; ctx.fillRect(cx,cy,courtW,courtH);
+  ctx.strokeStyle="rgba(255,255,255,0.22)"; ctx.lineWidth=1.5;
+  ctx.strokeRect(cx,cy,courtW,courtH);
+  // 네트 (세로 중앙)
+  const netX = cx + courtW/2;
+  ctx.strokeStyle="rgba(255,255,255,0.55)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(netX, cy); ctx.lineTo(netX, cy+courtH); ctx.stroke();
+  // 서비스라인 (양쪽)
+  ctx.strokeStyle="rgba(255,255,255,0.22)"; ctx.lineWidth=1;
+  const svc1 = cx + courtW/2 - (courtW/2)*(6.40/11.89);
+  const svc2 = cx + courtW/2 + (courtW/2)*(6.40/11.89);
+  ctx.beginPath(); ctx.moveTo(svc1, cy); ctx.lineTo(svc1, cy+courtH);
+  ctx.moveTo(svc2, cy); ctx.lineTo(svc2, cy+courtH);
+  ctx.moveTo(svc1, cy+courtH/2); ctx.lineTo(svc2, cy+courtH/2); ctx.stroke();
+  // v7.20: 내 위치 — xHit + lateral 반영 (그라운드는 courtX/Y, 발리/서브는 자동)
+  const myX = cx + (courtW/2) * ((R.d.xHit||0)/11.89);
+  const myCourtY = (S.stroke==="volley"||S.stroke==="serve") ? 0 : normalizeCourtY(S.courtY);
+  const myY = cy + courtH/2 + (courtH/2) * (myCourtY/4.115);
+  // v7.19: 베이스라인 뒤/안쪽 라벨 — 연속값 대응
+  if(R.d.xHit < -0.3){
+    ctx.strokeStyle="rgba(255,210,63,0.6)"; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(myX, myY); ctx.lineTo(cx, myY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="rgba(255,210,63,0.95)"; ctx.font="bold 10px sans-serif"; ctx.textAlign="left"; ctx.textBaseline="bottom";
+    ctx.fillText((-R.d.xHit).toFixed(1)+"m 뒤", myX+8, myY-2);
+  } else if(R.d.xHit > 0.3 && !R.d.isVolley){
+    const short = R.d.xHit >= 6.5 ? "미드코트" : R.d.xHit >= 4.5 ? "어프로치(서비스라인)" : R.d.xHit >= 2 ? "어프로치" : "라이저";
+    ctx.fillStyle="rgba(255,210,63,0.95)"; ctx.font="bold 10px sans-serif"; ctx.textAlign="left"; ctx.textBaseline="bottom";
+    ctx.fillText(short, myX+10, myY-6);
+  }
+  ctx.fillStyle="#ffd23f";
+  ctx.beginPath(); ctx.arc(myX, myY, 5, 0, 7); ctx.fill();
+  // 낙하점 (오른쪽 어딘가)
+  const absLand=R.absLand;
+  const lateral=R.d.lateral;
+  const landX = cx + courtW/2 + (courtW/2)*((absLand-11.89)/11.89);
+  const landY = cy + courtH/2 + (courtH/2)*(lateral/4.115);
+  // 휘는 궤적 곡선
+  const inb=R.status==="in";
+  const lineColor = R.d.omega>120?"#ff9d3c":R.d.omega<-120?"#7fc8ff":"#dfeebe";
+  // 라인 그림자 — 깊이감
+  ctx.shadowColor=lineColor; ctx.shadowBlur=8;
+  ctx.strokeStyle=lineColor; ctx.lineWidth=3.5; ctx.lineCap="round";
+  if(!inb) ctx.setLineDash([6,4]);
+  // 베지어 곡선으로 궤적
+  const midX=(myX+landX)/2, midY=(myY+landY)/2;
+  // 회전에 따라 살짝 휘기
+  const curveBend = R.d.omega>120 ? -15 : R.d.omega<-120 ? 15 : 0;
+  ctx.beginPath();
+  ctx.moveTo(myX, myY);
+  ctx.quadraticCurveTo(midX, midY+curveBend, landX, landY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.shadowBlur=0;
+  // 낙하 dot
+  ctx.fillStyle=inb?"#7fd14f":"#ff6b5e";
+  ctx.beginPath(); ctx.arc(landX, landY, 8, 0, 7); ctx.fill();
+  ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle="#0d0d12"; ctx.font="bold 10px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(inb?"✓":"✕", landX, landY);
+}
+document.getElementById("openWinnerBtn").addEventListener("click",openWinner);
+document.getElementById("winCloseBtn").addEventListener("click",()=>document.getElementById("winnerModal").classList.remove("on"));
+document.getElementById("winnerModal").addEventListener("click",e=>{
+  if(e.target.id==="winnerModal") document.getElementById("winnerModal").classList.remove("on");
+});
+// 캐릭터 이름 편집 (탭)
+document.getElementById("winCharName").addEventListener("click",()=>{
+  const nm=prompt("이름·메모", document.getElementById("winCharName").textContent);
+  if(nm===null) return;
+  document.getElementById("winCharName").textContent = nm.trim()||"나의 위닝샷";
+});
+// 캐릭터 6종 토글
+function applyWinBg(){
+  const [a,b] = WIN_BGS[winBgIdx];
+  document.getElementById("winCharFace").style.background = `linear-gradient(135deg,${a},${b})`;
+}
+document.getElementById("winCharFace").addEventListener("click",(e)=>{
+  // 이모지 자체는 별도 핸들러 — 배경만 사이클
+  if(e.target.id === "winCharEmoji") return;
+  winBgIdx = (winBgIdx+1) % WIN_BGS.length;
+  applyWinBg();
+});
+document.getElementById("winCharEmoji").addEventListener("click",(e)=>{
+  e.stopPropagation();
+  winCharIdx = (winCharIdx+1) % WIN_CHARS.length;
+  document.getElementById("winCharEmoji").textContent = WIN_CHARS[winCharIdx];
+});
+// 히든: 코트 탭 한 번에 색 테마 순환 (별도 버튼 X)
+document.getElementById("winCourt").style.cursor="pointer";
+document.getElementById("winCourt").addEventListener("click",()=>{
+  courtThemeIdx = (courtThemeIdx+1) % COURT_THEMES.length;
+  drawWinCourt();
+});
+// ─── v7.17: 액자(frame) 이스터에그 — 카드 외곽 탭으로 사이클 ───
+function applyFrame(){
+  const outer = document.getElementById("winCardOuter");
+  FRAMES.forEach(f=>outer.classList.remove("frame-"+f.id));
+  outer.classList.add("frame-"+FRAMES[frameIdx].id);
+}
+document.getElementById("winCardOuter").addEventListener("click",(e)=>{
+  // 내부(카드) 클릭은 무시 — 외곽 padding 6px 영역만 동작
+  if(e.target.id!=="winCardOuter") return;
+  frameIdx = (frameIdx+1) % FRAMES.length;
+  applyFrame();
+  showToast(`🖼 ${FRAMES[frameIdx].name} 액자`);
+});
+// ─── v7.17: 앞면/뒷면 플립 ───
+document.getElementById("winFlipBtn").addEventListener("click",()=>{
+  document.getElementById("winCardInner").classList.add("flipped");
+});
+document.getElementById("winUnflipBtn").addEventListener("click",()=>{
+  document.getElementById("winCardInner").classList.remove("flipped");
+});
+// ─── v7.17: 등급 산식 모달 (P0-4) ───
+function showRarityInfo(){
+  const tiersEl = document.getElementById("rarityInfoTiers");
+  tiersEl.innerHTML = RARITY_TIERS.slice().reverse().map(t=>(
+    `<div style="display:flex; align-items:center; gap:8px; padding:6px 8px; background:rgba(255,255,255,0.03); border-radius:6px;">`+
+    `<span style="display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:800; background:${t.badgeBg}; color:${t.badgeFg};">${t.emoji} ${t.name}</span>`+
+    `<span style="font-size:11px; color:rgba(255,255,255,0.55); font-weight:600;">${t.minScore}점+</span>`+
+    `<span style="font-size:10.5px; color:rgba(255,255,255,0.45); margin-left:auto;">${t.dist}</span>`+
+    `</div>`+
+    `<div style="font-size:10.5px; color:rgba(255,255,255,0.55); padding:0 8px 4px; line-height:1.4;">${t.blurb}</div>`
+  )).join("");
+  document.getElementById("rarityInfoModal").style.display="flex";
+}
+document.getElementById("winRarityBadge").addEventListener("click",showRarityInfo);
+document.getElementById("rarityInfoCloseBtn").addEventListener("click",()=>{
+  document.getElementById("rarityInfoModal").style.display="none";
+});
+document.getElementById("rarityInfoModal").addEventListener("click",e=>{
+  if(e.target.id==="rarityInfoModal") document.getElementById("rarityInfoModal").style.display="none";
+});
+document.getElementById("winShareBtn").addEventListener("click",async function(){
+  const shotName=document.getElementById("winShotName").textContent;
+  const impact=document.getElementById("winImpact").textContent;
+  const stats=document.getElementById("winStats").textContent.replace(/\s+/g," ").trim();
+  const url=location.origin+location.pathname+"#"+encodeState();
+  const title=`🎾 내 위닝샷 — ${shotName}`;
+  const text=`${impact}\n${stats}\n\n👉 너도 해봐:`;
+  // 모바일: 네이티브 공유 시트 (카톡·메신저·문자)
+  if(navigator.share){
+    try{ await navigator.share({title, text, url}); showToast("📤 공유 완료!"); return; }
+    catch(e){ if(e.name==="AbortError") return; /* 그 외는 폴백 */ }
+  }
+  // 데스크톱 폴백: 클립보드
+  try{ await navigator.clipboard.writeText(`${title}\n${text}\n${url}`); showToast("📋 카드 텍스트+링크 복사! 카톡·인스타에 붙여넣으세요."); }
+  catch(e){ showToast("링크: "+url); }
+});
+// ─── 1080×1080 PNG 다운로드 (canvas 직접 그리기, 외부 의존성 0) ───
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+// ─── v8.0: 캐릭터 PNG 로드 + 자동 매핑 (위닝샷 카드 합성용) ───
+// v9.1: 배포용 영문 경로 + WebP (사전 투명처리·860px, 총 ~365KB — 원본 PNG 9.3MB는 '테니스 케릭터/'에 보존)
+const CHAR_DIR = "characters/";
+const CHAR_FILES = {
+  base:          "cat_base.webp",
+  forehand:      "cat_forehand.webp",
+  backhand_two:  "cat_backhand_two.webp",
+  backhand_one:  "cat_backhand_one.webp",
+  celebrate:     "cat_celebrate.webp",
+  sad:           "cat_base.webp",  // ⚠️ cat_sad 미생성 — 일단 base로 fallback
+  serve:         "cat_serve.webp",
+  dog_standing:  "dog_standing.webp",
+  dog_fallen:    "dog_fallen.webp"
+};
+const charCache = {};
+// v8.0: 외곽 흰 배경을 투명으로 자동 처리 (flood fill from corners)
+function removeWhiteBackground(img, threshold = 230){
+  const c = document.createElement("canvas");
+  c.width = img.naturalWidth || img.width;
+  c.height = img.naturalHeight || img.height;
+  const cx = c.getContext("2d");
+  cx.drawImage(img, 0, 0);
+  const id = cx.getImageData(0, 0, c.width, c.height);
+  const d = id.data;
+  const w = c.width, h = c.height;
+  const isWhite = (i)=>d[i]>=threshold && d[i+1]>=threshold && d[i+2]>=threshold && d[i+3]>0;
+  // 모서리 4곳에서 flood fill — 외부 흰 픽셀만 처리, 내부 흰 영역(몸·장갑)은 외곽선에 막혀 안전
+  const visited = new Uint8Array(w*h);
+  const stack = [];
+  const seeds = [0, w-1, (h-1)*w, h*w-1, // 4 corners
+                 (w>>1), (h-1)*w + (w>>1), (h>>1)*w, (h>>1)*w + w-1]; // 4 edges
+  for(const s of seeds){ if(isWhite(s*4)) stack.push(s); }
+  while(stack.length){
+    const p = stack.pop();
+    if(visited[p]) continue;
+    visited[p] = 1;
+    if(!isWhite(p*4)) continue;
+    d[p*4+3] = 0; // alpha = 0
+    const x = p % w, y = (p/w)|0;
+    if(x>0   && !visited[p-1]) stack.push(p-1);
+    if(x<w-1 && !visited[p+1]) stack.push(p+1);
+    if(y>0   && !visited[p-w]) stack.push(p-w);
+    if(y<h-1 && !visited[p+w]) stack.push(p+w);
+  }
+  cx.putImageData(id, 0, 0);
+  return c; // canvas 객체 — drawImage에서 그대로 사용 가능
+}
+function loadCharImg(key){
+  const file = CHAR_FILES[key]; if(!file) return Promise.resolve(null);
+  if(charCache[key]) return Promise.resolve(charCache[key]);
+  return new Promise(resolve=>{
+    const img = new Image();
+    img.onload  = ()=>{
+      try {
+        const transparent = removeWhiteBackground(img);
+        charCache[key] = transparent;
+        resolve(transparent);
+      } catch(e){
+        // 변환 실패 시 원본 이미지 사용
+        charCache[key] = img;
+        resolve(img);
+      }
+    };
+    img.onerror = ()=>{ console.warn("char load fail:", file); resolve(null); };
+    img.src = encodeURI(CHAR_DIR + file);
+  });
+}
+function preloadAllChars(){
+  return Promise.all(Object.keys(CHAR_FILES).map(loadCharImg));
+}
+// 페이지 로드 시 사전 로드 (위닝샷 카드 클릭 시 지연 없게)
+preloadAllChars().then(()=>console.log("🎴 캐릭터 PNG 사전 로드 완료"));
+
+// 본인 캐릭터 자동 매핑 — verdict + 모드 + 매칭 선수 기반
+function pickMyCharKey(){
+  const mode = S.stroke;
+  const status = R.status;
+  const big = R.big || "";
+  // OUT = 안타까움 (sad 없으니 base fallback)
+  if(status === "out") return "sad";
+  // IN + 깊은 굿샷 = 환호 (위닝샷 ⭐)
+  if(status === "in" && big.includes("깊은")) return "celebrate";
+  // 모드별 스윙 자세
+  if(mode === "serve")  return "serve";
+  if(mode === "volley") return "forehand"; // 발리는 포핸드로 대체
+  if(mode === "backhand"){
+    // 시그니처 매칭이 원핸드 선수면 원핸드, 아니면 투핸드
+    const impMsg = (typeof impactMessage === "function") ? impactMessage() : "";
+    const oneHandPlayers = ["페더러","헤닌","아가시"];
+    if(oneHandPlayers.some(p => impMsg.includes(p))) return "backhand_one";
+    return "backhand_two";
+  }
+  if(mode === "forehand") return "forehand";
+  return "base";
+}
+// 상대 강아지 자동 매핑
+function pickOpponentKey(){
+  // 위닝샷일 때만 자빠짐, 아니면 정상
+  if(R.status === "in" && (R.big||"").includes("깊은")) return "dog_fallen";
+  return "dog_standing";
+}
+
+function drawWinCourtInto(ctx, x, y, w, h){
+  const t=COURT_THEMES[courtThemeIdx];
+  // v7.18: 왼쪽에 "베이스라인 뒤" 영역 확보 — 카드 배경에 자연스럽게 녹는 음영
+  const behindPad = 80;
+  const cx0 = x + behindPad;          // 내 베이스라인의 X (court 페인트 시작)
+  const cw  = w - behindPad;          // court 페인트 가로
+  // 카드 배경에 베이스라인 뒤 영역 살짝 음영 (코트 안 색감과 비주얼 분리)
+  ctx.fillStyle = "rgba(0,0,0,0.18)";
+  roundRectPath(ctx, x, y, behindPad+16, h, 16); ctx.fill();
+  // 코트 본체
+  const grad = ctx.createLinearGradient(cx0, y, cx0, y+h);
+  grad.addColorStop(0,t.a); grad.addColorStop(1,t.b);
+  ctx.fillStyle = grad;
+  roundRectPath(ctx, cx0, y, cw, h, 14); ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,0.22)"; ctx.lineWidth=2.5; ctx.stroke();
+  // 네트
+  const netX = cx0 + cw/2;
+  ctx.strokeStyle="rgba(255,255,255,0.55)"; ctx.lineWidth=3.5;
+  ctx.beginPath(); ctx.moveTo(netX, y); ctx.lineTo(netX, y+h); ctx.stroke();
+  // 서비스라인 (코트 본체 안에서)
+  ctx.strokeStyle="rgba(255,255,255,0.22)"; ctx.lineWidth=2;
+  const svc1 = cx0 + cw/2 - (cw/2)*(6.40/11.89), svc2 = cx0 + cw/2 + (cw/2)*(6.40/11.89);
+  ctx.beginPath(); ctx.moveTo(svc1, y); ctx.lineTo(svc1, y+h);
+  ctx.moveTo(svc2, y); ctx.lineTo(svc2, y+h);
+  ctx.moveTo(svc1, y+h/2); ctx.lineTo(svc2, y+h/2); ctx.stroke();
+  // v7.20: 내 위치 — xHit + lateral 반영
+  const myX = cx0 + (cw/2) * ((R.d.xHit||0)/11.89);
+  const myCourtY = (S.stroke==="volley"||S.stroke==="serve") ? 0 : normalizeCourtY(S.courtY);
+  const myY = y + h/2 + (h/2) * (myCourtY/4.115);
+  // v7.19: 연속값 대응 라벨 (PNG)
+  if(R.d.xHit < -0.3){
+    ctx.strokeStyle="rgba(255,210,63,0.55)"; ctx.lineWidth=2.6; ctx.setLineDash([8,5]);
+    ctx.beginPath(); ctx.moveTo(myX, myY); ctx.lineTo(cx0, myY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="rgba(255,210,63,0.9)"; ctx.font='bold 18px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign="center"; ctx.textBaseline="bottom";
+    ctx.fillText((-R.d.xHit).toFixed(1)+"m 뒤", (myX+cx0)/2, myY-8);
+  } else if(R.d.xHit > 0.3 && !R.d.isVolley){
+    const short2 = R.d.xHit >= 6.5 ? "미드코트" : R.d.xHit >= 4.5 ? "서비스라인 부근" : R.d.xHit >= 2 ? "어프로치" : "라이저";
+    ctx.fillStyle="rgba(255,210,63,0.9)"; ctx.font='bold 18px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign="left"; ctx.textBaseline="bottom";
+    ctx.fillText(short2, myX+14, myY-10);
+  }
+  ctx.fillStyle="#ffd23f";
+  ctx.beginPath(); ctx.arc(myX, myY, 11, 0, 7); ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,0.4)"; ctx.lineWidth=2; ctx.stroke();
+  // 낙하점 — 상대 코트 측, xHit 보정 불필요(absLand는 절대값)
+  const absLand=R.absLand, lateral=R.d.lateral;
+  const landX = cx0 + cw/2 + (cw/2)*((absLand-11.89)/11.89);
+  const landY = y + h/2 + (h/2)*(lateral/4.115);
+  const inb=R.status==="in";
+  const lineColor = R.d.omega>120?"#ff9d3c":R.d.omega<-120?"#7fc8ff":"#dfeebe";
+  ctx.shadowColor=lineColor; ctx.shadowBlur=18;
+  ctx.strokeStyle=lineColor; ctx.lineWidth=7; ctx.lineCap="round";
+  if(!inb) ctx.setLineDash([14,8]);
+  const midX=(myX+landX)/2, midY=(myY+landY)/2;
+  const curveBend = R.d.omega>120 ? -30 : R.d.omega<-120 ? 30 : 0;
+  ctx.beginPath(); ctx.moveTo(myX, myY);
+  ctx.quadraticCurveTo(midX, midY+curveBend, landX, landY); ctx.stroke();
+  ctx.setLineDash([]); ctx.shadowBlur=0;
+  // 낙하 dot
+  ctx.fillStyle=inb?"#7fd14f":"#ff6b5e";
+  ctx.beginPath(); ctx.arc(landX, landY, 17, 0, 7); ctx.fill();
+  ctx.strokeStyle="#fff"; ctx.lineWidth=4; ctx.stroke();
+  ctx.fillStyle="#0d0d12"; ctx.font='800 22px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(inb?"✓":"✕", landX, landY);
+}
+// v7.17: pill 배지 그리기 (오른쪽 정렬 — 오른쪽 끝 x 기준)
+function drawPillRight(ctx, rightX, y, text, bg, fg, fontSize){
+  ctx.font = `800 ${fontSize}px "Pretendard Variable", Pretendard, sans-serif`;
+  ctx.textBaseline = "middle";
+  const tw = ctx.measureText(text).width;
+  const padX = 16, h = fontSize + 14;
+  const w = tw + padX*2;
+  ctx.fillStyle = bg;
+  roundRectPath(ctx, rightX-w, y, w, h, h/2);
+  ctx.fill();
+  ctx.fillStyle = fg;
+  ctx.textAlign = "center";
+  ctx.fillText(text, rightX - w/2, y + h/2);
+  return {w, h};
+}
+function drawWinnerCardCanvas_v8_unused(ctx, W, H){
+  // ═══ v8.0 — (v9.0으로 대체, 검증 후 삭제 예정) ═══
+  // 색 토큰
+  const C_BG = "#EFE6D2";       // 베이지 배경
+  const C_NAVY = "#1B3A6B";     // 메인 네이비
+  const C_NAVY_60 = "rgba(27,58,107,0.6)";
+  const C_NAVY_45 = "rgba(27,58,107,0.45)";
+  const C_NAVY_30 = "rgba(27,58,107,0.3)";
+  const C_NAVY_18 = "rgba(27,58,107,0.18)";
+  const C_ACCENT = "#D5621A";   // 따뜻한 오렌지 (impact 강조)
+  const C_YELLOW = "#FFD23F";   // 노란 액센트
+
+  // 1. 베이지 배경
+  ctx.fillStyle = C_BG;
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. Outer rounded clip + 살짝 따뜻한 음영
+  ctx.save();
+  roundRectPath(ctx, 16, 16, W-32, H-32, 64); ctx.clip();
+  ctx.fillStyle = C_BG; ctx.fillRect(0, 0, W, H);
+  const g1 = ctx.createRadialGradient(W-120, 120, 0, W-120, 120, 600);
+  g1.addColorStop(0, "rgba(255,235,200,0.5)"); g1.addColorStop(1, "transparent");
+  ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+
+  // 3. Frame (액자) — 두꺼운 네이비 외곽선
+  const frm = FRAMES[frameIdx];
+  ctx.lineWidth = 12;
+  if(frm.gradient){
+    const fg2 = ctx.createLinearGradient(0, 0, W, H);
+    frm.gradient.forEach((c, i) => fg2.addColorStop(i/(frm.gradient.length-1), c));
+    ctx.strokeStyle = fg2;
+  } else {
+    ctx.strokeStyle = C_NAVY;
+  }
+  if(frm.glow){ ctx.shadowColor = frm.glow; ctx.shadowBlur = 24; }
+  roundRectPath(ctx, 28, 28, W-56, H-56, 50); ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 4. Inner thin line
+  ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 2;
+  roundRectPath(ctx, 50, 50, W-100, H-100, 40); ctx.stroke();
+  ctx.restore();
+
+  // 5. Header
+  ctx.font = '800 28px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillStyle = C_NAVY; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillText("🎾 WINNING SHOT", 95, 110);
+  ctx.fillStyle = C_NAVY_60; ctx.textAlign = "right";
+  ctx.font = '600 22px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText(document.getElementById("winDate").textContent, W-95, 116);
+
+  // 6. 레어도 배지 (날짜 아래)
+  const rb = document.getElementById("winRarityBadge");
+  const rarityText = rb.textContent;
+  const rarityBg = rb.style.background || "#9d9da3";
+  const rarityFg = rb.style.color || "#0d0d12";
+  const isLegendary = rb.dataset.tier === "legend" || rb.dataset.tier === "epic";
+  if(isLegendary){
+    ctx.save();
+    ctx.shadowColor = rb.dataset.tier === "legend" ? "#ffd23f" : "#9d5fde";
+    ctx.shadowBlur = 22;
+  }
+  drawPillRight(ctx, W-95, 155, rarityText, rarityBg, rarityFg, 20);
+  if(isLegendary){ ctx.restore(); }
+
+  // 7. 메인 영역 — v8.3 위뷰 풀코트 (코트가 메인, 캐릭터 부수)
+  const isWinning = (R.status === "in" && (R.big||"").includes("깊은"));
+  const myImg = charCache[pickMyCharKey()];
+  const oppImg = isWinning ? charCache[pickOpponentKey()] : null;
+
+  // 코트 영역 — 위뷰 (가로 길게)
+  const courtX0 = 70, courtY0 = 200, courtCW = W - 140, courtCH = 430;
+  const behindPad = 60;
+  const cx0 = courtX0 + behindPad; // 본인 베이스라인 위치
+  const cw  = courtCW - behindPad;
+
+  // 7-1. 베이스라인 뒤 음영 (좌측, 사용자 위치 -일 때)
+  ctx.fillStyle = "rgba(27,58,107,0.06)";
+  roundRectPath(ctx, courtX0, courtY0, behindPad+12, courtCH, 14); ctx.fill();
+
+  // 7-2. 코트 본체 (점토 톤)
+  const courtGrad = ctx.createLinearGradient(cx0, courtY0, cx0, courtY0+courtCH);
+  courtGrad.addColorStop(0, "#C49A6E");
+  courtGrad.addColorStop(1, "#A07F50");
+  ctx.fillStyle = courtGrad;
+  roundRectPath(ctx, cx0, courtY0, cw, courtCH, 12); ctx.fill();
+
+  // 7-3. 코트 외곽 (흰 라인)
+  ctx.strokeStyle = "#FFFEF6"; ctx.lineWidth = 3;
+  roundRectPath(ctx, cx0, courtY0, cw, courtCH, 12); ctx.stroke();
+
+  // 7-4. 네트 (가운데)
+  const netX = cx0 + cw/2;
+  ctx.strokeStyle = "#FFFEF6"; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(netX, courtY0); ctx.lineTo(netX, courtY0+courtCH); ctx.stroke();
+
+  // 7-5. 서비스라인 (양쪽) + 센터 마크
+  const sl1 = cx0 + cw/2 - (cw/2) * (6.40/11.89);
+  const sl2 = cx0 + cw/2 + (cw/2) * (6.40/11.89);
+  ctx.strokeStyle = "rgba(255,254,246,0.6)"; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(sl1, courtY0); ctx.lineTo(sl1, courtY0+courtCH);
+  ctx.moveTo(sl2, courtY0); ctx.lineTo(sl2, courtY0+courtCH);
+  ctx.moveTo(sl1, courtY0+courtCH/2); ctx.lineTo(sl2, courtY0+courtCH/2);
+  ctx.stroke();
+
+  // 7-6. 본인 dot — 실제 시뮬 좌표 (xHit, courtY)
+  const myMapX = cx0 + (cw/2) * ((R.d.xHit||0)/11.89);
+  const myCourtY = (S.stroke==="volley"||S.stroke==="serve") ? 0 : (normalizeCourtY(S.courtY)||0);
+  const myMapY = courtY0 + courtCH/2 + (courtCH/2) * (myCourtY/4.115);
+
+  // 베이스라인 뒤 점선 가이드
+  if((R.d.xHit||0) < -0.3){
+    ctx.strokeStyle = "rgba(255,210,63,0.7)"; ctx.lineWidth = 2; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(myMapX, myMapY); ctx.lineTo(cx0, myMapY); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // 본인 노란 dot
+  ctx.fillStyle = "#FFD23F";
+  ctx.beginPath(); ctx.arc(myMapX, myMapY, 12, 0, 7); ctx.fill();
+  ctx.strokeStyle = C_NAVY; ctx.lineWidth = 3; ctx.stroke();
+
+  // 7-7. 낙하 dot (실제 absLand·lateral)
+  const absLand = R.absLand;
+  const lateral = R.d.lateral;
+  const landX = cx0 + cw/2 + (cw/2) * ((absLand-11.89)/11.89);
+  const landY = courtY0 + courtCH/2 + (courtCH/2) * (lateral/4.115);
+  const inb = R.status === "in";
+
+  // 7-8. 궤적 (본인 → 낙하)
+  ctx.strokeStyle = "#D5621A"; ctx.lineWidth = 5; ctx.lineCap = "round";
+  ctx.shadowColor = "rgba(213,98,26,0.4)"; ctx.shadowBlur = 8;
+  if(!inb) ctx.setLineDash([10, 6]);
+  const midX = (myMapX + landX) / 2, midY = (myMapY + landY) / 2;
+  const curveBend = R.d.omega > 120 ? -28 : R.d.omega < -120 ? 28 : 0;
+  ctx.beginPath();
+  ctx.moveTo(myMapX, myMapY);
+  ctx.quadraticCurveTo(midX, midY + curveBend, landX, landY);
+  ctx.stroke();
+  ctx.setLineDash([]); ctx.shadowBlur = 0;
+
+  // 낙하 dot (✓ / ✕)
+  ctx.fillStyle = inb ? "#7FD14F" : "#FF6B5E";
+  ctx.beginPath(); ctx.arc(landX, landY, 16, 0, 7); ctx.fill();
+  ctx.strokeStyle = "#FFFEF6"; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = C_NAVY; ctx.font='800 20px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(inb?"✓":"✕", landX, landY);
+
+  // 7-9. 캐릭터 작게 — 부수적, 코트 안에 자동 배치
+  const courtCenterY = courtY0 + courtCH/2;
+  const courtTop = courtY0, courtBottom = courtY0 + courtCH;
+
+  if(myImg){
+    const sz = 240; // 고양이 크게 (강아지보다 ~2.7배)
+    // 본인 위치 자동 — dot 기준 코트 안쪽 (dot이 아래쪽이면 위에·위쪽이면 아래로)
+    const isDotInLowerHalf = myMapY > courtCenterY;
+    let myCharX = myMapX - sz/2;
+    let myCharY = isDotInLowerHalf ? (myMapY - sz - 6) : (myMapY + 10);
+    // 코트 영역 안 clamp (베이스 뒤 음영 포함)
+    myCharX = Math.max(courtX0 + 5, Math.min(courtX0 + courtCW - sz - 5, myCharX));
+    myCharY = Math.max(courtTop + 5, Math.min(courtBottom - sz - 5, myCharY));
+    // flip해서 우측(상대) 바라보게
+    ctx.save();
+    ctx.translate(myCharX + sz, myCharY);
+    ctx.scale(-1, 1);
+    ctx.drawImage(myImg, 0, 0, sz, sz);
+    ctx.restore();
+
+    if(isWinning && oppImg){
+      const opSize = 100; // 강아지 살짝 키움 (10% +)
+      const isLandInLowerHalf = landY > courtCenterY;
+      let opCharX = landX - opSize/2;
+      let opCharY = isLandInLowerHalf ? (landY - opSize - 3) : (landY + 8);
+      opCharX = Math.max(cx0 + 5, Math.min(cx0 + cw - opSize - 5, opCharX));
+      opCharY = Math.max(courtTop + 5, Math.min(courtBottom - opSize - 5, opCharY));
+      ctx.drawImage(oppImg, opCharX, opCharY, opSize, opSize);
+    }
+  }
+
+  // 7-10. 코트 라벨 — 사용자 요청으로 제거 (누가 모르냐)
+
+  // 8. 이름·메모 — 위닝샷 아닐 때 코트 아래 작게
+  if(!isWinning){
+    ctx.fillStyle = C_NAVY; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.font = '700 22px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.fillText(document.getElementById("winCharName").textContent, W/2, courtY0 + courtCH + 12);
+  }
+
+  // 9. 텍스트 영역 (코트 아래) — v8.3 큰 글씨 + 위치 정보
+  let textY = courtY0 + courtCH + 50;
+
+  // 9-1. Shot name (크게)
+  ctx.fillStyle = C_NAVY; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.font = '800 44px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText(document.getElementById("winShotName").textContent, 95, textY);
+  textY += 64;
+
+  // 9-2. Impact (선수 매칭 멘트)
+  ctx.fillStyle = C_ACCENT;
+  ctx.font = '700 26px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText(document.getElementById("winImpact").textContent, 95, textY);
+  textY += 42;
+
+  // 9-3. 시그니처 톤
+  const toneTxt = document.getElementById("winTone").textContent;
+  if(toneTxt){
+    ctx.fillStyle = "rgba(27,58,107,0.82)";
+    ctx.font = '600 22px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.fillText(toneTxt, 95, textY);
+    textY += 42;
+  }
+
+  // 9-4. 위치 정보 — 본인 → 목표 (큰 가치, v8.3 추가)
+  textY += 8;
+  const myPosLabel = (S.stroke==="volley") ? "네트 앞 4.5m" :
+                     (S.stroke==="serve")  ? "베이스라인" :
+                     courtFullLabel(normalizeCourtX(S.courtX), normalizeCourtY(S.courtY), S.hand);
+  const tgPosLabel = targetLabel(normalizeTargetX(S.targetX), normalizeTargetY(S.targetY), S.hand);
+  ctx.fillStyle = "#FFD23F"; // 노란 (본인)
+  ctx.font = '700 20px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText("📍", 95, textY);
+  ctx.fillStyle = C_NAVY;
+  ctx.font = '700 20px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText(myPosLabel, 130, textY);
+  textY += 32;
+  ctx.fillStyle = "#FF6B5E";
+  ctx.fillText("🎯", 95, textY);
+  ctx.fillStyle = C_NAVY;
+  ctx.fillText(tgPosLabel, 130, textY);
+  textY += 38;
+
+  // 9-5. 스탯 line (구분 라인 위)
+  ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(95, textY-6); ctx.lineTo(W-95, textY-6); ctx.stroke();
+  textY += 12;
+  const speed = Math.round(R.d.speed*3.6), marg = R.margin ? (R.margin.hi-R.margin.lo) : 0;
+  // 4-column stat grid
+  const statBoxes = [
+    {label:"스피드", value:`${speed}km/h`},
+    {label:"회전",   value:`${R.rpm}rpm`},
+    {label:"마진",   value:`${marg}°`},
+    {label:"낙하",   value:`${R.absLand.toFixed(1)}m`}
+  ];
+  const boxW = (W - 190) / 4;
+  statBoxes.forEach((s, i) => {
+    const bx = 95 + i*boxW;
+    ctx.fillStyle = C_NAVY_60;
+    ctx.font = '500 14px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign = "center";
+    ctx.fillText(s.label, bx + boxW/2, textY);
+    ctx.fillStyle = C_NAVY;
+    ctx.font = '800 26px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.fillText(s.value, bx + boxW/2, textY + 22);
+  });
+
+  // 10. 공유 권유 박스 (하단 — 스티커 톤)
+  const ctaY = H - 180;
+  ctx.fillStyle = "#FFD23F";
+  roundRectPath(ctx, 100, ctaY, W-200, 60, 18); ctx.fill();
+  ctx.strokeStyle = C_NAVY; ctx.lineWidth = 3;
+  roundRectPath(ctx, 100, ctaY, W-200, 60, 18); ctx.stroke();
+  // 그림자
+  ctx.fillStyle = "rgba(27,58,107,0.15)";
+  roundRectPath(ctx, 100, ctaY+6, W-200, 60, 18); // 살짝 아래 그림자
+  // 다시 메인
+  ctx.fillStyle = "#FFD23F";
+  roundRectPath(ctx, 100, ctaY, W-200, 60, 18); ctx.fill();
+  ctx.strokeStyle = C_NAVY; ctx.lineWidth = 3;
+  roundRectPath(ctx, 100, ctaY, W-200, 60, 18); ctx.stroke();
+  ctx.fillStyle = C_NAVY;
+  ctx.font = '800 24px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("🎾 너도 너의 위닝샷 만들어봐 →", W/2, ctaY + 32);
+
+  // 11. Watermark + 가드 (하단)
+  ctx.fillStyle = C_NAVY_45;
+  ctx.font = '600 18px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.textAlign = "center";
+  ctx.fillText("🎾 타점 시뮬레이터 · 추정값", W/2, H-90);
+  ctx.fillStyle = C_NAVY_30;
+  ctx.font = '400 14px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText("* 샷 1개 매칭 — 경기력 평가 아님", W/2, H-62);
+}
+// ═══ v9.0 — 브로드캐스트 포스터 구도 ═══
+// 관중석(내 베이스라인 뒤) 시점 원근 코트 + 실측 높이 아크 궤적 + 캐릭터 전경 배치.
+// v8의 시점 충돌(탑뷰 코트 × 사이드뷰 캐릭터)·빈 하단·밋밋한 궤적을 해소.
+function wrapLines9(ctx, text, maxW){
+  const words = String(text||"").split(" ");
+  const lines = []; let cur = "";
+  words.forEach(w => {
+    const t = cur ? cur + " " + w : w;
+    if(ctx.measureText(t).width > maxW && cur){ lines.push(cur); cur = w; }
+    else cur = t;
+  });
+  if(cur) lines.push(cur);
+  return lines;
+}
+function drawBurst9(ctx, x, y, rOut, rIn, n, fill, stroke){
+  ctx.beginPath();
+  for(let i=0; i<n*2; i++){
+    const r = (i%2===0) ? rOut : rIn;
+    const a = (Math.PI*i)/n - Math.PI/2;
+    const px = x + r*Math.cos(a), py = y + r*Math.sin(a);
+    i ? ctx.lineTo(px,py) : ctx.moveTo(px,py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fill; ctx.fill();
+  if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = 3; ctx.stroke(); }
+}
+function drawBall9(ctx, x, y, r, alpha){
+  ctx.save(); ctx.globalAlpha = alpha==null?1:alpha;
+  ctx.fillStyle = "#FFD23F";
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  ctx.strokeStyle = "#1B3A6B"; ctx.lineWidth = Math.max(2, r*0.16); ctx.stroke();
+  ctx.strokeStyle = "#FFFEF6"; ctx.lineWidth = Math.max(1.5, r*0.12);
+  ctx.beginPath(); ctx.arc(x - r*0.9, y, r*1.15, -0.55, 0.55); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x + r*0.9, y, r*1.15, Math.PI-0.55, Math.PI+0.55); ctx.stroke();
+  ctx.restore();
+}
+function drawWinnerCardCanvas(ctx, W, H){
+  const C_BG = "#EFE6D2", C_NAVY = "#1B3A6B";
+  const C_NAVY_60 = "rgba(27,58,107,0.6)", C_NAVY_45 = "rgba(27,58,107,0.45)",
+        C_NAVY_18 = "rgba(27,58,107,0.18)";
+  const C_ACCENT = "#D5621A", C_YELLOW = "#FFD23F", C_LINE = "#FFFEF6";
+  const FONT = '"Pretendard Variable", Pretendard, sans-serif';
+
+  // 1. 배경 + 프레임 (v8 유지)
+  ctx.fillStyle = C_BG; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  roundRectPath(ctx, 16, 16, W-32, H-32, 64); ctx.clip();
+  ctx.fillStyle = C_BG; ctx.fillRect(0, 0, W, H);
+  const g1 = ctx.createRadialGradient(W-120, 120, 0, W-120, 120, 600);
+  g1.addColorStop(0, "rgba(255,235,200,0.5)"); g1.addColorStop(1, "transparent");
+  ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+  const frm = FRAMES[frameIdx];
+  ctx.lineWidth = 12;
+  if(frm.gradient){
+    const fg2 = ctx.createLinearGradient(0, 0, W, H);
+    frm.gradient.forEach((c, i) => fg2.addColorStop(i/(frm.gradient.length-1), c));
+    ctx.strokeStyle = fg2;
+  } else ctx.strokeStyle = C_NAVY;
+  if(frm.glow){ ctx.shadowColor = frm.glow; ctx.shadowBlur = 24; }
+  roundRectPath(ctx, 28, 28, W-56, H-56, 50); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 2;
+  roundRectPath(ctx, 50, 50, W-100, H-100, 40); ctx.stroke();
+  ctx.restore();
+
+  // 2. 헤더
+  ctx.font = '800 30px ' + FONT;
+  ctx.fillStyle = C_NAVY; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillText("🎾 WINNING SHOT", 95, 104);
+  ctx.fillStyle = C_NAVY_60; ctx.textAlign = "right";
+  ctx.font = '600 22px ' + FONT;
+  ctx.fillText(document.getElementById("winDate").textContent, W-95, 112);
+
+  // 3. 히어로 존 — 원근 코트 (관중석 뷰)
+  const hero = {x:70, y:196, w:W-140, h:644};
+  // 높은 중계 카메라(6m) + 우측 3m 오프셋(+화면 보정) → 아크가 보이고 대각 구도가 생김
+  const cam = {f:558, dc:6.2, hc:6.0, ucam:3.0, cx:W/2+120, cy:hero.y+74};
+  const PJ = (u, v, h) => {
+    const dz = cam.dc + Math.max(v, -3);
+    return {x: cam.cx + (u-cam.ucam)*cam.f/dz, y: cam.cy + (cam.hc-h)*cam.f/dz, s: cam.f/dz};
+  };
+  const BASE = 23.77, NETV = 11.89, SGL = 4.115, DBL = 5.485, SVC1 = 5.48, SVC2 = 18.29;
+
+  ctx.save();
+  roundRectPath(ctx, hero.x, hero.y, hero.w, hero.h, 26); ctx.clip();
+
+  // 3-1. 스타디움 배경 (네이비) — 지평선(백런 4.2m 뒤) 위
+  const horizonY = PJ(0, BASE+4.2, 0).y;
+  const skyG = ctx.createLinearGradient(0, hero.y, 0, horizonY+8);
+  skyG.addColorStop(0, "#16305A"); skyG.addColorStop(1, "#24467E");
+  ctx.fillStyle = skyG;
+  ctx.fillRect(hero.x, hero.y, hero.w, (horizonY+8) - hero.y);
+  // 관중 실루엣 점들 (은은하게)
+  ctx.fillStyle = "rgba(255,254,246,0.10)";
+  for(let i=0; i<48; i++){
+    const dx = hero.x + 24 + ((i*83) % (hero.w-48));
+    const dy = hero.y + 40 + ((i*47) % Math.max(40, (horizonY - hero.y - 70)));
+    ctx.beginPath(); ctx.arc(dx, dy, 7 + (i%3)*2, 0, 7); ctx.fill();
+  }
+
+  // 3-2. 코트 밖 클레이 (어두운 톤)
+  const apG = ctx.createLinearGradient(0, horizonY, 0, hero.y+hero.h);
+  apG.addColorStop(0, "#8F6B45"); apG.addColorStop(1, "#7B5A38");
+  ctx.fillStyle = apG;
+  ctx.fillRect(hero.x, horizonY, hero.w, hero.y + hero.h - horizonY);
+
+  // 3-3. 코트 본체 사다리꼴 (밝은 클레이)
+  const cNL = PJ(-DBL, 0, 0), cNR = PJ(DBL, 0, 0), cFL = PJ(-DBL, BASE, 0), cFR = PJ(DBL, BASE, 0);
+  const ctG = ctx.createLinearGradient(0, cFL.y, 0, cNL.y);
+  ctG.addColorStop(0, "#B08A5C"); ctG.addColorStop(1, "#C49A6E");
+  ctx.fillStyle = ctG;
+  ctx.beginPath();
+  ctx.moveTo(cNL.x, cNL.y); ctx.lineTo(cNR.x, cNR.y);
+  ctx.lineTo(cFR.x, cFR.y); ctx.lineTo(cFL.x, cFL.y);
+  ctx.closePath(); ctx.fill();
+
+  // 3-4. 흰 라인 (원근 유지 — 먼 쪽 가늘게)
+  const seg = (u1,v1,u2,v2,w,alpha) => {
+    const a = PJ(u1,v1,0), b = PJ(u2,v2,0);
+    ctx.strokeStyle = alpha ? `rgba(255,254,246,${alpha})` : C_LINE;
+    ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  };
+  seg(-DBL, 0, DBL, 0, 6);            // 내 베이스라인
+  seg(-DBL, BASE, DBL, BASE, 2.5);    // 상대 베이스라인
+  seg(-DBL, 0, -DBL, BASE, 3.5);      // 더블 사이드
+  seg( DBL, 0,  DBL, BASE, 3.5);
+  seg(-SGL, 0, -SGL, BASE, 3);        // 싱글 사이드
+  seg( SGL, 0,  SGL, BASE, 3);
+  seg(-SGL, SVC1, SGL, SVC1, 4, 0.85);  // 내 서비스라인
+  seg(-SGL, SVC2, SGL, SVC2, 2.5, 0.85);// 상대 서비스라인
+  seg(0, SVC1, 0, SVC2, 3, 0.85);       // 센터 서비스라인
+  seg(0, 0, 0, 0.35, 5);                // 센터 마크
+  seg(0, BASE-0.35, 0, BASE, 2.5);
+
+  // 3-5. 네트 (반투명 플레인 + 흰 밴드 + 포스트)
+  const nL = PJ(-DBL-0.4, NETV, 0), nR = PJ(DBL+0.4, NETV, 0);
+  const nLt = PJ(-DBL-0.4, NETV, 1.07), nRt = PJ(DBL+0.4, NETV, 1.07);
+  ctx.fillStyle = "rgba(27,58,107,0.30)";
+  ctx.beginPath();
+  ctx.moveTo(nL.x, nL.y); ctx.lineTo(nR.x, nR.y);
+  ctx.lineTo(nRt.x, nRt.y); ctx.lineTo(nLt.x, nLt.y);
+  ctx.closePath(); ctx.fill();
+  // 메쉬
+  ctx.strokeStyle = "rgba(255,254,246,0.28)"; ctx.lineWidth = 1.5;
+  for(let mu=-5; mu<=5; mu+=0.75){
+    const b1 = PJ(mu, NETV, 0), t1 = PJ(mu, NETV, 1.0);
+    ctx.beginPath(); ctx.moveTo(b1.x, b1.y); ctx.lineTo(t1.x, t1.y); ctx.stroke();
+  }
+  for(let mh=0.3; mh<1.0; mh+=0.33){
+    const l1 = PJ(-DBL-0.4, NETV, mh), r1 = PJ(DBL+0.4, NETV, mh);
+    ctx.beginPath(); ctx.moveTo(l1.x, l1.y); ctx.lineTo(r1.x, r1.y); ctx.stroke();
+  }
+  // 흰 밴드 (상단)
+  ctx.strokeStyle = C_LINE; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(nLt.x, nLt.y); ctx.lineTo(nRt.x, nRt.y); ctx.stroke();
+  // 포스트
+  [nLt, nRt].forEach((p, i) => {
+    const pb = i===0 ? nL : nR;
+    ctx.strokeStyle = C_NAVY; ctx.lineWidth = 7; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(pb.x, pb.y); ctx.lineTo(p.x, p.y - 4); ctx.stroke();
+  });
+
+  // 3-6. 궤적 데이터 준비
+  const xHit = R.d.xHit || 0;
+  const myU0 = (S.stroke==="volley"||S.stroke==="serve") ? 0 : (normalizeCourtY(S.courtY)||0);
+  const landU = R.d.lateral || 0;
+  const landV = R.absLand;
+  const inb = R.status === "in";
+  const pts = (R.sim && R.sim.pts) ? R.sim.pts : [];
+  const xLand = R.sim ? (R.sim.xLand || 1) : 1;
+  const proj = pts.map(p => {
+    const fr = Math.min(1, p.x / xLand);
+    return PJ(myU0 + (landU - myU0)*fr, xHit + p.x, p.z);
+  });
+
+  // 3-7. 상대 캐릭터 (원코트, 궤적보다 먼저 = 공 뒤로)
+  const isWinning = (R.status === "in" && (R.big||"").includes("깊은"));
+  const oppImg = isWinning ? charCache[pickOpponentKey()] : charCache["dog_standing"];
+  if(oppImg){
+    const dogU = (landU >= 0 ? -2.3 : 2.3);
+    const dp = PJ(dogU, 22.8, 0);
+    const dsz = 84;
+    ctx.drawImage(oppImg, dp.x - dsz/2, dp.y - dsz + 6, dsz, dsz);
+  }
+
+  // 3-9. 궤적 아크 (원근 테이퍼 + 글로우)
+  if(proj.length > 1){
+    ctx.save();
+    ctx.strokeStyle = C_ACCENT; ctx.lineCap = "round";
+    ctx.shadowColor = "rgba(213,98,26,0.45)"; ctx.shadowBlur = 14;
+    if(inb){
+      // IN: 원근 테이퍼 (세그먼트별 두께)
+      for(let i=1; i<proj.length; i++){
+        const fr = i/proj.length;
+        ctx.lineWidth = 15 - 10*fr;
+        ctx.beginPath(); ctx.moveTo(proj[i-1].x, proj[i-1].y); ctx.lineTo(proj[i].x, proj[i].y); ctx.stroke();
+      }
+    } else {
+      // OUT: 점선은 단일 패스여야 대시가 이어짐
+      ctx.setLineDash([16, 12]); ctx.lineWidth = 9;
+      ctx.beginPath();
+      proj.forEach((p, i) => { i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); });
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+    // 잔상 볼 2개 + 메인 볼 (비행 30% 지점) + 볼 아래 지면 타원 그림자
+    const bi = Math.floor(proj.length*0.30);
+    const br = 13 * (proj[bi] ? proj[bi].s/PJ(0,8,0).s : 1);
+    if(pts[bi]){
+      const fr = Math.min(1, pts[bi].x/xLand);
+      const gs = PJ(myU0+(landU-myU0)*fr, xHit+pts[bi].x, 0);
+      ctx.fillStyle = "rgba(27,58,107,0.20)";
+      ctx.beginPath(); ctx.ellipse(gs.x, gs.y, br*1.5, br*0.5, 0, 0, 7); ctx.fill();
+    }
+    [12, 6].forEach((back, k) => {
+      const gi = bi - back;
+      if(gi > 0) drawBall9(ctx, proj[gi].x, proj[gi].y, br*0.85, k===0 ? 0.16 : 0.32);
+    });
+    if(proj[bi]) drawBall9(ctx, proj[bi].x, proj[bi].y, Math.max(11, br));
+  }
+
+  // 3-10. 낙하 버스트 + IN/OUT 필 (대홈런도 지평선 안에 표시)
+  const lp = PJ(landU, Math.min(landV, BASE + 4.0), 0);
+  const bCol = inb ? "#7FD14F" : "#FF6B5E";
+  ctx.save();
+  ctx.shadowColor = inb ? "rgba(127,209,79,0.55)" : "rgba(255,107,94,0.55)";
+  ctx.shadowBlur = 16;
+  drawBurst9(ctx, lp.x, lp.y, 30, 13, 8, bCol, C_LINE);
+  ctx.restore();
+  ctx.strokeStyle = "rgba(255,254,246,0.5)"; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(lp.x, lp.y, 36, 0, 7); ctx.stroke();
+  // IN/OUT 필
+  const pillTxt = inb ? "IN" : "OUT";
+  ctx.font = '800 22px ' + FONT;
+  const pw = ctx.measureText(pillTxt).width + 34;
+  const px0 = Math.min(hero.x + hero.w - pw - 14, lp.x + 44), py0 = lp.y - 80;
+  ctx.fillStyle = C_NAVY;
+  roundRectPath(ctx, px0, py0, pw, 38, 19); ctx.fill();
+  ctx.fillStyle = bCol; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(pillTxt, px0 + pw/2, py0 + 20);
+
+  ctx.restore(); // hero clip 해제
+
+  // 3-11. 히어로 존 테두리
+  ctx.strokeStyle = C_NAVY; ctx.lineWidth = 5;
+  roundRectPath(ctx, hero.x, hero.y, hero.w, hero.h, 26); ctx.stroke();
+
+  // 4. 내 캐릭터 — 전경 좌하단 (프레임 밖으로 살짝 → 포스터 느낌)
+  const myImg = charCache[pickMyCharKey()];
+  if(myImg){
+    const sz = (S.stroke==="volley") ? 350 : 430;
+    // 타점(궤적 시작점)에 라켓이 오도록 수평 위치를 따라감
+    const startPx = PJ(myU0, Math.max(xHit, 0), 0).x;
+    const catX = clamp(startPx - sz*0.62, 36, W - sz - 90);
+    const catY = hero.y + hero.h - sz + 36;
+    ctx.save();
+    ctx.translate(catX + sz, catY);
+    ctx.scale(-1, 1);
+    ctx.drawImage(myImg, 0, 0, sz, sz);
+    ctx.restore();
+  }
+
+  // 5. 레어도 배지 — 히어로 존 우상단에 스티커처럼
+  const rb = document.getElementById("winRarityBadge");
+  const isLegendary = rb.dataset.tier === "legend" || rb.dataset.tier === "epic";
+  if(isLegendary){
+    ctx.save();
+    ctx.shadowColor = rb.dataset.tier === "legend" ? "#ffd23f" : "#9d5fde";
+    ctx.shadowBlur = 22;
+  }
+  drawPillRight(ctx, W-88, hero.y+18, rb.textContent, rb.style.background || "#9d9da3", rb.style.color || "#0d0d12", 20);
+  if(isLegendary){ ctx.restore(); }
+
+  // 6. 텍스트 블록 — 매칭 멘트가 주인공
+  const statusTxt = document.getElementById("winShotName").textContent;
+  const impactTxt = document.getElementById("winImpact").textContent;
+  const toneTxt = document.getElementById("winTone").textContent;
+
+  // 6-1. 상태 칩 (작게 강등된 "굿샷, 인")
+  let ty = 872;
+  ctx.font = '700 22px ' + FONT;
+  const stW = ctx.measureText(statusTxt).width + 40;
+  ctx.fillStyle = inb ? "rgba(127,209,79,0.18)" : "rgba(255,107,94,0.18)";
+  roundRectPath(ctx, 95, ty, stW, 40, 20); ctx.fill();
+  ctx.strokeStyle = inb ? "#5CA83C" : "#D95547"; ctx.lineWidth = 2;
+  roundRectPath(ctx, 95, ty, stW, 40, 20); ctx.stroke();
+  ctx.fillStyle = inb ? "#3E7A26" : "#B03A2E";
+  ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.fillText(statusTxt, 115, ty + 21);
+
+  // 6-2. 헤드라인 = 매칭 멘트 (— 뒤 근거 수치는 서브라인으로 분리)
+  ty += 62;
+  const dashIdx = impactTxt.indexOf("—");
+  const headTxt = dashIdx > 0 ? impactTxt.slice(0, dashIdx).trim() : impactTxt;
+  const tailTxt = dashIdx > 0 ? impactTxt.slice(dashIdx+1).trim() : "";
+  ctx.textBaseline = "top"; ctx.fillStyle = C_NAVY;
+  let hSize = 50;
+  ctx.font = '800 ' + hSize + 'px ' + FONT;
+  let hLines = wrapLines9(ctx, headTxt, W-190);
+  if(hLines.length > 2){
+    hSize = 42; ctx.font = '800 ' + hSize + 'px ' + FONT;
+    hLines = wrapLines9(ctx, headTxt, W-190);
+    if(hLines.length > 2){ hLines = hLines.slice(0,2); hLines[1] += "…"; }
+  }
+  hLines.forEach((ln, i) => ctx.fillText(ln, 95, ty + i*(hSize+8)));
+  ty += hLines.length*(hSize+8) + 12;
+
+  // 6-3. 서브라인 (근거 수치 · 시그니처 톤) — 한 줄, 넘치면 말줄임
+  const subParts = [];
+  if(tailTxt) subParts.push(tailTxt);
+  if(toneTxt) subParts.push(toneTxt);
+  if(subParts.length){
+    let subTxt = subParts.join("  ·  ");
+    ctx.fillStyle = C_ACCENT;
+    ctx.font = '700 24px ' + FONT;
+    while(ctx.measureText(subTxt).width > W-190 && subTxt.length > 4) subTxt = subTxt.slice(0, -2).trim() + "…";
+    ctx.fillText(subTxt, 95, ty);
+    ty += 36;
+  }
+  // 6-4. 위치 한 줄 (스탯 밴드 침범 방지 상한)
+  ty = Math.min(ty, 1074);
+  const myPosLabel = (S.stroke==="volley") ? "네트 앞 4.5m" :
+                     (S.stroke==="serve")  ? "베이스라인" :
+                     courtFullLabel(normalizeCourtX(S.courtX), normalizeCourtY(S.courtY), S.hand);
+  const tgPosLabel = targetLabel(normalizeTargetX(S.targetX), normalizeTargetY(S.targetY), S.hand);
+  ctx.fillStyle = C_NAVY_60;
+  ctx.font = '600 20px ' + FONT;
+  let posTxt = "📍 " + myPosLabel + "  →  🎯 " + tgPosLabel;
+  while(ctx.measureText(posTxt).width > W-190 && posTxt.length > 4) posTxt = posTxt.slice(0, -2).trim() + "…";
+  ctx.fillText(posTxt, 95, ty);
+
+  // 7. 스탯 밴드 (고정 위치 — 오프화이트 박스)
+  const sbY = 1108, sbH = 100;
+  ctx.fillStyle = "#FAF4E6";
+  roundRectPath(ctx, 70, sbY, W-140, sbH, 22); ctx.fill();
+  ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 2;
+  roundRectPath(ctx, 70, sbY, W-140, sbH, 22); ctx.stroke();
+  const speed = Math.round(R.d.speed*3.6), marg = R.margin ? (R.margin.hi - R.margin.lo) : 0;
+  const statBoxes = [
+    {label:"스피드", value:`${speed}km/h`},
+    {label:"회전",   value:`${R.rpm}rpm`},
+    {label:"마진",   value:`${marg}°`},
+    {label:"낙하",   value:`${R.absLand.toFixed(1)}m`}
+  ];
+  const boxW = (W-140)/4;
+  statBoxes.forEach((s, i) => {
+    const bx = 70 + i*boxW;
+    if(i){ ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(bx, sbY+18); ctx.lineTo(bx, sbY+sbH-18); ctx.stroke(); }
+    ctx.fillStyle = C_NAVY_60;
+    ctx.font = '600 16px ' + FONT; ctx.textAlign = "center";
+    ctx.fillText(s.label, bx + boxW/2, sbY + 18);
+    ctx.fillStyle = C_NAVY;
+    ctx.font = '800 30px ' + FONT;
+    ctx.fillText(s.value, bx + boxW/2, sbY + 44);
+  });
+
+  // 8. CTA (노란 스티커)
+  const ctaY = 1232, ctaH = 56;
+  ctx.fillStyle = "rgba(27,58,107,0.15)";
+  roundRectPath(ctx, 100, ctaY+6, W-200, ctaH, 18); ctx.fill();
+  ctx.fillStyle = C_YELLOW;
+  roundRectPath(ctx, 100, ctaY, W-200, ctaH, 18); ctx.fill();
+  ctx.strokeStyle = C_NAVY; ctx.lineWidth = 3;
+  roundRectPath(ctx, 100, ctaY, W-200, ctaH, 18); ctx.stroke();
+  ctx.fillStyle = C_NAVY;
+  ctx.font = '800 24px ' + FONT;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("🎾 너도 너의 위닝샷 만들어봐 →", W/2, ctaY + ctaH/2 + 1);
+
+  // 9. 워터마크 + 정직 가드 (한 줄)
+  ctx.fillStyle = C_NAVY_45;
+  ctx.font = '500 16px ' + FONT;
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  ctx.fillText("🎾 타점 시뮬레이터 · 추정값 — 샷 1개 매칭, 경기력 평가 아님", W/2, 1302);
+}
+// v7.17: 카드 뒷면 PNG (P0-5)
+function drawWinnerBackCanvas(ctx, W, H){
+  // v8.0 ELSE 톤 뒷면 (베이지·네이비·노란)
+  const C_BG = "#EFE6D2", C_NAVY = "#1B3A6B";
+  const C_NAVY_60 = "rgba(27,58,107,0.6)", C_NAVY_45 = "rgba(27,58,107,0.45)";
+  const C_NAVY_30 = "rgba(27,58,107,0.3)", C_NAVY_18 = "rgba(27,58,107,0.18)";
+
+  ctx.fillStyle = C_BG; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  roundRectPath(ctx, 16, 16, W-32, H-32, 64); ctx.clip();
+  ctx.fillStyle = C_BG; ctx.fillRect(0, 0, W, H);
+  // 액자 외곽
+  const frm = FRAMES[frameIdx];
+  ctx.lineWidth = 12;
+  if(frm.gradient){
+    const fg2 = ctx.createLinearGradient(0, 0, W, H);
+    frm.gradient.forEach((c, i) => fg2.addColorStop(i/(frm.gradient.length-1), c));
+    ctx.strokeStyle = fg2;
+  } else { ctx.strokeStyle = C_NAVY; }
+  if(frm.glow){ ctx.shadowColor = frm.glow; ctx.shadowBlur = 24; }
+  roundRectPath(ctx, 28, 28, W-56, H-56, 50); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 2;
+  roundRectPath(ctx, 50, 50, W-100, H-100, 40); ctx.stroke();
+  ctx.restore();
+
+  // Header
+  ctx.font = '800 26px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillStyle = C_NAVY; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillText("🎾 위닝샷 · 뒷면", 95, 110);
+  ctx.fillStyle = C_NAVY_60; ctx.textAlign = "right";
+  ctx.font = '600 22px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText(document.getElementById("winDate").textContent, W-95, 116);
+
+  // 본문 섹션들
+  const secX = 95, secW = W - 190;
+  let y = 195;
+  const secGap = 26;
+  function drawSec(title, drawBody, h){
+    ctx.fillStyle = "rgba(255,254,246,0.7)"; // 오프화이트 박스
+    roundRectPath(ctx, secX, y, secW, h, 20); ctx.fill();
+    ctx.strokeStyle = C_NAVY_18; ctx.lineWidth = 2;
+    roundRectPath(ctx, secX, y, secW, h, 20); ctx.stroke();
+    ctx.fillStyle = C_NAVY_60; ctx.font = '800 18px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText(title, secX+28, y+22);
+    drawBody(secX+28, y+58, secW-56);
+    y += h + secGap;
+  }
+  // 1) 레어도
+  drawSec("🏆 레어도", (x, by, w)=>{
+    const tierId = document.getElementById("winRarityBadge").dataset.tier || "sprout";
+    const tier = RARITY_TIERS.find(t=>t.id===tierId) || RARITY_TIERS[0];
+    const score = document.getElementById("winBackRarityScore").textContent;
+    drawPillRight(ctx, x+200, by, `${tier.emoji} ${tier.name}`, tier.badgeBg, tier.badgeFg, 22);
+    ctx.fillStyle = C_NAVY; ctx.font='800 22px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText(`${score}/100점`, x+220, by+18);
+    ctx.fillStyle = C_NAVY_60; ctx.font='600 18px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.fillText(`동호인 ${tier.dist}`, x+390, by+18);
+    ctx.fillStyle = C_NAVY; ctx.font='600 20px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textBaseline="top";
+    ctx.fillText(tier.blurb, x, by+60);
+  }, 140);
+  // 2) 매칭 근거
+  drawSec("🎯 매칭 근거", (x, by, w)=>{
+    const player = document.getElementById("winBackMatchPlayer").textContent;
+    const basis = document.getElementById("winBackMatchBasis").textContent;
+    ctx.fillStyle = C_NAVY; ctx.font='800 26px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign="left"; ctx.textBaseline="top";
+    ctx.fillText(player, x, by);
+    ctx.fillStyle = C_NAVY_60; ctx.font='500 19px "Pretendard Variable", Pretendard, sans-serif';
+    wrapText(ctx, basis, x, by+44, w, 26);
+  }, 160);
+  // 3) 내 입력
+  drawSec("📋 내 입력", (x, by, w)=>{
+    const modeLabel = {forehand:"포핸드", backhand:"백핸드", volley:"발리", serve:"서브"}[S.stroke] || S.stroke;
+    let spinLabel;
+    if(S.stroke==="serve"){
+      spinLabel = {topspin:"톱스핀", flat:"플랫", slice:"슬라이스", kick:"킥", twist:"트위스트"}[S.serveType||"flat"] || "플랫";
+    } else {
+      const om = R.d.omega || 0;
+      spinLabel = om > 80 ? "톱스핀" : om < -80 ? "슬라이스" : "플랫";
+    }
+    const handLabel = S.hand==="left"?"왼손":"오른손";
+    let courtLabelTxt;
+    if(S.stroke==="volley") courtLabelTxt = "네트 앞 4.5m (발리)";
+    else if(S.stroke==="serve") courtLabelTxt = "베이스라인 (서브)";
+    else courtLabelTxt = courtFullLabel(normalizeCourtX(S.courtX), normalizeCourtY(S.courtY), S.hand);
+    ctx.fillStyle = "#D5621A"; ctx.font='800 21px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign="left"; ctx.textBaseline="top";
+    ctx.fillText(`📍 ${courtLabelTxt}`, x, by);
+    ctx.fillStyle = C_NAVY; ctx.font='800 21px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.fillText(`${modeLabel} · ${spinLabel} · ${handLabel}`, x, by+32);
+    ctx.fillStyle = C_NAVY_60; ctx.font='500 18px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.fillText(`라켓 ${S.head}sq · ${S.pattern} · ${S.tension}lbs`, x, by+62);
+  }, 160);
+  // 4) 어떻게 계산됐어?
+  drawSec("🤔 어떻게 계산됐어?", (x, by, w)=>{
+    ctx.fillStyle = C_NAVY_60; ctx.font='500 18px "Pretendard Variable", Pretendard, sans-serif';
+    ctx.textAlign="left"; ctx.textBaseline="top";
+    wrapText(ctx, "rpm·속도·마진은 입력값 + 간이 물리식(공기저항+마그누스) 추정값. 선수 매칭은 ATP·TWU·Hawk-Eye 공개 데이터와 비교 — 실측 평가 아님.", x, by, w, 25);
+  }, 140);
+  // Watermark
+  ctx.fillStyle = C_NAVY_45; ctx.font='600 18px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.textAlign="center"; ctx.fillText("🎾 타점 시뮬레이터 · 추정값", W/2, H-90);
+  ctx.fillStyle = C_NAVY_30; ctx.font='400 14px "Pretendard Variable", Pretendard, sans-serif';
+  ctx.fillText("* 샷 1개 매칭 — 경기력 평가 아님", W/2, H-62);
+}
+// 텍스트 줄바꿈 헬퍼
+function wrapText(ctx, text, x, y, maxW, lineH){
+  // 한국어는 공백 외 글자 단위로도 끊어야 함 — 폭 기준
+  const chars = [...text];
+  let line="", cy=y;
+  for(let i=0; i<chars.length; i++){
+    const test = line + chars[i];
+    if(ctx.measureText(test).width > maxW && line){
+      ctx.fillText(line, x, cy);
+      line = chars[i];
+      cy += lineH;
+    } else {
+      line = test;
+    }
+  }
+  if(line) ctx.fillText(line, x, cy);
+}
+async function downloadWinCard(){
+  showToast("📸 위닝샷 만드는 중…");
+  try{ await document.fonts.ready; }catch(e){}
+  const W=1080, H=1350; // v8: 인스타 4:5 친화
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+  const ctx=cv.getContext("2d");
+  drawWinnerCardCanvas(ctx, W, H);
+  cv.toBlob(blob=>{
+    if(!blob){ showToast("⚠️ 이미지 변환 실패"); return; }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=`winning-shot-${Date.now()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("📸 PNG 저장됨! 카톡·인스타 공유 준비 완료.");
+  }, "image/png");
+}
+document.getElementById("winDownloadBtn").addEventListener("click", downloadWinCard);
+// v8: 양면 PNG (앞 1080×1350 + 뒤 1080×1350 세로 스택 1080×2700)
+async function downloadWinCardBoth(){
+  showToast("📸 양면 만드는 중…");
+  try{ await document.fonts.ready; }catch(e){}
+  const W=1080, H=1350;
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H*2;
+  const ctx=cv.getContext("2d");
+  // 앞면
+  drawWinnerCardCanvas(ctx, W, H);
+  // 뒷면 — translate
+  ctx.save(); ctx.translate(0, H); drawWinnerBackCanvas(ctx, W, H); ctx.restore();
+  cv.toBlob(blob=>{
+    if(!blob){ showToast("⚠️ 이미지 변환 실패"); return; }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=`winning-shot-both-${Date.now()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("📸 양면 PNG 저장됨! 앞=시각화 / 뒤=매칭근거+등급");
+  }, "image/png");
+}
+document.getElementById("winDownloadBothBtn").addEventListener("click", downloadWinCardBoth);
+window.addEventListener("resize",()=>{ if(R.sim) render(); });
+if(location.hash.length>2) applyState(location.hash.slice(1));
+syncStrokeUI(); compute();
+// v7.20: 미니코트 초기 렌더 (DOM mount + 폰트 로드 후 확실히)
+requestAnimationFrame(()=>{ try{ drawMiniCourt(); }catch(e){} });
+// 첫 진입 모달 — 1회만
+try{
+  if(!localStorage.getItem("tts_welcomed")){
+    document.getElementById("welcomeModal").style.display="flex";
+  }
+}catch(e){}
+document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",function(){
+  const mode=this.dataset.mode;
+  if(mode==="full"){
+    document.body.classList.remove("easy");
+    const eb=document.getElementById("easyBtn");
+    eb.classList.remove("on"); eb.textContent="🧪 쉽게 보기";
+  }
+  document.getElementById("welcomeModal").style.display="none";
+  try{ localStorage.setItem("tts_welcomed","1"); }catch(e){}
+  if(R.sim) render();
+}));
+</script>
+</body>
+</html>
