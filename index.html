@@ -270,6 +270,12 @@
   .seqDots span{width:17px; height:17px; border-radius:50%; display:inline-block; border:1.5px solid rgba(27,58,107,.25);}
   #patternBox{margin-top:9px; padding:9px 11px; border-radius:10px; background:rgba(27,58,107,.06);
     font-size:12.5px; line-height:1.55; display:none;}
+  /* v11 서브 실험실 — 드래그 패드 퇴역 (서브 모드에서 스윙패드·리드아웃·컨트롤그리드 숨김) */
+  body.svlab .ballbox, body.svlab .readout, body.svlab .ctrlGrid{display:none !important;}
+  body.svlab #serveLab{display:block !important;}
+  #serveLab .ctrlRow{display:flex; align-items:center; gap:8px; margin-bottom:7px;}
+  #serveLab .ctrlRowLabel{flex:none; width:74px; font-size:11.5px; font-weight:700; color:var(--sub);}
+  #serveLab .seg{flex:1;}
   /* v10.1 원인 픽토그램 아코디언 (선화 4컷 인과 사슬) */
   .dCauseRow{padding:2px 0;}
   .mechToggle{display:inline-block; margin-left:6px; padding:2px 9px; font-size:11px; font-weight:800;
@@ -360,6 +366,21 @@
         <button data-v="volley">발리</button>
         <button data-v="serve">서브</button>
       </div>
+    </div>
+    <!-- v11 서브 실험실 — 원탭 파라미터 (드래그 패드 퇴역) -->
+    <div id="serveLab" style="display:none; margin-bottom:10px; padding:11px 12px; background:rgba(255,210,63,.07); border:1px solid rgba(255,210,63,.3); border-radius:10px;">
+      <div style="font-size:12.5px; font-weight:800; margin-bottom:8px;">🔬 서브 실험실 <span style="font-weight:400; color:var(--sub); font-size:10.5px;">버튼만 눌러 궤적과 안전 창을 실험하세요</span></div>
+      <div id="labExampleBadge" style="display:none; margin-bottom:8px; padding:7px 10px; background:rgba(94,204,255,.12); border:1.5px solid rgba(94,204,255,.5); border-radius:8px; font-size:11.5px; line-height:1.5;">🔍 <b>예시 재현</b> — 방금 진단 패턴을 재현한 예시예요. <b>실측 아님</b> · 버튼을 바꾸면 내 실험이 됩니다</div>
+      <div class="ctrlRow"><span class="ctrlRowLabel">종류</span>
+        <div class="seg sm" id="labType"><button data-v="flat" class="on">🎯 플랫</button><button data-v="slice">↶ 슬라이스</button><button data-v="kick">↗ 킥</button></div></div>
+      <div class="ctrlRow"><span class="ctrlRowLabel">세기</span>
+        <div class="seg sm" id="labPower"><button data-v="low">연습 스윙</button><button data-v="mid" class="on">보통</button><button data-v="high">풀스윙</button></div></div>
+      <div class="ctrlRow"><span class="ctrlRowLabel">타점 높이</span>
+        <div class="seg sm" id="labToss"><button data-v="low">낮음</button><button data-v="mid" class="on">보통</button><button data-v="high">높음</button></div></div>
+      <div class="ctrlRow"><span class="ctrlRowLabel">네트 위 겨냥</span>
+        <div class="seg sm" id="labAim"><button data-v="low">낮게</button><button data-v="mid" class="on">중간</button><button data-v="high">높게</button></div></div>
+      <div style="font-size:10.5px; color:var(--sub); line-height:1.55; margin-top:3px;">타점 높이 = 팔꿈치 다 펴기·토스 타이밍 / 네트 위 겨냥 = <b>안전 창</b>(공이 인 될 수 있는 네트 위 공간)</div>
+      <div id="labReadout" style="margin-top:9px; font-size:13.5px;"></div>
     </div>
     <!-- v7.21: 풀코트 미니코트 — 본인 위치(노란) + 목표 위치(빨간 별) 모두 찍기 -->
     <div id="courtPosRow" style="margin-bottom:10px; padding:9px 11px; background:rgba(127,209,79,.06); border:1px solid rgba(127,209,79,.30); border-radius:9px;">
@@ -956,6 +977,18 @@ function derive(){
                  late: {a:-1.5,o:0.82, s:0.94}}[S.contactPos];
   omega *= cpMul.o; angle += cpMul.a; speed *= cpMul.s;
   omega = clamp(omega, -260, 420);
+  // v11 서브 실험실: 서브는 스윙 패드 대신 원탭 파라미터가 직접 결정 (드래그 패드 퇴역)
+  if(isServe){
+    const svt = S.serveType||"flat";
+    // 스핀은 종류가 결정 (rpm ≈ ω×9.55 — 플랫 ~400 / 슬라이스 ~1,300 / 킥 ~2,300)
+    omega = {flat:42, slice:135, kick:240}[svt];
+    // 세기×종류 — 동호인 현실 스케일 (보통 플랫 ≈133km/h). 스핀 서브는 에너지 일부가 회전으로
+    speed = ({low:{flat:30,slice:28,kick:26}, mid:{flat:37,slice:34,kick:31}, high:{flat:44,slice:40,kick:36}})[S.power][svt] * headMult * tensionMult;
+    // 발사각 = 종류 기준각 + 네트 위 겨냥(안전 창) — 81조합 스윕 캘리브레이션 (v11):
+    // 보통/보통/중간 = 인(여유 ~38cm) · 풀스윙 플랫은 중간 겨냥도 롱(창 없음) · 킥은 높게 겨냥해도 인(창 넓음) · 타점↑=전 구간 개선
+    const aimAdj = {low:-2.2, mid:0, high:2.2}[S.svAim||"mid"];
+    angle = ({flat:-3.1, slice:-1.3, kick:1.1})[svt] + aimAdj;
+  }
   // v7.21: aim 칩 대신 targetY를 lateral 보정에 사용 (연속값). 기존 S.aim는 폴백
   const targetYn = normalizeTargetY(S.targetY);
   const aimLat = (typeof S.aim === "string" && !isFinite(targetYn))
@@ -996,9 +1029,8 @@ function updateServeHint(){
     slice:"<b>↶ 슬라이스</b><br>· <b>어디</b>: 공의 옆면 "+(lefty?"9~10시":"2~3시")+" (오른손 기준 3시 쪽)<br>· <b>라켓 동작</b>: 옆면을 <b>수평으로 깎아내듯</b> brush — 스윙이 올라가며 맞아 상향이 약간 섞일 뿐, 감각은 '옆을 깎기'<br>· <b>결과</b>: 옆 회전, 받는 사람 "+(lefty?"오른쪽":"왼쪽")+"으로 휨",
     kick:"<b>↗ 킥서브</b><br>· <b>어디</b>: 공의 아래 "+(lefty?"오른쪽":"왼쪽")+"<br>· <b>라켓 동작</b>: 아래 → 위로 강하게 긁어 올림<br>· <b>결과</b>: 위·옆 회전, 바운드 후 점프"
   };
-  const sw=S.swing, badSwing = sw.start.y < sw.end.y;
+  // v11: 서브 스윙 패드 퇴역 — badSwing 경고 불필요
   let html = hints[S.serveType||"flat"];
-  if(badSwing) html += '<br><span style="color:#ff9d3c">⚠️ 지금 swing이 <b>위→아래</b>예요. 실제 서브는 <b>아래→위로 brush</b>해야 자연스러워요. <b>시작(초록)을 끝(빨강)보다 아래에</b> 놓으세요.</span>';
   sh.innerHTML = html;
   sh.style.display="block";
 }
@@ -1765,6 +1797,9 @@ function syncSeg(id,val){ const el=document.getElementById(id); if(!el||!el.chil
 function syncStrokeUI(){
   const serve=S.stroke==="serve";
   const volley=S.stroke==="volley";
+  // v11 서브 실험실 표시 토글
+  document.body.classList.toggle("svlab", serve);
+  if(serve && typeof window.syncServeLab==="function") window.syncServeLab();
   document.querySelectorAll(".incRow").forEach(r=>r.classList.toggle("hide",serve));
   document.querySelectorAll(".serveRow").forEach(r=>r.classList.toggle("hide",!serve));
   document.querySelectorAll(".groundRow").forEach(r=>r.classList.toggle("hide",serve));
@@ -1960,7 +1995,7 @@ document.getElementById("failPresets").addEventListener("click",handlePreset);
 
 // share / URL state
 function encodeState(){
-  const o={st:S.stroke,p:S.power,f:S.face,a:S.aim,is:S.inSpeed,isp:S.inSpin,ih:S.inHeight,to:S.toss,
+  const o={st:S.stroke,p:S.power,f:S.face,a:S.aim,is:S.inSpeed,isp:S.inSpin,ih:S.inHeight,to:S.toss,sa:S.svAim,
     hd:S.head,pt:S.pattern,tn:S.tension,cx:S.courtX, cy:S.courtY,
     tx:S.targetX, ty:S.targetY, /* v7.18~v7.21 */
     sw:[S.swing.start.x|0,S.swing.start.y|0,S.swing.end.x|0,S.swing.end.y|0]};
@@ -1968,7 +2003,7 @@ function encodeState(){
 }
 function applyState(str){
   try{ const o=JSON.parse(decodeURIComponent(atob(str)));
-    S.stroke=o.st; S.power=o.p; S.face=o.f; S.aim=o.a; S.inSpeed=o.is; S.inSpin=o.isp; S.inHeight=o.ih; S.toss=o.to;
+    S.stroke=o.st; S.power=o.p; S.face=o.f; S.aim=o.a; S.inSpeed=o.is; S.inSpin=o.isp; S.inHeight=o.ih; S.toss=o.to; S.svAim=o.sa||"mid";
     S.head=o.hd; S.pattern=o.pt; S.tension=o.tn;
     if(o.cx !== undefined) S.courtX = normalizeCourtX(o.cx);
     if(o.cy !== undefined) S.courtY = normalizeCourtY(o.cy);
@@ -4008,7 +4043,20 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     card.innerHTML = html; card.style.display = "block";
     card.scrollIntoView({behavior:"smooth", block:"nearest"});
     const sb = $("dSimBtn");
-    if(sb) sb.addEventListener("click", ()=>{ switchTab(false); showToast("🔬 토스·타점을 바꿔가며 궤적이 어떻게 변하는지 직접 실험해보세요"); });
+    if(sb) sb.addEventListener("click", ()=>{
+      // v11: 결과를 재현하는 예시 프리셋 세팅 (패널 P0: '실측 아님' 배지는 applyLabPreset이 표시)
+      const PRESETS = {
+        net:  {toss:"low",  aim:"low"},
+        long: {type:"flat", power:"high", aim:"high"},
+        weak: {power:"low", toss:"low"},
+        wideL:{}, wideR:{}
+      };
+      const p = Object.assign({}, PRESETS[r]||{});
+      if(!p.type) p.type = serveType; // 진단 탭에서 고른 서브 종류 이어받기
+      switchTab(false);
+      setTimeout(()=>{ if(window.applyLabPreset) window.applyLabPreset(p); }, 120);
+      showToast("🔬 방금 결과를 재현한 <b>예시</b> 설정이에요 — 버튼을 바꿔가며 탈출법을 찾아보세요");
+    });
     const cb = $("dCardBtn");
     if(cb) cb.addEventListener("click", ()=>{ switchTab(false); setTimeout(()=>$("openWinnerBtn").click(), 350); });
     $("dCloseBtn").addEventListener("click", ()=>{ card.style.display="none"; });
@@ -4101,6 +4149,67 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
   if(serveBtn && !serveBtn.classList.contains("on")) serveBtn.click();
   switchTab(true);
   renderSess();
+})();
+
+// ═══ v11.0 서브 실험실 — 드래그 패드 퇴역, 원탭 파라미터 (140명 패널 4.11→6.67 승인) ═══
+(function(){
+  const $ = id => document.getElementById(id);
+  if(S.svAim === undefined) S.svAim = "mid";
+  const SEGS = [
+    {id:"labType",  get:()=>S.serveType||"flat", set:v=>{S.serveType=v;}},
+    {id:"labPower", get:()=>S.power,             set:v=>{S.power=v;}},
+    {id:"labToss",  get:()=>S.toss,              set:v=>{S.toss=v;}},
+    {id:"labAim",   get:()=>S.svAim,             set:v=>{S.svAim=v;}}
+  ];
+  window.syncServeLab = function(){
+    SEGS.forEach(sg=>{
+      const el=$(sg.id); if(!el) return;
+      el.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.v===sg.get()));
+    });
+  };
+  SEGS.forEach(sg=>{
+    const el=$(sg.id); if(!el) return;
+    el.addEventListener("click", e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      sg.set(b.dataset.v);
+      $("labExampleBadge").style.display="none"; // 사용자가 만지면 예시→내 실험
+      window.syncServeLab();
+      if(typeof updateServeHint==="function") updateServeHint();
+      compute();
+    });
+  });
+  // 진단 탭 딥링크: 예시 재현 프리셋 + '실측 아님' 배지 (패널 P0)
+  window.applyLabPreset = function(p){
+    if(p.type)  S.serveType=p.type;
+    if(p.power) S.power=p.power;
+    if(p.toss)  S.toss=p.toss;
+    if(p.aim)   S.svAim=p.aim;
+    $("labExampleBadge").style.display="block";
+    window.syncServeLab();
+    if(typeof updateServeHint==="function") updateServeHint();
+    compute();
+  };
+  // 네트 위 통과 리드아웃 — render 후크
+  const _render = render;
+  render = function(){
+    _render();
+    const ro=$("labReadout"); if(!ro) return;
+    if(S.stroke!=="serve"){ ro.textContent=""; return; }
+    if(R.sim && R.sim.zAtNet!=null){
+      const cm=Math.round((R.sim.zAtNet-NET_H)*100);
+      if(cm>=0){
+        const col = cm<15 ? "#B03A2E" : (cm<35 ? "#8F6E14" : "#3E7A26");
+        const verdict = R.status==="in" ? "✅ 인" : (R.absLand>SVC_ABS ? "🚀 길다 (아웃)" : "⚠️ 인 아님");
+        ro.innerHTML = `네트 위 <b style="color:${col}">${cm}cm</b>로 통과 · ${verdict} · 낙하 ${R.absLand.toFixed(1)}m`;
+      } else {
+        ro.innerHTML = `🥅 <b style="color:#B03A2E">네트에 걸림</b> — 네트 꼭대기에서 ${Math.abs(cm)}cm 부족`;
+      }
+    } else if(R.sim){
+      ro.innerHTML = `🥅 <b style="color:#B03A2E">네트까지 못 감</b> — 세기나 겨냥을 올려보세요`;
+    } else ro.textContent="";
+  };
+  window.syncServeLab();
+  if(S.stroke==="serve") compute();
 })();
 </script>
 </body>
