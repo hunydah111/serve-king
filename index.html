@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>테니스 타점 시뮬레이터 — 내 위닝샷, 누구급?</title>
-<meta name="description" content="라켓 타점·스윙으로 공 궤적 시뮬. 내 샷이 페더러·나달·알카라스 같은 누구와 비슷한지 위닝샷 카드로 만들어 친구한테 공유.">
+<title>내일은 서브왕 — 서브 셀프 코치</title>
+<meta name="description" content="코트에서 혼자 서브 연습할 때 켜두는 셀프 코치. 서브 결과를 원탭으로 기록하면 예상 원인과 다음 서브 큐 하나를 짚어드려요.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="🎾 내 위닝샷, 누구급?">
-<meta property="og:description" content="라켓 타점·스윙 시뮬레이터 + 위닝샷 카드 메이커. 친구한테 자랑하기.">
+<meta property="og:title" content="🎾 내일은 서브왕 — 서브 셀프 코치">
+<meta property="og:description" content="서브 쳤는데 네트에 박혔다? 원탭 기록 → 예상 원인 + 다음 서브에서 고칠 것 하나. 혼자 하는 서브 연습의 동반자.">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="🎾 내 위닝샷, 누구급?">
-<meta name="twitter:description" content="라켓 타점·스윙 시뮬레이터 + 위닝샷 카드 메이커">
+<meta name="twitter:title" content="🎾 내일은 서브왕 — 서브 셀프 코치">
+<meta name="twitter:description" content="서브 결과 원탭 기록 → 예상 원인 + 다음 서브 큐 하나">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%BE%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -225,18 +225,105 @@
   body.quiz.revealed #abBar, body.quiz.revealed #side, body.quiz.revealed #top,
   body.quiz.revealed #sideCap { filter:none; opacity:1; pointer-events:auto; }
   body:not(.quiz) #quizPanel{ display:none; }
+  /* ═══ v10 내일은 서브왕 — 진단(코치) 뷰 ═══ */
+  #tabBar{display:flex; gap:6px; margin-bottom:10px;}
+  #tabBar button{flex:1; padding:11px 8px; font-size:14px; font-weight:800; border-radius:11px;
+    border:2px solid var(--line); background:var(--card2); color:var(--sub); cursor:pointer;}
+  #tabBar button.on{background:var(--txt); color:#FFFEF6; border-color:var(--txt);}
+  body.coach .wrap > :not(.topbar):not(#tabBar):not(#coachView){display:none !important;}
+  body:not(.coach) #coachView{display:none !important;}
+  /* 랠리 모드 숨김 (코드 보존, UI만) — v10 서브 특화 */
+  #stroke button:not([data-v="serve"]){display:none !important;}
+  #coachView .cvCard{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:13px; margin-bottom:10px;}
+  .resGrid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .resBtn{min-height:64px; border-radius:13px; border:2.5px solid; font-weight:800; font-size:16.5px;
+    cursor:pointer; line-height:1.25; padding:8px 6px; background:var(--card);}
+  .resBtn small{display:block; font-size:10.5px; font-weight:600; opacity:.75; margin-top:2px;}
+  .resBtn:active{transform:scale(.97);}
+  .resBtn.rNet{border-color:#E05A4E; color:#B03A2E;}
+  .resBtn.rLong{border-color:#D5621A; color:#A34A10;}
+  .resBtn.rWide{border-color:#C79A2A; color:#8F6E14;}
+  .resBtn.rWeak{border-color:#7E8FB0; color:#4A5E85;}
+  .resBtn.rGood{border-color:#5CA83C; color:#3E7A26; background:rgba(127,209,79,.10);}
+  .resBtn.rToss{grid-column:1 / -1; min-height:44px; border-style:dashed; border-color:var(--line); color:var(--sub); font-size:13.5px;}
+  .nthChip{display:inline-block; padding:4px 12px; border-radius:999px; font-size:12.5px; font-weight:800;
+    background:rgba(255,210,63,.18); border:1.5px solid #C79A2A; color:#8F6E14;}
+  #diagCard{display:none; border:2.5px solid var(--txt); border-radius:13px; background:var(--card); padding:14px; margin-bottom:10px;}
+  #diagCard .dTitle{font-size:17px; font-weight:800; margin-bottom:8px;}
+  #diagCard .dCause{font-size:13.5px; line-height:1.55; color:var(--txt); padding:2px 0 2px 2px;}
+  #diagCard .dCue{margin-top:10px; padding:11px 12px; background:rgba(255,210,63,.16); border:2px solid #C79A2A;
+    border-radius:11px; font-size:15px; font-weight:800; line-height:1.45;}
+  #diagCard .dTrust{margin-top:9px; font-size:11.5px; color:var(--sub); line-height:1.5;}
+  #diagCard .dTrust.strong{color:#B03A2E; font-weight:700;}
+  .dBtns{display:flex; gap:6px; margin-top:11px;}
+  .dBtns button{flex:1; padding:10px 8px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--card2); color:var(--txt); font-size:12.5px; font-weight:700; cursor:pointer;}
+  .sessBar{display:flex; align-items:center; gap:6px; font-size:12px; margin:4px 0;}
+  .sessBar .bar{flex:1; height:14px; border-radius:7px; background:var(--card2); overflow:hidden; border:1px solid var(--line);}
+  .sessBar .fill{height:100%; border-radius:7px;}
+  .seqDots{display:flex; flex-wrap:wrap; gap:4px; margin-top:7px;}
+  .seqDots span{width:17px; height:17px; border-radius:50%; display:inline-block; border:1.5px solid rgba(27,58,107,.25);}
+  #patternBox{margin-top:9px; padding:9px 11px; border-radius:10px; background:rgba(27,58,107,.06);
+    font-size:12.5px; line-height:1.55; display:none;}
 </style>
 </head>
 <body class="easy">
 <div class="wrap">
   <div class="topbar" style="align-items:center;">
-    <h1>🎾 테니스 타점 시뮬레이터</h1>
+    <div>
+      <h1>🎾 내일은 서브왕</h1>
+      <div class="tag">서브 셀프 코치 — 결과 기록 → 원인 → 다음 서브 큐 하나</div>
+    </div>
     <div style="display:flex; gap:5px; align-items:center;">
       <button class="easyToggle" id="handBtn" style="font-size:11px; padding:5px 8px;">🤚 오른손</button>
       <button class="easyToggle" id="quizBtn" style="font-size:11px; padding:5px 8px;">🎯 퀴즈</button>
       <button class="easyToggle on" id="easyBtn" style="font-size:11px; padding:5px 8px;">⚙️ 라켓·전체</button>
     </div>
   </div>
+
+  <div id="tabBar">
+    <button id="tabCoach" class="on">🎯 서브 진단</button>
+    <button id="tabSim">🔬 서브 시뮬레이터</button>
+  </div>
+
+  <section id="coachView">
+    <div class="cvCard">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;">
+        <div style="font-size:14.5px; font-weight:800;">방금 친 서브, 어떻게 됐어요?</div>
+        <span class="nthChip" id="nthChip">1st 서브</span>
+      </div>
+      <div class="resGrid">
+        <button class="resBtn rNet"  data-r="net">🥅 네트에 걸림</button>
+        <button class="resBtn rLong" data-r="long">🚀 길게 나감<small>베이스라인 너머</small></button>
+        <button class="resBtn rWide" data-r="wideL">↖ 왼쪽으로 빠짐</button>
+        <button class="resBtn rWide" data-r="wideR">↗ 오른쪽으로 빠짐</button>
+        <button class="resBtn rWeak" data-r="weak">🪶 들어갔지만 얕음<small>서비스라인 근처 · 힘 없음</small></button>
+        <button class="resBtn rGood" data-r="good">✅ 굿! 잘 들어감</button>
+        <button class="resBtn rToss" data-r="toss">✋ 토스 캐치 — 안 치고 다시 (기록 제외)</button>
+      </div>
+      <div style="display:flex; gap:5px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+        <span style="font-size:11.5px; color:var(--sub); font-weight:700;">시도한 서브:</span>
+        <div class="seg sm" id="coachServeType" style="display:inline-flex;">
+          <button data-v="flat" class="on">플랫</button><button data-v="slice">슬라이스</button><button data-v="kick">킥</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="diagCard"></div>
+
+    <div class="cvCard">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:14px; font-weight:800;">📋 이번 세션</div>
+        <button id="sessResetBtn" style="font-size:11px; padding:5px 9px; border-radius:8px; border:1px solid var(--line); background:var(--card2); color:var(--sub); cursor:pointer;">새 세션 시작</button>
+      </div>
+      <div id="sessSummary" style="font-size:12.5px; color:var(--sub); margin-top:6px;">아직 기록이 없어요. 서브 치고 위 버튼 하나만 눌러보세요.</div>
+      <div id="sessBars"></div>
+      <div class="seqDots" id="seqDots"></div>
+      <div id="patternBox"></div>
+    </div>
+
+    <div class="foot" style="margin-top:2px;">카메라 없이 결과만으로 추정하는 <b>일반적인 원인</b>이에요. 같은 결과가 반복될수록 진단이 정확해집니다. 코치 레슨을 대체하지 않아요.</div>
+  </section>
 
   <div class="card mainCard">
     <div class="strokeRow" style="margin-bottom:8px;">
@@ -3419,6 +3506,221 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
   try{ localStorage.setItem("tts_welcomed","1"); }catch(e){}
   if(R.sim) render();
 }));
+
+// ═══════════════════════════════════════════════════════
+// v10.0 내일은 서브왕 — 서브 진단 모듈
+// 결과 원탭 → 가능성 그룹(순위 아님) + 다음 서브 큐 하나 → 세션 패턴
+// ═══════════════════════════════════════════════════════
+(function(){
+  const $ = id => document.getElementById(id);
+
+  // ── 진단 지식 베이스 (코칭 일반론 · 140명 패널 B검증 반영: 순위 아닌 "가능성 그룹")
+  const DIAG = {
+    net: {
+      name:"🥅 네트에 걸림", color:"#B03A2E", group:"toss",
+      causes:[
+        "토스가 낮았거나 몸 <b>뒤쪽</b>으로 흘렀다",
+        "타점이 낮다 — 팔꿈치가 다 펴지기 전에 맞음",
+        "임팩트 타이밍이 늦어 면이 아래를 봤다"
+      ],
+      cue:"토스를 <b>한 뼘 더 높게, 발끝 30cm 앞</b>으로. 그리고 팔이 가장 길어진 최고점에서 치기.",
+      tip:"목표를 '서비스박스'가 아니라 <b>네트 위 1m 통과</b>로 잡으면 저절로 마진이 생겨요.",
+      trust:"결과만으로 추정한 일반적 원인이에요 — 네트류는 토스·타점 계열일 확률이 높은 편."
+    },
+    long: {
+      name:"🚀 길게 나감", color:"#A34A10", group:"face",
+      causes:[
+        "토스가 몸 <b>앞</b>으로 덜 가서 면이 하늘을 봤다",
+        "스핀 없이 플랫으로만 풀파워",
+        "팔로스루 없이 몸으로 밀어쳤다"
+      ],
+      cue:"다음 서브는 <b>스핀 한 스푼</b> — 공 뒤를 아래에서 위로(7시→1시) 쓸어올리는 느낌만.",
+      tip:"세게 칠수록 스핀이 있어야 안에 떨어져요. 프로가 풀스윙해도 들어가는 이유.",
+      trust:"결과만으로 추정한 일반적 원인이에요 — 롱은 면 방향·릴리즈 계열일 확률이 높은 편."
+    },
+    wideL: {
+      name:"↖ 왼쪽으로 빠짐", color:"#8F6E14", group:"lateral",
+      causes:[
+        "토스가 <b>왼쪽</b>으로 흘렀다",
+        "어깨·몸통이 일찍 열렸다",
+        "임팩트에서 면이 왼쪽을 봤다 (프로네이션 과다)"
+      ],
+      cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12시</b>에 떨어지는지 3번 연속 확인.",
+      tip:"(오른손 기준 설명 — 왼손이면 반대로 읽어주세요)",
+      trust:"⚠️ 좌우 방향은 결과만으로 원인 확정이 <b>특히 어려운</b> 유형이에요. 3회 이상 반복되면 폰으로 옆모습 영상을 찍어보는 게 가장 정확합니다."
+    },
+    wideR: {
+      name:"↗ 오른쪽으로 빠짐", color:"#8F6E14", group:"lateral",
+      causes:[
+        "토스가 <b>오른쪽(몸 밖)</b>으로 흘렀다",
+        "몸이 덜 돌아간 채 팔로만 밀었다",
+        "임팩트에서 면이 오른쪽을 봤다 (프로네이션 부족)"
+      ],
+      cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12시</b>에 떨어지는지 3번 연속 확인.",
+      tip:"(오른손 기준 설명 — 왼손이면 반대로 읽어주세요)",
+      trust:"⚠️ 좌우 방향은 결과만으로 원인 확정이 <b>특히 어려운</b> 유형이에요. 3회 이상 반복되면 폰으로 옆모습 영상을 찍어보는 게 가장 정확합니다."
+    },
+    weak: {
+      name:"🪶 들어갔지만 얕음", color:"#4A5E85", group:"toss",
+      causes:[
+        "타점이 낮아 위에서 아래로 <b>눌러</b>쳤다",
+        "무릎·어깨 회전 없이 팔로만 쳤다",
+        "그립을 너무 꽉 쥐어 라켓 스피드가 죽었다"
+      ],
+      cue:"딱 하나: <b>무릎 굽혔다 펴는 반동</b>을 토스와 같이 시작하기.",
+      tip:"얕은 서브도 IN은 IN — 폴트 아닌 게 우선이에요. 깊이는 그 다음.",
+      trust:"'얕음'은 원인이 가장 다양한 유형이라 추정 신뢰도가 낮아요. 반복되면 영상 확인 추천."
+    },
+    good: {
+      name:"✅ 굿 서브!", color:"#3E7A26", group:"good",
+      causes:[],
+      cue:"<b>같은 리듬으로 한 번 더.</b> 몸이 기억하게 3연속에 도전하세요.",
+      tip:"지금 토스 위치·타점 느낌을 한 단어로 붙여두면(예: '높게-앞') 다음에 재현이 쉬워요.",
+      trust:""
+    }
+  };
+  const GROUP_MSG = {
+    toss:   "🥅네트·🪶얕음 계열이 잦아요 → <b>토스 높이·타점</b> 루틴부터 잡는 게 효율적이에요.",
+    face:   "🚀롱 계열이 잦아요 → <b>스핀·면 방향</b> 연습(공 뒤 쓸어올리기)이 우선이에요.",
+    lateral:"↖↗좌우 빠짐이 잦아요 → <b>토스 좌우 위치</b>부터 고정하세요. 영상 촬영도 추천."
+  };
+
+  // ── 세션 로그 (localStorage)
+  let LOG = [];
+  try{ LOG = JSON.parse(localStorage.getItem("sk_log")||"[]"); }catch(e){}
+  let sessStart = 0;
+  try{ sessStart = +(localStorage.getItem("sk_sess_start")||0); }catch(e){}
+  const save = () => { try{ localStorage.setItem("sk_log", JSON.stringify(LOG.slice(-500))); }catch(e){} };
+  const sess = () => LOG.filter(e => e.t >= sessStart);
+
+  // ── 서브 종류 칩 (마지막 선택 기억)
+  let serveType = "flat";
+  try{ serveType = localStorage.getItem("sk_type")||"flat"; }catch(e){}
+  const typeSeg = $("coachServeType");
+  const syncType = () => typeSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.v===serveType));
+  typeSeg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    serveType = b.dataset.v; syncType();
+    try{ localStorage.setItem("sk_type", serveType); }catch(err){}
+  });
+  syncType();
+
+  // ── 1st/2nd 자동 추정: 폴트 다음은 2nd, 그 외엔 1st (패널 P1-9)
+  const isFault = r => (r==="net"||r==="long"||r==="wideL"||r==="wideR");
+  const nth = () => {
+    const s = sess().filter(e=>e.r!=="toss");
+    return (s.length && isFault(s[s.length-1].r) && s[s.length-1].nth===1) ? 2 : 1;
+  };
+  const syncNth = () => {
+    const n = nth();
+    $("nthChip").textContent = n===2 ? "지금은 2nd 서브" : "1st 서브";
+    $("nthChip").style.background = n===2 ? "rgba(255,107,94,.15)" : "rgba(255,210,63,.18)";
+  };
+
+  // ── 진단 카드 렌더
+  function renderDiag(r, wasDF){
+    const d = DIAG[r]; if(!d){ $("diagCard").style.display="none"; return; }
+    let html = `<div class="dTitle" style="color:${d.color}">${d.name}${wasDF ? ' <span style="font-size:12px; color:#B03A2E;">(더블폴트)</span>' : ''}</div>`;
+    if(d.causes.length){
+      html += `<div style="font-size:11.5px; font-weight:700; color:var(--sub); margin-bottom:4px;">자주 나오는 원인 — 순위 아님, 본인 느낌과 맞춰보세요</div>`;
+      html += d.causes.map(c=>`<div class="dCause">· ${c}</div>`).join("");
+    }
+    html += `<div class="dCue">👉 다음 서브에선 이것 하나만<br>${d.cue}</div>`;
+    if(d.tip) html += `<div class="dTrust">${d.tip}</div>`;
+    if(d.trust) html += `<div class="dTrust${d.group==="lateral"?" strong":""}">${d.trust}</div>`;
+    html += `<div class="dBtns">`;
+    if(r==="good") html += `<button id="dCardBtn">📸 이 서브, 카드로 남기기</button>`;
+    else html += `<button id="dSimBtn">🔬 왜 그런지 시뮬로 보기</button>`;
+    html += `<button id="dCloseBtn">닫기</button></div>`;
+    const card = $("diagCard");
+    card.innerHTML = html; card.style.display = "block";
+    card.scrollIntoView({behavior:"smooth", block:"nearest"});
+    const sb = $("dSimBtn");
+    if(sb) sb.addEventListener("click", ()=>{ switchTab(false); showToast("🔬 토스·타점을 바꿔가며 궤적이 어떻게 변하는지 직접 실험해보세요"); });
+    const cb = $("dCardBtn");
+    if(cb) cb.addEventListener("click", ()=>{ switchTab(false); setTimeout(()=>$("openWinnerBtn").click(), 350); });
+    $("dCloseBtn").addEventListener("click", ()=>{ card.style.display="none"; });
+  }
+
+  // ── 세션 요약 렌더
+  const RES_COLOR = {net:"#E05A4E", long:"#D5621A", wideL:"#C79A2A", wideR:"#C79A2A", weak:"#7E8FB0", good:"#5CA83C"};
+  function renderSess(){
+    const s = sess().filter(e=>e.r!=="toss");
+    const tosses = sess().length - s.length;
+    if(!s.length){
+      $("sessSummary").textContent = "아직 기록이 없어요. 서브 치고 위 버튼 하나만 눌러보세요.";
+      $("sessBars").innerHTML = ""; $("seqDots").innerHTML = ""; $("patternBox").style.display = "none";
+      syncNth(); return;
+    }
+    const inCnt = s.filter(e=>e.r==="good"||e.r==="weak").length;
+    const df = s.filter((e,i)=> e.nth===2 && isFault(e.r)).length;
+    $("sessSummary").innerHTML = `총 <b>${s.length}구</b> · 성공 <b>${inCnt}</b> (${Math.round(inCnt/s.length*100)}%)`
+      + (df ? ` · 더블폴트 ${df}` : "") + (tosses ? ` · 토스캐치 ${tosses}` : "");
+    // 결과별 미니바
+    const counts = {};
+    s.forEach(e=>counts[e.r]=(counts[e.r]||0)+1);
+    $("sessBars").innerHTML = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([r,c])=>{
+      const pct = Math.round(c/s.length*100);
+      return `<div class="sessBar"><span style="width:118px; flex:none;">${DIAG[r].name}</span>
+        <div class="bar"><div class="fill" style="width:${pct}%; background:${RES_COLOR[r]};"></div></div>
+        <span style="width:38px; text-align:right; flex:none;">${c}구</span></div>`;
+    }).join("");
+    // 최근 시퀀스 점
+    $("seqDots").innerHTML = s.slice(-20).map(e=>`<span style="background:${RES_COLOR[e.r]}" title="${DIAG[e.r].name}"></span>`).join("");
+    // 패턴 진단 (최근 10구 · 5구 이상일 때)
+    const recent = s.slice(-10);
+    const gc = {};
+    recent.forEach(e=>{ const g=DIAG[e.r].group; if(g!=="good") gc[g]=(gc[g]||0)+1; });
+    const top = Object.entries(gc).sort((a,b)=>b[1]-a[1])[0];
+    const pb = $("patternBox");
+    if(recent.length>=5 && top && top[1] >= Math.max(3, recent.length*0.4)){
+      pb.innerHTML = `<b>📊 패턴:</b> 최근 ${recent.length}구 중 ${top[1]}구 — ` + GROUP_MSG[top[0]];
+      pb.style.display = "block";
+    } else pb.style.display = "none";
+    syncNth();
+  }
+
+  // ── 결과 버튼
+  document.querySelector("#coachView .resGrid").addEventListener("click", e => {
+    const b = e.target.closest(".resBtn"); if(!b) return;
+    const r = b.dataset.r;
+    if(r === "toss"){
+      LOG.push({t:Date.now(), r:"toss", s:serveType, nth:0});
+      save(); renderSess();
+      showToast("✋ 기록에서 뺐어요. 토스 캐치는 좋은 습관!");
+      return;
+    }
+    const n = nth();
+    const wasDF = (n===2 && isFault(r));
+    LOG.push({t:Date.now(), r, s:serveType, nth:n});
+    save(); renderDiag(r, wasDF); renderSess();
+  });
+
+  // ── 세션 리셋
+  $("sessResetBtn").addEventListener("click", ()=>{
+    sessStart = Date.now();
+    try{ localStorage.setItem("sk_sess_start", String(sessStart)); }catch(e){}
+    $("diagCard").style.display="none";
+    renderSess();
+    showToast("🆕 새 세션! 이전 기록은 보관돼요.");
+  });
+
+  // ── 탭 전환
+  function switchTab(coach){
+    document.body.classList.toggle("coach", coach);
+    $("tabCoach").classList.toggle("on", coach);
+    $("tabSim").classList.toggle("on", !coach);
+    if(!coach && R.sim) render();
+  }
+  $("tabCoach").addEventListener("click", ()=>switchTab(true));
+  $("tabSim").addEventListener("click", ()=>switchTab(false));
+
+  // ── 초기화: 시뮬은 서브 모드로 고정 (랠리 모드는 v10에서 숨김 — 코드 보존)
+  const serveBtn = document.querySelector('#stroke button[data-v="serve"]');
+  if(serveBtn && !serveBtn.classList.contains("on")) serveBtn.click();
+  switchTab(true);
+  renderSess();
+})();
 </script>
 </body>
 </html>
