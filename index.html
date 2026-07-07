@@ -430,7 +430,7 @@
 
   <!-- v12 내 서브 — 레시피(1st/2nd) + 부적 보관함 -->
   <section id="recipeView">
-    <div style="font-size:11.5px; color:var(--sub); margin-bottom:8px; padding:0 2px;">🧿 여기는 <b>극강의 그 순간·잘 되는 내 설정</b>만 — 매일의 연습 기록은 📓 일지로</div>
+    <div style="font-size:11.5px; color:var(--sub); margin-bottom:8px; padding:0 2px;">🧿 <b>서브 잘 맞는 날 — 기록용.</b> 매일의 연습 기록은 📓 일지에</div>
     <div class="cvCard">
       <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px;">
         <div style="font-size:14.5px; font-weight:800;">1️⃣ 퍼스트 서브 레시피</div>
@@ -475,7 +475,7 @@
       <div id="charmList"></div>
     </div>
 
-    <div class="foot" style="margin-top:2px;">🧿 부적과 레시피는 '정답'이 아니라 <b>그날의 나를 소환하는 기록</b>이에요. 오늘 몸은 다를 수 있어요 — 안 되는 날엔 부적을 탓하지 말고 진단 탭으로.</div>
+    <div class="foot" style="margin-top:2px;">부적·레시피는 정답이 아니라 <b>그날의 기록</b>이에요. 오늘 몸은 다를 수 있어요 — 안 되는 날엔 진단 탭으로.</div>
   </section>
 
   <!-- v12.1 서브 일지 — 날짜별 자유 기록 + 세션 통계 자동 도장 -->
@@ -4366,7 +4366,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     if(cur) Object.assign(cur, {txt, t:Date.now(), n:st.n, inC:st.inC, df:st.df});
     else JOURNAL.push({d:today, txt, t:Date.now(), n:st.n, inC:st.inC, df:st.df});
     saveJr(); renderJournal();
-    showToast("📓 오늘 일지 저장! 내일의 나가 고마워할 기록이에요.");
+    showToast("📓 오늘 일지 저장!");
   });
   $("jrList").addEventListener("click", e=>{
     const b = e.target.closest("button[data-jd]"); if(!b) return;
@@ -4435,7 +4435,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     const best = [...CHARMS].sort((a,b)=>(b.star?1:0)-(a.star?1:0) || b.t-a.t)[0];
     if(best){
       st.style.display = "block";
-      st.textContent = `🧿 ${best.star?"⭐ ":""}${best.txt}` + (best.rate!=null ? ` — 성공률 ${best.rate}%의 그날` : "");
+      st.textContent = `🧿 ${best.star?"⭐ ":""}${best.txt}` + (best.rate!=null ? ` (그날 성공률 ${best.rate}%)` : "");
     } else st.style.display = "none";
   }
   function openCharmInput(){
@@ -4471,7 +4471,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     const sr = sessRate();
     CHARMS.push({t:Date.now(), txt, rate:sr?sr.rate:null, n:sr?sr.n:null, type:serveType, star:false});
     saveCh(); closeCharmInput(); renderCharms();
-    showToast("🧿 부적 저장! 안 되는 날, 이 감각을 소환하세요.");
+    showToast("🧿 부적 저장!");
   });
   $("charmList").addEventListener("click", e=>{
     const b = e.target.closest("button[data-ct]"); if(!b) return;
