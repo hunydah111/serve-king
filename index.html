@@ -265,6 +265,19 @@
   .seqDots span{width:17px; height:17px; border-radius:50%; display:inline-block; border:1.5px solid rgba(27,58,107,.25);}
   #patternBox{margin-top:9px; padding:9px 11px; border-radius:10px; background:rgba(27,58,107,.06);
     font-size:12.5px; line-height:1.55; display:none;}
+  /* v10.1 원인 픽토그램 아코디언 (선화 4컷 인과 사슬) */
+  .dCauseRow{padding:2px 0;}
+  .mechToggle{display:inline-block; margin-left:6px; padding:2px 9px; font-size:11px; font-weight:800;
+    border:1.5px solid var(--line); border-radius:999px; background:var(--card2); color:var(--sub); cursor:pointer;}
+  .mechToggle.open{background:var(--txt); color:#FFFEF6; border-color:var(--txt);}
+  .mechStrip{display:none; margin:8px 0 4px; padding:4px 0 0;}
+  .mechStrip.open{display:block;}
+  .mechStep{display:flex; gap:10px; align-items:center; background:#FFFEF6; border:1.5px solid var(--line);
+    border-radius:11px; padding:7px 10px;}
+  .mechStep svg{flex:none; width:118px; height:92px;}
+  .mechStep .mTitle{font-size:13px; font-weight:800; margin-bottom:3px;}
+  .mechStep .mDesc{font-size:11.5px; color:var(--sub); line-height:1.5;}
+  .mechDown{text-align:center; font-size:13px; color:var(--sub); line-height:1; padding:3px 0;}
 </style>
 </head>
 <body class="easy">
@@ -3565,7 +3578,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       causes:[
         "타점이 낮아 위에서 아래로 <b>눌러</b>쳤다",
         "무릎·어깨 회전 없이 팔로만 쳤다",
-        "그립을 너무 꽉 쥐어 라켓 스피드가 죽었다"
+        {t:"그립을 너무 꽉 쥐어 라켓 스피드가 죽었다", mech:"grip_tight"}
       ],
       cue:"딱 하나: <b>무릎 굽혔다 펴는 반동</b>을 토스와 같이 시작하기.",
       tip:"얕은 서브도 IN은 IN — 폴트 아닌 게 우선이에요. 깊이는 그 다음.",
@@ -3617,13 +3630,112 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     $("nthChip").style.background = n===2 ? "rgba(255,107,94,.15)" : "rgba(255,210,63,.18)";
   };
 
+  // ── v10.1 원인 픽토그램 (선화 4컷 인과 사슬) — 부품 재사용형 SVG
+  // 팔레트: 네이비 선 / 노랑(손·공) / 빨강(문제 표시). viewBox 130×100 통일.
+  const MN = "#1B3A6B", MA = "#FFD23F", MR = "#E05A4E";
+  const art_grip = `
+    <ellipse cx="52" cy="20" rx="15" ry="19" fill="none" stroke="${MN}" stroke-width="2.5"/>
+    <g stroke="${MN}" stroke-width="0.9" opacity="0.3">
+      <line x1="46" y1="6" x2="46" y2="34"/><line x1="52" y1="4" x2="52" y2="36"/><line x1="58" y1="6" x2="58" y2="34"/>
+      <line x1="39" y1="14" x2="65" y2="14"/><line x1="38" y1="20" x2="66" y2="20"/><line x1="39" y1="26" x2="65" y2="26"/>
+    </g>
+    <line x1="47" y1="38" x2="50" y2="46" stroke="${MN}" stroke-width="2.5"/>
+    <line x1="57" y1="38" x2="54" y2="46" stroke="${MN}" stroke-width="2.5"/>
+    <rect x="49" y="46" width="7" height="18" rx="2" fill="none" stroke="${MN}" stroke-width="2"/>
+    <ellipse cx="52" cy="71" rx="13" ry="11" fill="${MA}" stroke="${MN}" stroke-width="2"/>
+    <path d="M41,67 Q52,63 63,67" fill="none" stroke="${MN}" stroke-width="1.2"/>
+    <path d="M40,72 Q52,68 64,72" fill="none" stroke="${MN}" stroke-width="1.2"/>
+    <path d="M42,77 Q52,73 62,77" fill="none" stroke="${MN}" stroke-width="1.2"/>
+    <path d="M42,68 Q37,73 43,79" fill="none" stroke="${MN}" stroke-width="1.6"/>
+    <line x1="42" y1="79" x2="20" y2="92" stroke="${MN}" stroke-width="7" stroke-linecap="round"/>
+    <g stroke="${MR}" stroke-width="2">
+      <line x1="30" y1="57" x2="36" y2="62"/><line x1="74" y1="57" x2="68" y2="62"/>
+      <line x1="28" y1="73" x2="35" y2="73"/><line x1="76" y1="73" x2="69" y2="73"/>
+    </g>
+    <text x="80" y="70" font-size="13" font-weight="800" fill="${MN}">꽉!</text>`;
+  const art_lock = `
+    <g transform="rotate(-6 30 66)"><rect x="6" y="59" width="48" height="15" rx="8" fill="none" stroke="${MN}" stroke-width="2.2"/></g>
+    <ellipse cx="62" cy="62" rx="11" ry="9" fill="${MA}" stroke="${MN}" stroke-width="2"/>
+    <path d="M58,54 Q55,62 58,70" fill="none" stroke="${MN}" stroke-width="1.1"/>
+    <path d="M63,53 Q60,62 63,71" fill="none" stroke="${MN}" stroke-width="1.1"/>
+    <line x1="72" y1="59" x2="94" y2="52" stroke="${MN}" stroke-width="3.5" stroke-linecap="round"/>
+    <g transform="rotate(-15 106 46)">
+      <ellipse cx="106" cy="46" rx="12" ry="15" fill="none" stroke="${MN}" stroke-width="2.2"/>
+      <g stroke="${MN}" stroke-width="0.8" opacity="0.3">
+        <line x1="101" y1="34" x2="101" y2="58"/><line x1="106" y1="32" x2="106" y2="60"/><line x1="111" y1="34" x2="111" y2="58"/>
+        <line x1="96" y1="42" x2="116" y2="42"/><line x1="96" y1="50" x2="116" y2="50"/>
+      </g>
+    </g>
+    <line x1="8" y1="72" x2="120" y2="50" stroke="${MN}" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+    <path d="M56,32 a7,7 0 0 1 14,0" fill="none" stroke="${MN}" stroke-width="2"/>
+    <rect x="52" y="32" width="22" height="15" rx="3" fill="${MR}"/>
+    <path d="M112,60 Q122,74 112,90" fill="none" stroke="${MN}" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+    <g stroke="${MR}" stroke-width="2.5">
+      <line x1="111" y1="67" x2="121" y2="77"/><line x1="121" y1="67" x2="111" y2="77"/>
+    </g>`;
+  const art_slow = `
+    <circle cx="24" cy="80" r="4" fill="none" stroke="${MN}" stroke-width="2"/>
+    <line x1="20" y1="83" x2="6" y2="90" stroke="${MN}" stroke-width="6" stroke-linecap="round"/>
+    <g opacity="0.3">
+      <line x1="27" y1="77" x2="78" y2="38" stroke="${MN}" stroke-width="2.5"/>
+      <ellipse cx="86" cy="31" rx="12" ry="15" fill="none" stroke="${MN}" stroke-width="2.5"/>
+      <path d="M34,58 Q56,42 78,32" fill="none" stroke="${MN}" stroke-width="1.2"/>
+      <path d="M40,68 Q62,52 86,44" fill="none" stroke="${MN}" stroke-width="1.2"/>
+    </g>
+    <text x="98" y="26" font-size="9.5" fill="${MN}" opacity="0.55">정상</text>
+    <line x1="24" y1="80" x2="52" y2="52" stroke="${MN}" stroke-width="2.8"/>
+    <ellipse cx="59" cy="44" rx="11" ry="14" fill="none" stroke="${MN}" stroke-width="2.5"/>
+    <line x1="38" y1="68" x2="31" y2="74" stroke="${MN}" stroke-width="1.2"/>
+    <g stroke="${MR}" stroke-width="2.5">
+      <line x1="72" y1="49" x2="82" y2="59"/><line x1="82" y1="49" x2="72" y2="59"/>
+    </g>
+    <text x="34" y="95" font-size="9.5" fill="${MN}" opacity="0.6">잠기면 여기서 멈춤</text>`;
+  const art_shallow = `
+    <line x1="6" y1="88" x2="124" y2="88" stroke="${MN}" stroke-width="2"/>
+    <circle cx="18" cy="42" r="4.5" fill="none" stroke="${MN}" stroke-width="2"/>
+    <line x1="18" y1="46" x2="18" y2="68" stroke="${MN}" stroke-width="2"/>
+    <line x1="18" y1="68" x2="13" y2="86" stroke="${MN}" stroke-width="2"/>
+    <line x1="18" y1="68" x2="23" y2="86" stroke="${MN}" stroke-width="2"/>
+    <line x1="18" y1="52" x2="28" y2="38" stroke="${MN}" stroke-width="2"/>
+    <circle cx="31" cy="33" r="5" fill="none" stroke="${MN}" stroke-width="2"/>
+    <line x1="76" y1="88" x2="76" y2="70" stroke="${MN}" stroke-width="2"/>
+    <line x1="72" y1="70" x2="80" y2="70" stroke="${MN}" stroke-width="2.5"/>
+    <path d="M31,31 Q60,16 112,86" fill="none" stroke="${MN}" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.35"/>
+    <circle cx="112" cy="85" r="3" fill="none" stroke="${MN}" stroke-width="1.3" opacity="0.4"/>
+    <path d="M31,31 Q52,26 82,86" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <circle cx="82" cy="84" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <text x="88" y="78" font-size="9.5" font-weight="700" fill="#B03A2E">얕음</text>`;
+  const MECH = {
+    grip_tight: [
+      {t:"그립을 꽉 쥠", d:"손가락·팔뚝에 힘이 잔뜩 들어가 팔 전체가 통째로 굳어요.", art:art_grip},
+      {t:"손목이 잠김", d:"팔·손·라켓이 한 막대기처럼 굳어 손목 스냅(채찍질)이 안 나와요.", art:art_lock},
+      {t:"라켓 헤드가 못 달려요", d:"같은 팔 힘이어도 스냅이 없으면 헤드 스피드가 뚝 떨어져요.", art:art_slow},
+      {t:"공이 네트 넘자마자 뚝", d:"겨우 넘어가 서비스라인 한참 앞에 떨어지는 얕은 서브가 돼요.", art:art_shallow}
+    ]
+  };
+  function renderMech(key){
+    return MECH[key].map((s,i)=>
+      (i ? `<div class="mechDown">▼</div>` : ``) +
+      `<div class="mechStep"><svg viewBox="0 0 130 100">${s.art}</svg>
+        <div><div class="mTitle">${i+1}. ${s.t}</div><div class="mDesc">${s.d}</div></div></div>`
+    ).join("");
+  }
+
   // ── 진단 카드 렌더
   function renderDiag(r, wasDF){
     const d = DIAG[r]; if(!d){ $("diagCard").style.display="none"; return; }
     let html = `<div class="dTitle" style="color:${d.color}">${d.name}${wasDF ? ' <span style="font-size:12px; color:#B03A2E;">(더블폴트)</span>' : ''}</div>`;
     if(d.causes.length){
       html += `<div style="font-size:11.5px; font-weight:700; color:var(--sub); margin-bottom:4px;">자주 나오는 원인 — 순위 아님, 본인 느낌과 맞춰보세요</div>`;
-      html += d.causes.map(c=>`<div class="dCause">· ${c}</div>`).join("");
+      html += d.causes.map(c => {
+        const txt = (typeof c === "string") ? c : c.t;
+        const hasMech = (typeof c === "object") && c.mech && MECH[c.mech];
+        let row = `<div class="dCauseRow"><span class="dCause">· ${txt}</span>`;
+        if(hasMech) row += `<button class="mechToggle" data-mech="${c.mech}">▶ 원리 보기</button>`;
+        row += `</div>`;
+        if(hasMech) row += `<div class="mechStrip" data-strip="${c.mech}"></div>`;
+        return row;
+      }).join("");
     }
     html += `<div class="dCue">👉 다음 서브에선 이것 하나만<br>${d.cue}</div>`;
     if(d.tip) html += `<div class="dTrust">${d.tip}</div>`;
@@ -3640,6 +3752,15 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     const cb = $("dCardBtn");
     if(cb) cb.addEventListener("click", ()=>{ switchTab(false); setTimeout(()=>$("openWinnerBtn").click(), 350); });
     $("dCloseBtn").addEventListener("click", ()=>{ card.style.display="none"; });
+    // 원리 보기 토글 (내용은 처음 열 때 1회 렌더)
+    card.querySelectorAll(".mechToggle").forEach(btn => btn.addEventListener("click", ()=>{
+      const strip = card.querySelector(`.mechStrip[data-strip="${btn.dataset.mech}"]`);
+      const open = !strip.classList.contains("open");
+      if(open && !strip.innerHTML) strip.innerHTML = renderMech(btn.dataset.mech);
+      strip.classList.toggle("open", open);
+      btn.classList.toggle("open", open);
+      btn.textContent = open ? "▼ 접기" : "▶ 원리 보기";
+    }));
   }
 
   // ── 세션 요약 렌더
