@@ -1009,7 +1009,9 @@ function isInbounds(d, sim){
 }
 function computeMargin(d){
   let lo=null, hi=null, loSim=null, hiSim=null;
-  for(let a=-15; a<=25; a+=1){
+  // v11.1: 서브는 0.25° 정밀 스캔 — 풀스윙 플랫의 창이 1°보다 좁아 정수 스캔으론 안 잡힘 (드래그 퇴역으로 탭당 1회만 계산돼 비용 OK)
+  const step = d.isServe ? 0.25 : 1;
+  for(let a=-15; a<=25; a+=step){
     const sm=simulate(d.speed,a,d.h0,d.omega,d.Dnet);
     if(isInbounds(d,sm)){ if(lo===null){ lo=a; loSim=sm; } hi=a; hiSim=sm; }
   }
@@ -1286,6 +1288,28 @@ function drawSide(){
     const hiMid = R.margin.hiSim.pts[Math.floor(R.margin.hiSim.pts.length*0.35)];
     if(hiMid){ ctx.fillStyle="rgba(91,214,111,.85)"; ctx.font="bold 10px sans-serif"; ctx.textAlign="left"; ctx.fillText("◆ IN 영역", X(hiMid.x)+5, Z(hiMid.z)-5); }
   }
+  // v11.1 안전 창(safety window) — 서브: 인이 되는 '네트 위 통과 구간'을 네트에 밴드로 (Guillot 2013 개념)
+  if(R.d.isServe && R.margin && R.margin.loSim && R.margin.hiSim
+     && R.margin.loSim.zAtNet!=null && R.margin.hiSim.zAtNet!=null){
+    const zLo=Math.max(NET_H, R.margin.loSim.zAtNet), zHi=R.margin.hiSim.zAtNet;
+    if(zHi > zLo){
+      const bx=X(Dnet), winCm=Math.round((zHi-zLo)*100);
+      ctx.fillStyle="rgba(255,210,63,.28)";
+      ctx.fillRect(bx-5, Z(zHi), 10, Z(zLo)-Z(zHi));
+      ctx.strokeStyle="rgba(255,210,63,.9)"; ctx.lineWidth=1.5;
+      ctx.strokeRect(bx-5, Z(zHi), 10, Z(zLo)-Z(zHi));
+      ctx.fillStyle="#ffd23f"; ctx.font="bold 10px sans-serif"; ctx.textAlign="left"; ctx.textBaseline="middle";
+      ctx.fillText(`안전 창 ${winCm}cm`, bx+9, Z(zHi)-7);
+      // 내 공이 창을 통과하는 지점
+      if(R.sim && R.sim.zAtNet!=null){
+        const inWin = R.sim.zAtNet>zLo-0.001 && R.sim.zAtNet<=zHi+0.001;
+        ctx.fillStyle = inWin ? "#5bd66f" : "#ff6b5e";
+        ctx.beginPath(); ctx.arc(bx, Z(R.sim.zAtNet), 4.5, 0, 7); ctx.fill();
+        ctx.strokeStyle="#0b1620"; ctx.lineWidth=1; ctx.stroke();
+      }
+      window.__safetyWinCm = winCm; // 리드아웃용
+    } else window.__safetyWinCm = null;
+  } else window.__safetyWinCm = null;
   if(R.sim){
     const inb=R.status==="in";
     // 회전 강도에 따른 라인 색 (톱스핀: 주황→빨강, 슬라이스: 하늘→파랑, 플랫: 옅은 흰)
@@ -4200,7 +4224,8 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       if(cm>=0){
         const col = cm<15 ? "#B03A2E" : (cm<35 ? "#8F6E14" : "#3E7A26");
         const verdict = R.status==="in" ? "✅ 인" : (R.absLand>SVC_ABS ? "🚀 길다 (아웃)" : "⚠️ 인 아님");
-        ro.innerHTML = `네트 위 <b style="color:${col}">${cm}cm</b>로 통과 · ${verdict} · 낙하 ${R.absLand.toFixed(1)}m`;
+        const win = window.__safetyWinCm ? ` · 안전 창 <b>${window.__safetyWinCm}cm</b>` : "";
+        ro.innerHTML = `네트 위 <b style="color:${col}">${cm}cm</b>로 통과 · ${verdict} · 낙하 ${R.absLand.toFixed(1)}m${win}`;
       } else {
         ro.innerHTML = `🥅 <b style="color:#B03A2E">네트에 걸림</b> — 네트 꼭대기에서 ${Math.abs(cm)}cm 부족`;
       }
