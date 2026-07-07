@@ -3548,8 +3548,8 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       name:"🥅 네트에 걸림", color:"#B03A2E", group:"toss",
       physics:"물리 판정: 발사각이 너무 <b>아래</b>를 향했거나 속도가 부족 — 서브는 수평보다 겨우 2~6° 아래로 나가는 좁은 창 통과예요(중속 이상 기준).",
       causes:[
-        "토스 올린 <b>반대팔을 너무 일찍</b> 내렸다 — 궤적이 ~3° 가팔라져 네트행 <i>(Newton·Reid 2025 실험)</i>",
-        "타점이 낮았다 — 팔꿈치가 다 안 펴지면 네트 위 여유가 확 줄어요",
+        {t:"토스 올린 <b>반대팔을 너무 일찍</b> 내렸다 — 궤적이 ~3° 가팔라져 네트행 <i>(Newton·Reid 2025 실험)</i>", mech:"arm_early"},
+        {t:"타점이 낮았다 — 팔꿈치가 다 안 펴지면 네트 위 여유가 확 줄어요", mech:"contact_low"},
         "토스가 낮거나 몸 뒤로 흘러 면이 아래를 본 채 눌러쳤다"
       ],
       cue:"공을 <b>네트 위 1m '안전 창'으로 통과</b>시키는 것만 생각하고 치기 — 과녁은 박스가 아니라 창.",
@@ -3560,7 +3560,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       name:"🚀 길게 나감", color:"#A34A10", group:"face",
       physics:"물리 판정: 궤적이 너무 <b>평평</b>했거나, 속도 대비 회전이 부족했어요 — 빠른 공은 스핀 없이는 코트 안에 못 떨어져요.",
       causes:[
-        "토스 반대팔이 <b>너무 늦게까지</b> 떠 있었다 — 궤적이 평평해져 롱 <i>(Newton·Reid 2025 실험)</i>",
+        {t:"토스 반대팔이 <b>너무 늦게까지</b> 떠 있었다 — 궤적이 평평해져 롱 <i>(Newton·Reid 2025 실험)</i>", mech:"arm_late"},
         "공을 <b>너무 앞에서/너무 일찍</b> 쳤다 — 위로 쓸어올리는 각이 죽어 톱스핀이 ~1/5로 <i>(Cross 물리)</i>",
         "스핀 없이 플랫 풀파워로 밀어쳤다"
       ],
@@ -3571,6 +3571,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     wideL: {
       name:"↖ 왼쪽으로 빠짐", color:"#8F6E14", group:"lateral",
       physics:"물리 판정: 임팩트 순간 <b>라켓면이 왼쪽</b>을 봤어요 — 면이 1°만 틀어져도 박스에서 약 40cm 벗어나요(TWU).",
+      physMech:"face_angle",
       causes:[
         "토스가 <b>왼쪽</b>으로 흘렀다 — 특히 플랫·퍼스트 서브에서 영향 <i>(Reid 2011)</i>",
         "어깨·몸통이 일찍 열리며 면이 같이 돌았다",
@@ -3583,6 +3584,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     wideR: {
       name:"↗ 오른쪽으로 빠짐", color:"#8F6E14", group:"lateral",
       physics:"물리 판정: 임팩트 순간 <b>라켓면이 오른쪽</b>을 봤어요 — 면이 1°만 틀어져도 박스에서 약 40cm 벗어나요(TWU).",
+      physMech:"face_angle",
       causes:[
         "토스가 <b>오른쪽(몸 밖)</b>으로 흘렀다 — 특히 플랫·퍼스트 서브에서 영향 <i>(Reid 2011)</i>",
         "몸이 덜 돌아간 채 팔로만 밀었다",
@@ -3596,8 +3598,8 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       name:"🪶 들어갔지만 얕음", color:"#4A5E85", group:"toss",
       physics:"물리 판정: 라켓 헤드 스피드가 부족했거나 타점이 낮았어요 — 얕음은 '팔 힘'이 아니라 '엔진 미사용' 문제인 경우가 많아요.",
       causes:[
-        "스피드 엔진을 안 썼다 — 헤드 스피드의 <b>~40%는 어깨 내회전, ~30%는 손목 스냅</b>에서 나와요 <i>(Elliott 2006)</i>",
-        "타점이 낮았다 — 팔꿈치 펴기는 스피드가 아니라 <b>'높이' 담당</b>, 낮으면 마진부터 손해",
+        {t:"스피드 엔진을 안 썼다 — 헤드 스피드의 <b>~40%는 어깨 내회전, ~30%는 손목 스냅</b>에서 나와요 <i>(Elliott 2006)</i>", mech:"speed_engine"},
+        {t:"타점이 낮았다 — 팔꿈치 펴기는 스피드가 아니라 <b>'높이' 담당</b>, 낮으면 마진부터 손해", mech:"contact_low"},
         {t:"그립을 너무 꽉 쥐어 <b>손목 스냅이 잠겼다</b>", mech:"grip_tight"}
       ],
       cue:"더 세게 밀지 말기 — 임팩트 직전 <b>손목으로 공 등을 '탁' 튕겨</b> 보내는 느낌 하나만.",
@@ -3732,12 +3734,237 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     <path d="M31,31 Q52,26 82,86" fill="none" stroke="${MN}" stroke-width="2.2"/>
     <circle cx="82" cy="84" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
     <text x="88" y="78" font-size="9.5" font-weight="700" fill="#B03A2E">얕음</text>`;
+  // ── v10.3 리서치 확정 원인 픽토그램 (근거: 리서치_서브진단_근거.md)
+  const art_armEarly = `
+    <line x1="6" y1="88" x2="124" y2="88" stroke="${MN}" stroke-width="1.5" opacity="0.25"/>
+    <circle cx="56" cy="16" r="6.5" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="56" y1="23" x2="53" y2="52" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="53" y1="52" x2="45" y2="76" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="53" y1="52" x2="61" y2="76" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="55" y1="28" x2="72" y2="14" stroke="${MN}" stroke-width="2.4"/>
+    <circle cx="79" cy="9" r="7" fill="none" stroke="${MN}" stroke-width="2"/>
+    <g stroke="${MN}" stroke-width="0.8" opacity="0.35">
+      <line x1="76" y1="3.5" x2="76" y2="14.5"/><line x1="82" y1="3.5" x2="82" y2="14.5"/>
+      <line x1="73.5" y1="6" x2="84.5" y2="6"/><line x1="73.5" y1="12" x2="84.5" y2="12"/>
+    </g>
+    <circle cx="38" cy="7" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <line x1="55" y1="30" x2="38" y2="46" stroke="${MN}" stroke-width="2.4"/>
+    <g stroke="${MR}" stroke-width="2.5">
+      <line x1="34" y1="52" x2="34" y2="68"/>
+      <line x1="30" y1="62" x2="34" y2="68"/><line x1="38" y1="62" x2="34" y2="68"/>
+    </g>
+    <path d="M66,26 Q72,37 61,45" fill="none" stroke="${MR}" stroke-width="2"/>
+    <path d="M57,43 L61,45 L62,40" fill="none" stroke="${MR}" stroke-width="2"/>
+    <text x="6" y="36" font-size="9.5" fill="${MN}" opacity="0.65">토스 팔</text>
+    <line x1="24" y1="37" x2="36" y2="40" stroke="${MN}" stroke-width="1" stroke-dasharray="2.5 2.5" opacity="0.6"/>`;
+  const art_angleDown = `
+    <circle cx="6" cy="15" r="5" fill="none" stroke="${MN}" stroke-width="2"/>
+    <line x1="9" y1="18" x2="15" y2="24" stroke="${MN}" stroke-width="2.5"/>
+    <circle cx="16" cy="26" r="3.5" fill="${MN}"/>
+    <line x1="16" y1="26" x2="122" y2="52" stroke="${MN}" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.4"/>
+    <text x="100" y="42" font-size="9" fill="${MN}" opacity="0.5">정상</text>
+    <line x1="16" y1="26" x2="114" y2="80" stroke="${MN}" stroke-width="2.6"/>
+    <circle cx="70" cy="56" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M45,33 A30 30 0 0 1 42,40" fill="none" stroke="${MR}" stroke-width="2"/>
+    <text x="48" y="46" font-size="10" font-weight="800" fill="${MR}">≈3° ↓</text>`;
+  const art_netHit = `
+    <line x1="6" y1="86" x2="124" y2="86" stroke="${MN}" stroke-width="2"/>
+    <line x1="88" y1="86" x2="88" y2="62" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="83" y1="62" x2="93" y2="62" stroke="${MN}" stroke-width="2.5"/>
+    <circle cx="13" cy="20" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M16,24 Q52,42 87,64" fill="none" stroke="${MN}" stroke-width="2.4"/>
+    <g stroke="${MR}" stroke-width="2">
+      <line x1="82" y1="58" x2="94" y2="70"/><line x1="94" y1="58" x2="82" y2="70"/>
+      <line x1="88" y1="56" x2="88" y2="72"/><line x1="80" y1="64" x2="96" y2="64"/>
+    </g>
+    <text x="96" y="54" font-size="10" font-weight="800" fill="${MR}">네트!</text>`;
+  const art_armLate = `
+    <line x1="6" y1="88" x2="124" y2="88" stroke="${MN}" stroke-width="1.5" opacity="0.25"/>
+    <circle cx="52" cy="18" r="6.5" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="52" y1="25" x2="52" y2="54" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="52" y1="54" x2="44" y2="78" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="52" y1="54" x2="60" y2="78" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="52" y1="30" x2="38" y2="12" stroke="${MN}" stroke-width="2.4"/>
+    <circle cx="34" cy="7" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <line x1="52" y1="32" x2="68" y2="20" stroke="${MN}" stroke-width="2.4"/>
+    <circle cx="75" cy="15" r="7" fill="none" stroke="${MN}" stroke-width="2"/>
+    <g stroke="${MN}" stroke-width="0.8" opacity="0.35">
+      <line x1="72" y1="9.5" x2="72" y2="20.5"/><line x1="78" y1="9.5" x2="78" y2="20.5"/>
+      <line x1="69.5" y1="12" x2="80.5" y2="12"/><line x1="69.5" y1="18" x2="80.5" y2="18"/>
+    </g>
+    <text x="4" y="28" font-size="9.5" font-weight="800" fill="${MR}">아직 위!</text>
+    <line x1="26" y1="24" x2="36" y2="14" stroke="${MR}" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>
+    <path d="M62,46 Q70,36 63,25" fill="none" stroke="${MR}" stroke-width="2"/>
+    <path d="M60,28 L63,25 L66,29" fill="none" stroke="${MR}" stroke-width="2"/>`;
+  const art_angleFlat = `
+    <circle cx="6" cy="19" r="5" fill="none" stroke="${MN}" stroke-width="2"/>
+    <line x1="9" y1="22" x2="15" y2="28" stroke="${MN}" stroke-width="2.5"/>
+    <circle cx="16" cy="30" r="3.5" fill="${MN}"/>
+    <line x1="16" y1="30" x2="118" y2="62" stroke="${MN}" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.4"/>
+    <text x="98" y="52" font-size="9" fill="${MN}" opacity="0.5">정상</text>
+    <line x1="16" y1="30" x2="122" y2="44" stroke="${MN}" stroke-width="2.6"/>
+    <circle cx="72" cy="37" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M50,34 A34 34 0 0 1 48,40" fill="none" stroke="${MR}" stroke-width="2"/>
+    <text x="56" y="28" font-size="10" font-weight="800" fill="${MR}">≈1° ↑</text>`;
+  const art_longOut = `
+    <line x1="6" y1="86" x2="124" y2="86" stroke="${MN}" stroke-width="2"/>
+    <line x1="60" y1="86" x2="60" y2="66" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="55" y1="66" x2="65" y2="66" stroke="${MN}" stroke-width="2.5"/>
+    <line x1="104" y1="86" x2="104" y2="76" stroke="${MN}" stroke-width="2.2"/>
+    <text x="86" y="97" font-size="8" fill="${MN}" opacity="0.6">베이스라인</text>
+    <path d="M10,30 Q60,26 119,82" fill="none" stroke="${MN}" stroke-width="2.4"/>
+    <circle cx="119" cy="81" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <text x="96" y="66" font-size="10" font-weight="800" fill="${MR}">아웃</text>`;
+  const art_armPush = `
+    <circle cx="18" cy="52" r="4.5" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="23" y1="51" x2="66" y2="42" stroke="${MN}" stroke-width="5.5" stroke-linecap="round"/>
+    <ellipse cx="73" cy="40" rx="9" ry="8" fill="${MA}" stroke="${MN}" stroke-width="2"/>
+    <path d="M69,33 Q66,40 69,47" fill="none" stroke="${MN}" stroke-width="1.1"/>
+    <line x1="82" y1="37" x2="96" y2="31" stroke="${MN}" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="104" cy="27" r="10" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <g stroke="${MN}" stroke-width="0.8" opacity="0.35">
+      <line x1="100" y1="19" x2="100" y2="35"/><line x1="108" y1="19" x2="108" y2="35"/>
+      <line x1="95" y1="23" x2="113" y2="23"/><line x1="95" y1="31" x2="113" y2="31"/>
+    </g>
+    <line x1="30" y1="66" x2="72" y2="57" stroke="${MN}" stroke-width="3" opacity="0.45"/>
+    <path d="M66,52 L74,57 L66,62" fill="none" stroke="${MN}" stroke-width="3" opacity="0.45"/>
+    <path d="M36,40 A10 10 0 1 1 35,53" fill="none" stroke="${MN}" stroke-width="1.3" stroke-dasharray="3 3" opacity="0.5"/>
+    <g stroke="${MR}" stroke-width="2.2">
+      <line x1="40" y1="42" x2="48" y2="50"/><line x1="48" y1="42" x2="40" y2="50"/>
+    </g>
+    <text x="28" y="84" font-size="9" fill="${MN}" opacity="0.6">회전 없이 밀기만</text>`;
+  const art_engine = `
+    <line x1="22" y1="60" x2="50" y2="44" stroke="${MN}" stroke-width="5.5" stroke-linecap="round"/>
+    <line x1="50" y1="44" x2="74" y2="30" stroke="${MN}" stroke-width="4.5" stroke-linecap="round"/>
+    <ellipse cx="80" cy="27" rx="8" ry="7" fill="${MA}" stroke="${MN}" stroke-width="2"/>
+    <line x1="88" y1="24" x2="98" y2="19" stroke="${MN}" stroke-width="2.8" stroke-linecap="round"/>
+    <circle cx="105" cy="15" r="9" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <g stroke="${MN}" stroke-width="0.8" opacity="0.35">
+      <line x1="101" y1="8" x2="101" y2="22"/><line x1="109" y1="8" x2="109" y2="22"/>
+      <line x1="97" y1="11" x2="113" y2="11"/><line x1="97" y1="19" x2="113" y2="19"/>
+    </g>
+    <path d="M28,44 A11 11 0 1 0 27,58" fill="none" stroke="${MN}" stroke-width="2"/>
+    <path d="M23,55 L27,58 L28,53" fill="none" stroke="${MN}" stroke-width="2"/>
+    <path d="M70,14 Q80,9 92,15" fill="none" stroke="${MN}" stroke-width="2"/>
+    <path d="M89,11 L92,15 L87,17" fill="none" stroke="${MN}" stroke-width="2"/>
+    <path d="M114,4 Q120,9 121,16" fill="none" stroke="${MN}" stroke-width="1.3"/>
+    <path d="M117,22 Q121,26 122,31" fill="none" stroke="${MN}" stroke-width="1.3"/>
+    <rect x="8" y="78" width="62" height="16" rx="8" fill="rgba(255,210,63,0.25)" stroke="#C79A2A" stroke-width="1"/>
+    <text x="39" y="89" font-size="8.5" font-weight="700" fill="${MN}" text-anchor="middle">내회전 ~40%</text>
+    <rect x="76" y="78" width="48" height="16" rx="8" fill="rgba(255,210,63,0.25)" stroke="#C79A2A" stroke-width="1"/>
+    <text x="100" y="89" font-size="8.5" font-weight="700" fill="${MN}" text-anchor="middle">손목 ~30%</text>`;
+  const art_lowContact = `
+    <line x1="46" y1="66" x2="60" y2="20" stroke="${MN}" stroke-width="2.2" stroke-dasharray="4 3" opacity="0.35"/>
+    <circle cx="63" cy="13" r="7" fill="none" stroke="${MN}" stroke-width="2" opacity="0.35"/>
+    <circle cx="63" cy="5" r="3.5" fill="none" stroke="${MN}" stroke-width="1.5" opacity="0.35"/>
+    <line x1="46" y1="66" x2="60" y2="48" stroke="${MN}" stroke-width="2.6"/>
+    <line x1="60" y1="48" x2="46" y2="36" stroke="${MN}" stroke-width="2.6"/>
+    <circle cx="42" cy="30" r="7" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <g stroke="${MN}" stroke-width="0.8" opacity="0.35">
+      <line x1="39" y1="24.5" x2="39" y2="35.5"/><line x1="45" y1="24.5" x2="45" y2="35.5"/>
+      <line x1="36.5" y1="27" x2="47.5" y2="27"/><line x1="36.5" y1="33" x2="47.5" y2="33"/>
+    </g>
+    <circle cx="42" cy="21" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M55,42 Q52,46 56,50" fill="none" stroke="${MR}" stroke-width="2"/>
+    <line x1="102" y1="7" x2="102" y2="19" stroke="${MN}" stroke-width="1.8"/>
+    <path d="M99,10 L102,6 L105,10" fill="none" stroke="${MN}" stroke-width="1.8"/>
+    <path d="M99,16 L102,20 L105,16" fill="none" stroke="${MN}" stroke-width="1.8"/>
+    <text x="106" y="17" font-size="10" font-weight="800" fill="${MR}">타점↓</text>
+    <line x1="46" y1="66" x2="46" y2="86" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="46" y1="86" x2="39" y2="97" stroke="${MN}" stroke-width="2.4"/>
+    <line x1="46" y1="86" x2="53" y2="97" stroke="${MN}" stroke-width="2.4"/>`;
+  const art_margin = `
+    <line x1="6" y1="88" x2="124" y2="88" stroke="${MN}" stroke-width="2"/>
+    <line x1="80" y1="88" x2="80" y2="64" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="75" y1="64" x2="85" y2="64" stroke="${MN}" stroke-width="2.5"/>
+    <circle cx="12" cy="18" r="3.5" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M12,18 Q55,28 118,80" fill="none" stroke="${MN}" stroke-width="2"/>
+    <circle cx="12" cy="46" r="3.5" fill="none" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M12,46 Q50,52 112,84" fill="none" stroke="${MN}" stroke-width="2" opacity="0.8"/>
+    <line x1="77" y1="49" x2="77" y2="63" stroke="${MN}" stroke-width="1.5"/>
+    <text x="46" y="48" font-size="8.5" fill="${MN}" opacity="0.7">여유↑</text>
+    <text x="84" y="80" font-size="8.5" font-weight="700" fill="${MR}">아슬</text>
+    <text x="18" y="12" font-size="8.5" fill="${MN}" opacity="0.6">높은 타점</text>
+    <text x="14" y="68" font-size="8.5" fill="${MN}" opacity="0.6">낮은 타점</text>`;
+  const art_lowOutcome = `
+    <line x1="6" y1="88" x2="124" y2="88" stroke="${MN}" stroke-width="2"/>
+    <line x1="72" y1="88" x2="72" y2="66" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="67" y1="66" x2="77" y2="66" stroke="${MN}" stroke-width="2.5"/>
+    <circle cx="12" cy="40" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <path d="M14,43 Q40,52 71,68" fill="none" stroke="${MN}" stroke-width="2" stroke-dasharray="5 4"/>
+    <g stroke="${MR}" stroke-width="1.8">
+      <line x1="67" y1="63" x2="77" y2="73"/><line x1="77" y1="63" x2="67" y2="73"/>
+    </g>
+    <text x="44" y="44" font-size="9" font-weight="700" fill="${MR}">네트</text>
+    <path d="M14,37 Q48,40 88,84" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <circle cx="88" cy="83" r="4" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <text x="95" y="76" font-size="9" font-weight="700" fill="#B03A2E">얕음</text>`;
+  const art_face1 = `
+    <ellipse cx="40" cy="54" rx="16" ry="8" fill="none" stroke="${MN}" stroke-width="2.5" transform="rotate(-35 40 54)"/>
+    <g stroke="${MN}" stroke-width="0.8" opacity="0.35" transform="rotate(-35 40 54)">
+      <line x1="28" y1="50" x2="52" y2="50"/><line x1="26" y1="54" x2="54" y2="54"/><line x1="28" y1="58" x2="52" y2="58"/>
+      <line x1="34" y1="47.5" x2="34" y2="60.5"/><line x1="40" y1="46.5" x2="40" y2="61.5"/><line x1="46" y1="47.5" x2="46" y2="60.5"/>
+    </g>
+    <line x1="27" y1="63" x2="15" y2="77" stroke="${MN}" stroke-width="3" stroke-linecap="round"/>
+    <text x="6" y="92" font-size="8" fill="${MN}" opacity="0.6">라켓 (위에서 본 모습)</text>
+    <line x1="53" y1="45" x2="100" y2="34" stroke="${MN}" stroke-width="2.2"/>
+    <path d="M94,30 L102,34 L95,39" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <line x1="53" y1="45" x2="98" y2="56" stroke="${MR}" stroke-width="2" stroke-dasharray="4 3"/>
+    <path d="M92,51 L100,56 L91,59" fill="none" stroke="${MR}" stroke-width="2"/>
+    <text x="76" y="46" font-size="11" font-weight="800" fill="${MR}">1°</text>
+    <text x="62" y="74" font-size="8" fill="${MN}" opacity="0.55">(그림은 과장)</text>`;
+  const art_face2 = `
+    <circle cx="12" cy="50" r="3" fill="${MN}"/>
+    <line x1="12" y1="50" x2="120" y2="36" stroke="${MN}" stroke-width="1.8"/>
+    <line x1="12" y1="50" x2="120" y2="60" stroke="${MN}" stroke-width="1.8"/>
+    <line x1="120" y1="38" x2="120" y2="58" stroke="${MR}" stroke-width="1.5"/>
+    <path d="M117,41 L120,37 L123,41" fill="none" stroke="${MR}" stroke-width="1.5"/>
+    <path d="M117,55 L120,59 L123,55" fill="none" stroke="${MR}" stroke-width="1.5"/>
+    <text x="92" y="50" font-size="9.5" font-weight="800" fill="${MR}">40cm</text>
+    <text x="46" y="32" font-size="8.5" fill="${MN}" opacity="0.55">≈18m 비행</text>`;
+  const art_face3 = `
+    <line x1="20" y1="18" x2="20" y2="82" stroke="${MN}" stroke-width="2.5"/>
+    <rect x="20" y="18" width="70" height="64" fill="none" stroke="${MN}" stroke-width="2"/>
+    <line x1="55" y1="18" x2="55" y2="82" stroke="${MN}" stroke-width="1" opacity="0.4"/>
+    <path d="M6,50 Q60,44 104,58" fill="none" stroke="${MN}" stroke-width="2.2"/>
+    <circle cx="104" cy="58" r="4.5" fill="${MA}" stroke="${MN}" stroke-width="1.5"/>
+    <g stroke="${MR}" stroke-width="2.2">
+      <line x1="108" y1="44" x2="116" y2="52"/><line x1="116" y1="44" x2="108" y2="52"/>
+    </g>
+    <text x="94" y="74" font-size="9" font-weight="700" fill="#B03A2E">와이드</text>`;
+
   const MECH = {
     grip_tight: [
       {t:"그립을 꽉 쥠", d:"손가락·팔뚝에 힘이 잔뜩 들어가 팔 전체가 통째로 굳어요.", art:art_grip},
       {t:"손목이 잠김", d:"팔·손·라켓이 한 막대기처럼 굳어 손목 스냅(채찍질)이 안 나와요.", art:art_lock},
       {t:"라켓 헤드가 못 달려요", d:"같은 팔 힘이어도 스냅이 없으면 헤드 스피드가 뚝 떨어져요.", art:art_slow},
       {t:"공이 네트 넘자마자 뚝", d:"겨우 넘어가 서비스라인 한참 앞에 떨어지는 얕은 서브가 돼요.", art:art_shallow}
+    ],
+    arm_early: [
+      {t:"토스 팔을 일찍 내림", d:"공 맞기 전에 토스 팔이 떨어지면 가슴이 같이 닫히며 몸이 앞으로 접혀요.", art:art_armEarly},
+      {t:"궤적이 ~3° 아래로", d:"실험에서 일부러 일찍 내리게 하자 임팩트 후 궤적이 약 3° 가팔라졌어요 (Newton·Reid 2025, 엘리트 강제 조건).", art:art_angleDown},
+      {t:"네트에 콱", d:"서브는 수평 아래 2~6°의 좁은 창 통과 게임 — 3°는 큰 오차라 대부분 네트로 꽂혀요.", art:art_netHit}
+    ],
+    arm_late: [
+      {t:"토스 팔이 늦게까지 위에", d:"팔이 계속 떠 있으면 가슴이 열린 채 몸이 덜 접혀요.", art:art_armLate},
+      {t:"궤적이 ~1° 평평해짐", d:"같은 실험에서 늦게 내리게 하자 궤적이 약 1° 평평해졌어요 (Newton·Reid 2025).", art:art_angleFlat},
+      {t:"베이스라인 너머로", d:"평평한 공은 떨어질 시간이 없어 길게 나가요 — 해법은 감속이 아니라 스핀.", art:art_longOut}
+    ],
+    speed_engine: [
+      {t:"팔로 밀기만 함", d:"팔 전체로 미는 힘은 사실 헤드 스피드에 큰 기여를 못 해요.", art:art_armPush},
+      {t:"진짜 엔진은 회전", d:"헤드 스피드의 ~40%는 어깨 내회전, ~30%는 손목 스냅에서 나와요 (Elliott 2006).", art:art_engine},
+      {t:"엔진 없으면 헤드가 못 달림", d:"회전 없이 밀면 헤드 스피드가 뚝 — 공을 '튕기는' 게 아니라 '밀어주는' 서브가 돼요.", art:art_slow},
+      {t:"공이 얕게 뚝", d:"헤드 스피드가 없으니 겨우 넘어가 얕게 떨어져요.", art:art_shallow}
+    ],
+    contact_low: [
+      {t:"팔꿈치가 덜 펴진 임팩트", d:"팔꿈치 펴기는 스피드보다 '타점 높이' 담당이에요 (Elliott 2006). 덜 펴지면 타점부터 낮아져요.", art:art_lowContact},
+      {t:"낮은 타점 = 좁은 안전 창", d:"타점이 낮을수록 네트 위로 통과할 수 있는 창이 얇아져요 — 마진 게임에서 시작부터 손해.", art:art_margin},
+      {t:"네트 아니면 얕음", d:"얇은 창은 조금만 어긋나도 네트, 억지로 넘기면 얕은 공이 돼요.", art:art_lowOutcome}
+    ],
+    face_angle: [
+      {t:"임팩트 순간 면이 살짝 틀어짐", d:"공은 라켓면이 향한 곳으로 날아가요 — 단 1° 차이라도요.", art:art_face1},
+      {t:"작은 각도가 거리에서 증폭", d:"약 18m를 날아가는 동안 1°가 좌우 약 40cm로 벌어져요 (TWU 물리).", art:art_face2},
+      {t:"박스 옆으로 와이드", d:"그래서 좌우 미스는 결과만으론 원인 확정이 특히 어려워요 — 반복되면 영상 촬영이 정답.", art:art_face3}
     ]
   };
   function renderMech(key){
@@ -3752,7 +3979,11 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
   function renderDiag(r, wasDF){
     const d = DIAG[r]; if(!d){ $("diagCard").style.display="none"; return; }
     let html = `<div class="dTitle" style="color:${d.color}">${d.name}${wasDF ? ' <span style="font-size:12px; color:#B03A2E;">(더블폴트)</span>' : ''}</div>`;
-    if(d.physics) html += `<div class="dPhys">${d.physics}</div>`;
+    if(d.physics){
+      const pm = d.physMech && MECH[d.physMech];
+      html += `<div class="dPhys">${d.physics}${pm ? ` <button class="mechToggle" data-mech="${d.physMech}">▶ 원리 보기</button>` : ``}</div>`;
+      if(pm) html += `<div class="mechStrip" data-strip="${d.physMech}"></div>`;
+    }
     if(d.causes.length){
       html += `<div style="font-size:11.5px; font-weight:700; color:var(--sub); margin-bottom:4px;">자주 나오는 원인 — 순위 아님, 본인 느낌과 맞춰보세요</div>`;
       html += d.causes.map(c => {
