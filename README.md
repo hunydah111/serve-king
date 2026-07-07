@@ -12,3 +12,16 @@
 
 카메라 없이 결과만으로 추정하는 일반론이며 코치 레슨을 대체하지 않습니다.
 약사가 취미로 만들었습니다. 피드백: hunydah111@gmail.com
+
+## 진단 근거 (2026-07 딥리서치)
+진단 문구는 아래 영어권 연구·물리 자료의 검증된 발견에 기반합니다 (수치는 대부분 엘리트 측정 기준 — 앱에서는 방향성으로만 사용):
+- Whiteside, Elliott, Reid & Lay (2013) *Human Movement Science* 32(4) — 발사각이 굿서브/네트폴트의 유일 판별자
+- Newton, Girard, Chin & Reid (2025) *Eur J Sport Sci* 25(8) — 토스 반대팔 하강 타이밍: 일찍→네트, 늦게→롱
+- Reid, Whiteside & Elliott (2011) *Sports Biomechanics* 10(4) — 목표별 토스·타점 (퍼스트 서브만 유의)
+- Elliott (2006) *Br J Sports Med* 40(5) — 라켓 스피드 기여: 내회전 ~40% > 손목 굴곡 ~30%
+- Vaverka & Carboch (2015) *Acta Gymnica* 45(2) — 서브 종류별 토스/타점 위치
+- Rod Cross / Tennis Warehouse University — 서브 발사각(수평 아래 2~6°)·스핀 물리
+- Wulf (2002), Chua et al. (2021 메타분석), Guillot (2013) — 외적 초점 큐·'안전 창' 시각화
+- Silva et al. (2023) *JSAMS* — 서브 연구의 근거 공백 지도 (초보·스핀서브 데이터 희소)
+
+한계: 결과 기록만으로는 오차의 '방향'까지만 판정 가능하며, 신체 원인 확정은 영상 분석이 필요합니다.

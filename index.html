@@ -255,6 +255,11 @@
     border-radius:11px; font-size:15px; font-weight:800; line-height:1.45;}
   #diagCard .dTrust{margin-top:9px; font-size:11.5px; color:var(--sub); line-height:1.5;}
   #diagCard .dTrust.strong{color:#B03A2E; font-weight:700;}
+  #diagCard .dPhys{margin-bottom:9px; padding:8px 11px; background:rgba(27,58,107,.07); border-radius:9px;
+    font-size:12.5px; line-height:1.55; color:var(--txt);}
+  #diagCard .dDF{margin-top:9px; padding:9px 11px; background:rgba(255,107,94,.09); border:1.5px solid rgba(255,107,94,.35);
+    border-radius:9px; font-size:12.5px; line-height:1.55;}
+  #diagCard .dCause i{font-style:normal; font-size:11px; color:var(--sub);}
   .dBtns{display:flex; gap:6px; margin-top:11px;}
   .dBtns button{flex:1; padding:10px 8px; border-radius:10px; border:1.5px solid var(--line);
     background:var(--card2); color:var(--txt); font-size:12.5px; font-weight:700; cursor:pointer;}
@@ -320,6 +325,15 @@
           <button data-v="flat" class="on">플랫</button><button data-v="slice">슬라이스</button><button data-v="kick">킥</button>
         </div>
       </div>
+      <details style="margin-top:9px; background:rgba(27,58,107,.05); border-radius:9px; padding:2px 9px;">
+        <summary style="font-size:11.5px; color:var(--sub); font-weight:700; cursor:pointer; padding:6px 0;">🕐 서브별 토스 위치 가이드 (오른손 기준)</summary>
+        <div style="font-size:12px; line-height:1.75; padding:2px 2px 9px;">
+          · <b>플랫</b>: 시계 <b>1시</b> — 몸 살짝 앞·오른쪽<br>
+          · <b>슬라이스</b>: <b>2~3시</b> — 플랫보다 조금 더 오른쪽·앞 (공 옆을 깎게)<br>
+          · <b>킥</b>: <b>11~12시</b> — 머리 살짝 뒤·왼쪽, 위로 쳐올리게<br>
+          <span style="color:var(--sub); font-size:11px;">왼손잡이는 좌우 반대. 프로 측정에서 킥 타점은 슬라이스보다 ~30cm 왼쪽(Acta Gymnica 2015) — 종류별 토스는 실제로 달라요. 단, 슬라이스·플랫 차이는 작습니다.</span>
+        </div>
+      </details>
     </div>
 
     <div id="diagCard"></div>
@@ -335,7 +349,7 @@
       <div id="patternBox"></div>
     </div>
 
-    <div class="foot" style="margin-top:2px;">카메라 없이 결과만으로 추정하는 <b>일반적인 원인</b>이에요. 같은 결과가 반복될수록 진단이 정확해집니다. 코치 레슨을 대체하지 않아요.</div>
+    <div class="foot" style="margin-top:2px;">결과 기록으로 <b>'어느 방향으로 틀렸는지'(물리)</b>까지는 알 수 있지만, 몸의 원인은 <b>가능성 그룹</b>으로만 짚어드려요 — 확정은 영상 촬영이 필요합니다. 코치 레슨을 대체하지 않아요. 근거: Elliott·Reid·Cross 등 영어권 연구 (출처 목록은 GitHub README).</div>
   </section>
 
   <div class="card mainCard">
@@ -3527,75 +3541,82 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
 (function(){
   const $ = id => document.getElementById(id);
 
-  // ── 진단 지식 베이스 (코칭 일반론 · 140명 패널 B검증 반영: 순위 아닌 "가능성 그룹")
+  // ── 진단 지식 베이스 v2 (2026-07-07 딥리서치 반영 — 근거 원장: G드라이브 리서치_서브진단_근거.md)
+  // 원칙: ①물리 판정(확실한 방향)과 몸의 원인(가능성 그룹) 분리 ②큐는 외적 초점(공의 효과) 우선(Wulf·Chua) ③수치는 엘리트 기준 방향성으로만
   const DIAG = {
     net: {
       name:"🥅 네트에 걸림", color:"#B03A2E", group:"toss",
+      physics:"물리 판정: 발사각이 너무 <b>아래</b>를 향했거나 속도가 부족 — 서브는 수평보다 겨우 2~6° 아래로 나가는 좁은 창 통과예요(중속 이상 기준).",
       causes:[
-        "토스가 낮았거나 몸 <b>뒤쪽</b>으로 흘렀다",
-        "타점이 낮다 — 팔꿈치가 다 펴지기 전에 맞음",
-        "임팩트 타이밍이 늦어 면이 아래를 봤다"
+        "토스 올린 <b>반대팔을 너무 일찍</b> 내렸다 — 궤적이 ~3° 가팔라져 네트행 <i>(Newton·Reid 2025 실험)</i>",
+        "타점이 낮았다 — 팔꿈치가 다 안 펴지면 네트 위 여유가 확 줄어요",
+        "토스가 낮거나 몸 뒤로 흘러 면이 아래를 본 채 눌러쳤다"
       ],
-      cue:"토스를 <b>한 뼘 더 높게, 발끝 30cm 앞</b>으로. 그리고 팔이 가장 길어진 최고점에서 치기.",
-      tip:"목표를 '서비스박스'가 아니라 <b>네트 위 1m 통과</b>로 잡으면 저절로 마진이 생겨요.",
-      trust:"결과만으로 추정한 일반적 원인이에요 — 네트류는 토스·타점 계열일 확률이 높은 편."
+      cue:"공을 <b>네트 위 1m '안전 창'으로 통과</b>시키는 것만 생각하고 치기 — 과녁은 박스가 아니라 창.",
+      tip:"체크 하나: 토스 올린 팔을 <b>공 맞는 순간까지</b> 가슴 쪽에 붙잡아 두기. 일찍 떨어지면 몸이 접히며 궤적이 아래로 꽂혀요.",
+      trust:"어느 원인인지는 결과만으론 확정 불가 — 네트가 반복되면 반대팔 타이밍부터 영상으로 확인해보세요."
     },
     long: {
       name:"🚀 길게 나감", color:"#A34A10", group:"face",
+      physics:"물리 판정: 궤적이 너무 <b>평평</b>했거나, 속도 대비 회전이 부족했어요 — 빠른 공은 스핀 없이는 코트 안에 못 떨어져요.",
       causes:[
-        "토스가 몸 <b>앞</b>으로 덜 가서 면이 하늘을 봤다",
-        "스핀 없이 플랫으로만 풀파워",
-        "팔로스루 없이 몸으로 밀어쳤다"
+        "토스 반대팔이 <b>너무 늦게까지</b> 떠 있었다 — 궤적이 평평해져 롱 <i>(Newton·Reid 2025 실험)</i>",
+        "공을 <b>너무 앞에서/너무 일찍</b> 쳤다 — 위로 쓸어올리는 각이 죽어 톱스핀이 ~1/5로 <i>(Cross 물리)</i>",
+        "스핀 없이 플랫 풀파워로 밀어쳤다"
       ],
-      cue:"다음 서브는 <b>스핀 한 스푼</b> — 공 뒤를 아래에서 위로(7시→1시) 쓸어올리는 느낌만.",
-      tip:"세게 칠수록 스핀이 있어야 안에 떨어져요. 프로가 풀스윙해도 들어가는 이유.",
-      trust:"결과만으로 추정한 일반적 원인이에요 — 롱은 면 방향·릴리즈 계열일 확률이 높은 편."
+      cue:"공이 네트 넘고 <b>뚝 떨어지게</b> 만들기 — 공 뒤를 아래에서 위로(7시→1시) 쓸어올리는 느낌 하나만.",
+      tip:"속도를 줄이는 게 아니라 회전을 더하는 게 근거 있는 해법 — 프로가 풀스윙해도 들어가는 이유예요.",
+      trust:"어느 원인인지는 결과만으론 확정 불가 — 롱이 반복되면 타점이 몸 앞으로 쏠렸는지 영상으로 확인해보세요."
     },
     wideL: {
       name:"↖ 왼쪽으로 빠짐", color:"#8F6E14", group:"lateral",
+      physics:"물리 판정: 임팩트 순간 <b>라켓면이 왼쪽</b>을 봤어요 — 면이 1°만 틀어져도 박스에서 약 40cm 벗어나요(TWU).",
       causes:[
-        "토스가 <b>왼쪽</b>으로 흘렀다",
-        "어깨·몸통이 일찍 열렸다",
-        "임팩트에서 면이 왼쪽을 봤다 (프로네이션 과다)"
+        "토스가 <b>왼쪽</b>으로 흘렀다 — 특히 플랫·퍼스트 서브에서 영향 <i>(Reid 2011)</i>",
+        "어깨·몸통이 일찍 열리며 면이 같이 돌았다",
+        "프로네이션(전완 회전)이 과했거나 일렀다"
       ],
-      cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12시</b>에 떨어지는지 3번 연속 확인.",
-      tip:"(오른손 기준 설명 — 왼손이면 반대로 읽어주세요)",
-      trust:"⚠️ 좌우 방향은 결과만으로 원인 확정이 <b>특히 어려운</b> 유형이에요. 3회 이상 반복되면 폰으로 옆모습 영상을 찍어보는 게 가장 정확합니다."
+      cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12~1시</b>(플랫 기준)에 3번 연속 떨어뜨리기.",
+      tip:"(오른손 기준 — 왼손이면 반대로 읽어주세요) 서브별 토스 위치는 위 '토스 가이드' 참고.",
+      trust:"⚠️ 좌우는 '면 각도 1°' 문제라 결과만으로 원인 확정이 <b>특히 어려운</b> 유형(연구도 영상 필요 영역). 3회 반복되면 뒤에서 영상 촬영이 가장 정확합니다."
     },
     wideR: {
       name:"↗ 오른쪽으로 빠짐", color:"#8F6E14", group:"lateral",
+      physics:"물리 판정: 임팩트 순간 <b>라켓면이 오른쪽</b>을 봤어요 — 면이 1°만 틀어져도 박스에서 약 40cm 벗어나요(TWU).",
       causes:[
-        "토스가 <b>오른쪽(몸 밖)</b>으로 흘렀다",
+        "토스가 <b>오른쪽(몸 밖)</b>으로 흘렀다 — 특히 플랫·퍼스트 서브에서 영향 <i>(Reid 2011)</i>",
         "몸이 덜 돌아간 채 팔로만 밀었다",
-        "임팩트에서 면이 오른쪽을 봤다 (프로네이션 부족)"
+        "프로네이션(전완 회전)이 부족했거나 늦었다"
       ],
-      cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12시</b>에 떨어지는지 3번 연속 확인.",
-      tip:"(오른손 기준 설명 — 왼손이면 반대로 읽어주세요)",
-      trust:"⚠️ 좌우 방향은 결과만으로 원인 확정이 <b>특히 어려운</b> 유형이에요. 3회 이상 반복되면 폰으로 옆모습 영상을 찍어보는 게 가장 정확합니다."
+      cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12~1시</b>(플랫 기준)에 3번 연속 떨어뜨리기.",
+      tip:"(오른손 기준 — 왼손이면 반대로 읽어주세요) 서브별 토스 위치는 위 '토스 가이드' 참고.",
+      trust:"⚠️ 좌우는 '면 각도 1°' 문제라 결과만으로 원인 확정이 <b>특히 어려운</b> 유형(연구도 영상 필요 영역). 3회 반복되면 뒤에서 영상 촬영이 가장 정확합니다."
     },
     weak: {
       name:"🪶 들어갔지만 얕음", color:"#4A5E85", group:"toss",
+      physics:"물리 판정: 라켓 헤드 스피드가 부족했거나 타점이 낮았어요 — 얕음은 '팔 힘'이 아니라 '엔진 미사용' 문제인 경우가 많아요.",
       causes:[
-        "타점이 낮아 위에서 아래로 <b>눌러</b>쳤다",
-        "무릎·어깨 회전 없이 팔로만 쳤다",
-        {t:"그립을 너무 꽉 쥐어 라켓 스피드가 죽었다", mech:"grip_tight"}
+        "스피드 엔진을 안 썼다 — 헤드 스피드의 <b>~40%는 어깨 내회전, ~30%는 손목 스냅</b>에서 나와요 <i>(Elliott 2006)</i>",
+        "타점이 낮았다 — 팔꿈치 펴기는 스피드가 아니라 <b>'높이' 담당</b>, 낮으면 마진부터 손해",
+        {t:"그립을 너무 꽉 쥐어 <b>손목 스냅이 잠겼다</b>", mech:"grip_tight"}
       ],
-      cue:"딱 하나: <b>무릎 굽혔다 펴는 반동</b>을 토스와 같이 시작하기.",
-      tip:"얕은 서브도 IN은 IN — 폴트 아닌 게 우선이에요. 깊이는 그 다음.",
+      cue:"더 세게 밀지 말기 — 임팩트 직전 <b>손목으로 공 등을 '탁' 튕겨</b> 보내는 느낌 하나만.",
+      tip:"얕아도 IN은 IN — 폴트 아닌 게 우선. 깊이는 힘이 아니라 '헤드 스피드 + 타점 높이'에서 나와요.",
       trust:"'얕음'은 원인이 가장 다양한 유형이라 추정 신뢰도가 낮아요. 반복되면 영상 확인 추천."
     },
     good: {
       name:"✅ 굿 서브!", color:"#3E7A26", group:"good",
+      physics:"",
       causes:[],
       cue:"<b>같은 리듬으로 한 번 더.</b> 몸이 기억하게 3연속에 도전하세요.",
-      tip:"지금 토스 위치·타점 느낌을 한 단어로 붙여두면(예: '높게-앞') 다음에 재현이 쉬워요.",
+      tip:"지금 토스 위치·임팩트 느낌에 한 단어 이름 붙이기(예: '높게-앞'). 세컨드용 스핀 버전도 같은 리듬으로 만들어두면 더블폴트 보험이 돼요.",
       trust:""
     }
   };
   const GROUP_MSG = {
-    toss:   "🥅네트·🪶얕음 계열이 잦아요 → <b>토스 높이·타점</b> 루틴부터 잡는 게 효율적이에요.",
-    face:   "🚀롱 계열이 잦아요 → <b>스핀·면 방향</b> 연습(공 뒤 쓸어올리기)이 우선이에요.",
-    lateral:"↖↗좌우 빠짐이 잦아요 → <b>토스 좌우 위치</b>부터 고정하세요. 영상 촬영도 추천."
+    toss:   "🥅네트·🪶얕음 계열이 잦아요 → <b>타점 높이·반대팔 타이밍·토스</b> 루틴부터 잡는 게 효율적이에요.",
+    face:   "🚀롱 계열이 잦아요 → <b>스핀 걸기</b>(공 뒤 쓸어올리기)와 <b>반대팔 오래 버티기</b>가 우선이에요.",
+    lateral:"↖↗좌우 빠짐이 잦아요 → <b>토스 좌우 고정</b>부터. 면 각도 문제라 영상 촬영이 가장 정확해요."
   };
 
   // ── 세션 로그 (localStorage)
@@ -3731,6 +3752,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
   function renderDiag(r, wasDF){
     const d = DIAG[r]; if(!d){ $("diagCard").style.display="none"; return; }
     let html = `<div class="dTitle" style="color:${d.color}">${d.name}${wasDF ? ' <span style="font-size:12px; color:#B03A2E;">(더블폴트)</span>' : ''}</div>`;
+    if(d.physics) html += `<div class="dPhys">${d.physics}</div>`;
     if(d.causes.length){
       html += `<div style="font-size:11.5px; font-weight:700; color:var(--sub); margin-bottom:4px;">자주 나오는 원인 — 순위 아님, 본인 느낌과 맞춰보세요</div>`;
       html += d.causes.map(c => {
@@ -3744,6 +3766,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       }).join("");
     }
     html += `<div class="dCue">👉 다음 서브에선 이것 하나만<br>${d.cue}</div>`;
+    if(wasDF) html += `<div class="dDF">🔁 <b>더블폴트.</b> 세컨드에서 '속도만 줄인 플랫'은 궤적이 평평해져 오히려 롱·얕은 공이 되기 쉬워요. 근거 있는 세컨드 = <b>스핀 추가 + 네트 위 여유(안전 창) 겨냥</b>.</div>`;
     if(d.tip) html += `<div class="dTrust">${d.tip}</div>`;
     if(d.trust) html += `<div class="dTrust${d.group==="lateral"?" strong":""}">${d.trust}</div>`;
     html += `<div class="dBtns">`;
