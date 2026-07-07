@@ -235,6 +235,15 @@
   /* v12 내 서브(레시피+부적) 탭 */
   body.recipe .wrap > :not(.topbar):not(#tabBar):not(#recipeView){display:none !important;}
   body:not(.recipe) #recipeView{display:none !important;}
+  /* v12.1 서브 일지 탭 (4탭 체제) */
+  body.journal .wrap > :not(.topbar):not(#tabBar):not(#journalView){display:none !important;}
+  body:not(.journal) #journalView{display:none !important;}
+  #tabBar button{font-size:13px; padding:11px 4px;}
+  #journalView textarea.rcNote{min-height:88px; resize:vertical; line-height:1.6;}
+  .jrItem{padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; background:var(--card2);}
+  .jrItem .jrDate{font-size:12px; font-weight:800; margin-bottom:3px;}
+  .jrItem .jrTxt{font-size:12.5px; line-height:1.6; white-space:pre-wrap;}
+  .jrItem .jrMeta{font-size:10.5px; color:var(--sub); margin-top:5px; display:flex; justify-content:space-between; align-items:center;}
   #recipeView .rcRow{margin-bottom:8px;}
   #recipeView .rcLabel{font-size:11.5px; font-weight:700; color:var(--sub); margin-bottom:4px;}
   #recipeView .rcChips{display:flex; flex-wrap:wrap; gap:5px;}
@@ -325,7 +334,8 @@
   <div id="tabBar">
     <button id="tabCoach" class="on">🎯 진단</button>
     <button id="tabSim">🔬 실험실</button>
-    <button id="tabRecipe">🧿 내 서브</button>
+    <button id="tabJournal">📓 일지</button>
+    <button id="tabRecipe">🧿 부적</button>
   </div>
 
   <section id="coachView">
@@ -420,6 +430,7 @@
 
   <!-- v12 내 서브 — 레시피(1st/2nd) + 부적 보관함 -->
   <section id="recipeView">
+    <div style="font-size:11.5px; color:var(--sub); margin-bottom:8px; padding:0 2px;">🧿 여기는 <b>극강의 그 순간·잘 되는 내 설정</b>만 — 매일의 연습 기록은 📓 일지로</div>
     <div class="cvCard">
       <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px;">
         <div style="font-size:14.5px; font-weight:800;">1️⃣ 퍼스트 서브 레시피</div>
@@ -465,6 +476,21 @@
     </div>
 
     <div class="foot" style="margin-top:2px;">🧿 부적과 레시피는 '정답'이 아니라 <b>그날의 나를 소환하는 기록</b>이에요. 오늘 몸은 다를 수 있어요 — 안 되는 날엔 부적을 탓하지 말고 진단 탭으로.</div>
+  </section>
+
+  <!-- v12.1 서브 일지 — 날짜별 자유 기록 + 세션 통계 자동 도장 -->
+  <section id="journalView">
+    <div class="cvCard">
+      <div style="font-size:14.5px; font-weight:800; margin-bottom:3px;">📓 오늘의 서브 일지 <span id="jrToday" style="font-weight:400; font-size:11px; color:var(--sub);"></span></div>
+      <div style="font-size:11px; color:var(--sub); margin-bottom:9px;">연습 어땠는지 자유롭게 — 저장하면 오늘 세션 통계가 도장으로 붙어요. 짧은 '감각 한 줄'은 🧿 부적 탭이 더 어울려요.</div>
+      <textarea class="rcNote" id="jrInput" maxlength="1000" placeholder="예: 초반엔 토스가 자꾸 뒤로 갔는데, 20구쯤부터 발끝 앞에 떨어지기 시작. 무릎 반동 넣으니 세컨드 킥이 처음으로 연속으로 들어감. 다음엔 와이드 코스 연습."></textarea>
+      <button id="jrSaveBtn" style="width:100%; margin-top:8px; padding:10px; border-radius:9px; border:none; background:var(--txt); color:#FFFEF6; font-weight:800; font-size:13px; cursor:pointer;">📓 오늘 일지 저장</button>
+      <div id="jrStamp" style="font-size:10.5px; color:var(--sub); margin-top:6px;"></div>
+    </div>
+    <div class="cvCard">
+      <div style="font-size:14px; font-weight:800; margin-bottom:9px;">지난 일지</div>
+      <div id="jrList"></div>
+    </div>
   </section>
 
   <div class="card mainCard">
@@ -4284,15 +4310,69 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     const view = v===true ? "coach" : (v===false ? "sim" : v);
     document.body.classList.toggle("coach", view==="coach");
     document.body.classList.toggle("recipe", view==="recipe");
+    document.body.classList.toggle("journal", view==="journal");
     $("tabCoach").classList.toggle("on", view==="coach");
     $("tabSim").classList.toggle("on", view==="sim");
+    $("tabJournal").classList.toggle("on", view==="journal");
     $("tabRecipe").classList.toggle("on", view==="recipe");
     if(view==="sim" && R.sim) render();
     if(view==="recipe") renderRecipe();
+    if(view==="journal") renderJournal();
   }
   $("tabCoach").addEventListener("click", ()=>switchTab("coach"));
   $("tabSim").addEventListener("click", ()=>switchTab("sim"));
+  $("tabJournal").addEventListener("click", ()=>switchTab("journal"));
   $("tabRecipe").addEventListener("click", ()=>switchTab("recipe"));
+
+  // ── v12.1 서브 일지 — 하루 1개 수정형 + 중립 카운트 도장 (패널 P0: 성공률% 대신 구수·더블폴트)
+  let JOURNAL = [];
+  try{ JOURNAL = JSON.parse(localStorage.getItem("sk_journal")||"[]"); }catch(e){}
+  const saveJr = () => { try{ localStorage.setItem("sk_journal", JSON.stringify(JOURNAL.slice(-60))); }catch(e){} };
+  const dayKey = t => new Date(t).toDateString();
+  function todayStats(){
+    const today = dayKey(Date.now());
+    const s = LOG.filter(e => dayKey(e.t)===today && e.r!=="toss");
+    const inC = s.filter(e=>e.r==="good"||e.r==="weak").length;
+    const df = s.filter(e=>e.nth===2 && isFault(e.r)).length;
+    return {n:s.length, inC, df};
+  }
+  const statLine = st => st.n ? `오늘 ${st.n}구 · 인 ${st.inC}` + (st.df?` · 더블폴트 ${st.df}`:"") : "오늘 세션 기록 없음";
+  function renderJournal(){
+    const today = dayKey(Date.now());
+    const d = new Date();
+    $("jrToday").textContent = `${d.getMonth()+1}월 ${d.getDate()}일`;
+    const cur = JOURNAL.find(j=>j.d===today);
+    if(document.activeElement !== $("jrInput")) $("jrInput").value = cur ? cur.txt : "";
+    $("jrStamp").textContent = cur
+      ? `저장됨 · 도장: ${cur.n?`${cur.n}구 · 인 ${cur.inC}`+(cur.df?` · 더블폴트 ${cur.df}`:"") : "세션 기록 없음"}`
+      : `저장하면 도장이 붙어요 — ${statLine(todayStats())}`;
+    const past = JOURNAL.filter(j=>j.d!==today).sort((a,b)=>b.t-a.t);
+    $("jrList").innerHTML = past.length ? past.map(j=>{
+      const jd = new Date(j.t);
+      return `<div class="jrItem">
+        <div class="jrDate">${jd.getMonth()+1}월 ${jd.getDate()}일</div>
+        <div class="jrTxt">${esc(j.txt)}</div>
+        <div class="jrMeta"><span>${j.n?`${j.n}구 · 인 ${j.inC}`+(j.df?` · 더블폴트 ${j.df}`:"") : ""}</span>
+        <button data-jd="${j.d}" style="border:none; background:none; cursor:pointer; font-size:13px;">✕</button></div>
+      </div>`;
+    }).join("") : `<div style="font-size:12px; color:var(--sub); line-height:1.7;">아직 일지가 없어요. 한 줄이면 충분해요 —<br>· "토스가 자꾸 뒤로 갔다"<br>· "킥이 두 번 연속 들어갔다!"<br>· "바람 부는 날은 토스 낮게가 나았다"</div>`;
+  }
+  $("jrSaveBtn").addEventListener("click", ()=>{
+    const txt = $("jrInput").value.trim();
+    if(!txt){ showToast("한 줄이라도 적어야 일지가 돼요 🙂"); return; }
+    const today = dayKey(Date.now());
+    const st = todayStats();
+    const cur = JOURNAL.find(j=>j.d===today);
+    if(cur) Object.assign(cur, {txt, t:Date.now(), n:st.n, inC:st.inC, df:st.df});
+    else JOURNAL.push({d:today, txt, t:Date.now(), n:st.n, inC:st.inC, df:st.df});
+    saveJr(); renderJournal();
+    showToast("📓 오늘 일지 저장! 내일의 나가 고마워할 기록이에요.");
+  });
+  $("jrList").addEventListener("click", e=>{
+    const b = e.target.closest("button[data-jd]"); if(!b) return;
+    JOURNAL = JOURNAL.filter(j=>j.d!==b.dataset.jd);
+    saveJr(); renderJournal();
+  });
 
   // ── v12 내 서브 레시피(1st/2nd) + 부적 보관함 (패널 7.01 승인: 칩+자유한줄·접이식 띠·기록 프레이밍)
   let RECIPES = {};
