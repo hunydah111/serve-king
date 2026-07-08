@@ -436,14 +436,16 @@
         <div style="font-size:14.5px; font-weight:800;">1️⃣ 퍼스트 서브 레시피</div>
         <span class="rcStamp" id="stamp_r1"></span>
       </div>
-      <div class="rcRow"><div class="rcLabel">어디 서서</div>
-        <div class="rcChips" data-rc="r1" data-f="pos"><button data-v="center">센터 마크 옆</button><button data-v="step">한두 걸음 바깥</button><button data-v="wide">와이드 쪽</button></div></div>
-      <div class="rcRow"><div class="rcLabel">공의 어디를</div>
-        <div class="rcChips" data-rc="r1" data-f="ball"><button data-v="back">뒤 정중앙</button><button data-v="top">12~1시</button><button data-v="side">2~3시 옆면</button><button data-v="brush">7→1시 쓸어올림</button></div></div>
       <div class="rcRow"><div class="rcLabel">서브 종류</div>
         <div class="rcChips" data-rc="r1" data-f="type"><button data-v="flat">🎯 플랫</button><button data-v="slice">↶ 슬라이스</button><button data-v="kick">↗ 킥</button></div></div>
-      <div class="rcRow"><div class="rcLabel">어떻게 + 마인드 (한 줄)</div>
-        <input class="rcNote" id="note_r1" maxlength="120" placeholder="예: 토스 높게-앞 · 최고점 직선 관통 · '창으로 던진다'만 생각"></div>
+      <div class="rcRow"><div class="rcLabel">어디 서서</div>
+        <input class="rcNote rcTxt" data-rc="r1" data-f="stand" maxlength="200" placeholder="예: 센터 마크에서 오른쪽으로 두 걸음"></div>
+      <div class="rcRow"><div class="rcLabel">토스 — 위치·높이·마음가짐</div>
+        <input class="rcNote rcTxt" data-rc="r1" data-f="toss" maxlength="200" placeholder="예: 1시 방향 높게, '토스 잡으러 올라간다'는 마음으로"></div>
+      <div class="rcRow"><div class="rcLabel">임팩트 — 공의 어디를 어떻게</div>
+        <input class="rcNote rcTxt" data-rc="r1" data-f="impact" maxlength="200" placeholder="예: 공 뒤 정중앙을 최고점에서 직선으로 뚫기"></div>
+      <div class="rcRow"><div class="rcLabel">마인드</div>
+        <input class="rcNote rcTxt" data-rc="r1" data-f="mind" maxlength="200" placeholder="예: 네트 위 창만 생각, 급하지 않게"></div>
     </div>
 
     <div class="cvCard">
@@ -451,14 +453,16 @@
         <div style="font-size:14.5px; font-weight:800;">2️⃣ 세컨드 서브 레시피</div>
         <span class="rcStamp" id="stamp_r2"></span>
       </div>
-      <div class="rcRow"><div class="rcLabel">어디 서서</div>
-        <div class="rcChips" data-rc="r2" data-f="pos"><button data-v="center">센터 마크 옆</button><button data-v="step">한두 걸음 바깥</button><button data-v="wide">와이드 쪽</button></div></div>
-      <div class="rcRow"><div class="rcLabel">공의 어디를</div>
-        <div class="rcChips" data-rc="r2" data-f="ball"><button data-v="back">뒤 정중앙</button><button data-v="top">12~1시</button><button data-v="side">2~3시 옆면</button><button data-v="brush">7→1시 쓸어올림</button></div></div>
       <div class="rcRow"><div class="rcLabel">서브 종류</div>
         <div class="rcChips" data-rc="r2" data-f="type"><button data-v="flat">🎯 플랫</button><button data-v="slice">↶ 슬라이스</button><button data-v="kick">↗ 킥</button></div></div>
-      <div class="rcRow"><div class="rcLabel">어떻게 + 마인드 (한 줄)</div>
-        <input class="rcNote" id="note_r2" maxlength="120" placeholder="예: 같은 자리 · 공 2~3시 깎기 · '스핀 듬뿍, 네트 위 높게'"></div>
+      <div class="rcRow"><div class="rcLabel">어디 서서</div>
+        <input class="rcNote rcTxt" data-rc="r2" data-f="stand" maxlength="200" placeholder="예: 퍼스트와 같은 자리"></div>
+      <div class="rcRow"><div class="rcLabel">토스 — 위치·높이·마음가짐</div>
+        <input class="rcNote rcTxt" data-rc="r2" data-f="toss" maxlength="200" placeholder="예: 머리 살짝 뒤 12시, 몸에 더 가깝게"></div>
+      <div class="rcRow"><div class="rcLabel">임팩트 — 공의 어디를 어떻게</div>
+        <input class="rcNote rcTxt" data-rc="r2" data-f="impact" maxlength="200" placeholder="예: 공 2~3시를 아래에서 위로 깎아 올리기"></div>
+      <div class="rcRow"><div class="rcLabel">마인드</div>
+        <input class="rcNote rcTxt" data-rc="r2" data-f="mind" maxlength="200" placeholder="예: 스핀 믿고 네트 위 여유 있게"></div>
     </div>
 
     <div class="cvCard">
@@ -4377,6 +4381,17 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
   // ── v12 내 서브 레시피(1st/2nd) + 부적 보관함 (패널 7.01 승인: 칩+자유한줄·접이식 띠·기록 프레이밍)
   let RECIPES = {};
   try{ RECIPES = JSON.parse(localStorage.getItem("sk_recipes")||"{}"); }catch(e){}
+  // v12.2 마이그레이션: 구버전 칩(pos/ball)+note → 자유 텍스트 필드(stand/impact/mind)
+  (function(){
+    const POS_TXT = {center:"센터 마크 옆", step:"센터에서 한두 걸음 바깥", wide:"와이드 쪽"};
+    const BALL_TXT = {back:"공 뒤 정중앙", top:"공 12~1시", side:"공 2~3시 옆면", brush:"공 7→1시 쓸어올림"};
+    ["r1","r2"].forEach(k=>{
+      const rc = RECIPES[k]; if(!rc) return;
+      if(rc.pos && !rc.stand) rc.stand = POS_TXT[rc.pos]||"";
+      if(rc.ball && !rc.impact) rc.impact = BALL_TXT[rc.ball]||"";
+      if(rc.note && !rc.mind) rc.mind = rc.note;
+    });
+  })();
   let CHARMS = [];
   try{ CHARMS = JSON.parse(localStorage.getItem("sk_charms")||"[]"); }catch(e){}
   const saveRc = () => { try{ localStorage.setItem("sk_recipes", JSON.stringify(RECIPES)); }catch(e){} };
@@ -4411,7 +4426,9 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       document.querySelectorAll(`.rcChips[data-rc="${k}"]`).forEach(g=>{
         g.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.v===rc[g.dataset.f]));
       });
-      if($("note_"+k)) $("note_"+k).value = rc.note||"";
+      document.querySelectorAll(`.rcTxt[data-rc="${k}"]`).forEach(inp=>{
+        if(document.activeElement !== inp) inp.value = rc[inp.dataset.f]||"";
+      });
       if($("stamp_"+k)) $("stamp_"+k).textContent = stampTxt(rc);
     });
     renderCharms();
@@ -4455,11 +4472,11 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     RECIPES[k][f] = (RECIPES[k][f]===b.dataset.v) ? null : b.dataset.v; // 재탭 = 해제
     touchRc(k); saveRc(); renderRecipe();
   }));
-  ["r1","r2"].forEach(k=>{
-    const inp = $("note_"+k); if(!inp) return;
+  document.querySelectorAll("#recipeView .rcTxt").forEach(inp=>{
     inp.addEventListener("change", ()=>{
+      const k = inp.dataset.rc;
       RECIPES[k] = RECIPES[k]||{};
-      RECIPES[k].note = inp.value.slice(0,120);
+      RECIPES[k][inp.dataset.f] = inp.value.slice(0,200);
       touchRc(k); saveRc(); renderRecipe();
     });
   });
