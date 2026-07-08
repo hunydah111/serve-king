@@ -286,6 +286,12 @@
   #diagCard .dDF{margin-top:9px; padding:9px 11px; background:rgba(255,107,94,.09); border:1.5px solid rgba(255,107,94,.35);
     border-radius:9px; font-size:12.5px; line-height:1.55;}
   #diagCard .dCause i{font-style:normal; font-size:11px; color:var(--sub);}
+  /* v13 모양새 2단 분류 */
+  .subQ{font-size:11.5px; font-weight:700; color:var(--sub); margin:2px 0 6px;}
+  .subChips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:11px;}
+  .subChip{padding:9px 13px; border-radius:999px; border:1.5px solid var(--line); background:var(--card2);
+    color:var(--txt); font-size:12.5px; font-weight:700; cursor:pointer;}
+  .subChip.on{background:var(--txt); color:#FFFEF6; border-color:var(--txt);}
   .dBtns{display:flex; gap:6px; margin-top:11px;}
   .dBtns button{flex:1; padding:10px 8px; border-radius:10px; border:1.5px solid var(--line);
     background:var(--card2); color:var(--txt); font-size:12.5px; font-weight:700; cursor:pointer;}
@@ -3744,6 +3750,25 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
   const DIAG = {
     net: {
       name:"🥅 네트에 걸림", color:"#B03A2E", group:"toss",
+      // v13 모양새 하위 케이스 (근거: 리서치_교본_2단분류.md — 교본 단편+물리 재합성, 출판 선례 없음)
+      subs:[
+        {k:"slam", label:"아래쪽에 콱",
+         physics:"물리 판정: 발사각이 크게 <b>아래</b> — '내려친' 계열이에요.",
+         causes:[
+           {t:"토스 올린 <b>반대팔을 너무 일찍</b> 내렸다 <i>(Newton·Reid 2025 실험)</i>", mech:"arm_early"},
+           "토스가 너무 <b>앞·낮아서</b> 위로 못 뻗고 내려찍었다 <i>(Special Olympics 코칭 가이드)</i>",
+           {t:"타점이 낮았다 — 팔꿈치가 다 안 펴짐", mech:"contact_low"}
+         ],
+         cue:"타격 순간 <b>고개 들기</b> — 시선이 먼저 떨어지면 몸이 접혀 공을 내려찍어요 <i>(Steps to Success의 교정 큐)</i>.",
+         tip:"과녁은 박스가 아니라 <b>네트 위 안전 창</b> — 실험실에서 내 창 크기를 확인해보세요.",
+         trust:"모양새 세분화는 교본 단편+물리의 재조합이에요(출판 교본엔 결과당 처방 1개뿐) — 출처는 README."},
+        {k:"tape", label:"테이프 근처 아슬",
+         physics:"물리 판정: 방향은 맞고 <b>마진만 부족</b> — 몇 cm 싸움. 서브 허용창은 2~6°라 1° 오차로도 테이프예요.",
+         causes:["겨냥이 안전 창 <b>아래쪽 끝</b>을 스쳤다 — 기술 결함이 아닐 수 있어요"],
+         cue:"<b>폼은 그대로.</b> 겨냥만 네트 위로 한 뼘 올리기.",
+         tip:"테이프가 3연속이면 '콱' 쪽 원인(고개·반대팔·타점)도 점검하세요.",
+         trust:"한두 번의 테이프는 정상 범위 — 반복될 때 신호예요."}
+      ],
       physics:"물리 판정: 발사각이 너무 <b>아래</b>를 향했거나 속도가 부족 — 서브는 수평보다 겨우 2~6° 아래로 나가는 좁은 창 통과예요(중속 이상 기준).",
       causes:[
         {t:"토스 올린 <b>반대팔을 너무 일찍</b> 내렸다 — 궤적이 ~3° 가팔라져 네트행 <i>(Newton·Reid 2025 실험)</i>", mech:"arm_early"},
@@ -3756,6 +3781,34 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     },
     long: {
       name:"🚀 길게 나감", color:"#A34A10", group:"face",
+      subs:[
+        {k:"flat", label:"낮고 빠르게 총알처럼",
+         physics:"물리 판정: 궤적이 <b>평평</b> — 이 속도를 코트에 넣을 회전이 없었어요. 빠를수록 창이 얇아져요.",
+         causes:[
+           {t:"토스 반대팔이 <b>너무 늦게까지</b> 떠 있었다 <i>(Newton·Reid 2025 실험)</i>", mech:"arm_late"},
+           "공을 <b>너무 앞·너무 일찍</b> 쳤다 — 쓸어올릴 각이 죽어 스핀 급감 <i>(Cross 물리)</i>",
+           "스핀 없이 플랫 풀파워"
+         ],
+         cue:"공이 네트 넘고 <b>뚝 떨어지게</b> — 공 뒤를 아래→위(7시→1시)로 쓸어올리기.",
+         tip:"스핀 서브는 네트 위 60~90cm로 통과시키는 게 정석 — 스핀이 곧 오차 마진이에요 <i>(Steps to Success p.45)</i>.",
+         trust:"모양새 세분화는 교본 단편+물리의 재조합(출판 선례 없음) — 출처는 README."},
+        {k:"loft", label:"붕 떠서 높게",
+         physics:"물리 판정: 높이 떠서 멀리 — <b>면이 하늘</b>을 본 채 밀렸어요. 토스·상체 계열 신호.",
+         causes:[
+           "<b>토스가 몸 뒤</b>로 갔다 — 교본 두 권이 독립적으로 일치하는 대표 원인 <i>(Steps to Success 4판 p.50 · Special Olympics)</i>",
+           "상체가 뒤로 젖혀진 채 임팩트",
+           "면이 하늘을 향한 채 밀어쳤다"
+         ],
+         cue:"토스를 <b>치려는 방향으로 살짝 앞</b>에 — 그냥 두면 베이스라인 안쪽에 떨어질 위치로.",
+         tip:"토스가 뒤면 몸은 필연적으로 젖혀져요 — 토스 위치 하나로 상체까지 고쳐지는 경우가 많아요.",
+         trust:"'롱=토스 뒤'는 붕 뜬 롱 얘기예요 — 총알처럼 나갔다면 스핀 쪽을 보세요."},
+        {k:"edge", label:"아슬하게 살짝",
+         physics:"물리 판정: 기술 결함이 아닐 수 있어요 — 허용창 2~6°에서 1° 오차면 살짝 롱이에요.",
+         causes:["같은 스윙의 미세 각도 오차 — 한두 번은 정상 분포"],
+         cue:"<b>폼은 그대로.</b> 스핀 반 스푼 추가 또는 겨냥만 한 뼘 낮게.",
+         tip:"3연속 살짝 롱이면 '총알/붕 뜸' 중 어느 쪽인지 다시 봐주세요.",
+         trust:""}
+      ],
       physics:"물리 판정: 궤적이 너무 <b>평평</b>했거나, 속도 대비 회전이 부족했어요 — 빠른 공은 스핀 없이는 코트 안에 못 떨어져요.",
       causes:[
         {t:"토스 반대팔이 <b>너무 늦게까지</b> 떠 있었다 — 궤적이 평평해져 롱 <i>(Newton·Reid 2025 실험)</i>", mech:"arm_late"},
@@ -3800,7 +3853,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
         {t:"타점이 낮았다 — 팔꿈치 펴기는 스피드가 아니라 <b>'높이' 담당</b>, 낮으면 마진부터 손해", mech:"contact_low"},
         {t:"그립을 너무 꽉 쥐어 <b>손목 스냅이 잠겼다</b>", mech:"grip_tight"}
       ],
-      cue:"더 세게 밀지 말기 — 임팩트 직전 <b>손목으로 공 등을 '탁' 튕겨</b> 보내는 느낌 하나만.",
+      cue:"더 세게 밀지 말고 <b>팔을 최고점까지 끝까지 던지기</b> — 손목은 억지로 스냅하지 말고 저절로 풀리게 <i>(Bollettieri: 강제 스냅은 연쇄를 늦춤)</i>.",
       tip:"얕아도 IN은 IN — 폴트 아닌 게 우선. 깊이는 힘이 아니라 '헤드 스피드 + 타점 높이'에서 나와요.",
       trust:"'얕음'은 원인이 가장 다양한 유형이라 추정 신뢰도가 낮아요. 반복되면 영상 확인 추천."
     },
@@ -4173,10 +4226,20 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     ).join("");
   }
 
-  // ── 진단 카드 렌더
-  function renderDiag(r, wasDF){
-    const d = DIAG[r]; if(!d){ $("diagCard").style.display="none"; return; }
-    let html = `<div class="dTitle" style="color:${d.color}">${d.name}${wasDF ? ' <span style="font-size:12px; color:#B03A2E;">(더블폴트)</span>' : ''}</div>`;
+  // ── 진단 카드 렌더 (v13: net/long은 모양새 2단 — 하위 케이스별 원인·처방 분기)
+  function renderDiag(r, wasDF, subKey){
+    const d0 = DIAG[r]; if(!d0){ $("diagCard").style.display="none"; return; }
+    const hasSubs = !!(d0.subs && d0.subs.length);
+    const subDef = (hasSubs && subKey && subKey!=="unknown") ? d0.subs.find(x=>x.k===subKey) : null;
+    const d = subDef ? Object.assign({}, d0, subDef) : d0;
+    const pickerOnly = hasSubs && !subKey;
+    let html = `<div class="dTitle" style="color:${d0.color}">${d0.name}${subDef ? ` <span style="font-size:12.5px; opacity:.85;">· ${subDef.label}</span>` : ''}${wasDF ? ' <span style="font-size:12px; color:#B03A2E;">(더블폴트)</span>' : ''}</div>`;
+    if(hasSubs){
+      html += `<div class="subQ">어떻게요? — 모양새에 따라 원인이 갈라져요</div><div class="subChips">`
+        + d0.subs.map(s=>`<button class="subChip${subKey===s.k?" on":""}" data-sub="${s.k}">${s.label}</button>`).join("")
+        + `<button class="subChip${subKey==="unknown"?" on":""}" data-sub="unknown">잘 모름</button></div>`;
+    }
+    if(!pickerOnly){
     if(d.physics){
       const pm = d.physMech && MECH[d.physMech];
       html += `<div class="dPhys">${d.physics}${pm ? ` <button class="mechToggle" data-mech="${d.physMech}">▶ 원리 보기</button>` : ``}</div>`;
@@ -4198,9 +4261,12 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
     if(wasDF) html += `<div class="dDF">🔁 <b>더블폴트.</b> 세컨드에서 '속도만 줄인 플랫'은 궤적이 평평해져 오히려 롱·얕은 공이 되기 쉬워요. 근거 있는 세컨드 = <b>스핀 추가 + 네트 위 여유(안전 창) 겨냥</b>.</div>`;
     if(d.tip) html += `<div class="dTrust">${d.tip}</div>`;
     if(d.trust) html += `<div class="dTrust${d.group==="lateral"?" strong":""}">${d.trust}</div>`;
+    }
     html += `<div class="dBtns">`;
-    if(r==="good") html += `<button id="dCharmBtn">🧿 부적 남기기</button><button id="dCardBtn">📸 카드로 남기기</button>`;
-    else html += `<button id="dSimBtn">🔬 왜 그런지 시뮬로 보기</button>`;
+    if(!pickerOnly){
+      if(r==="good") html += `<button id="dCharmBtn">🧿 부적 남기기</button><button id="dCardBtn">📸 카드로 남기기</button>`;
+      else html += `<button id="dSimBtn">🔬 왜 그런지 시뮬로 보기</button>`;
+    }
     html += `<button id="dCloseBtn">닫기</button></div>`;
     const card = $("diagCard");
     card.innerHTML = html; card.style.display = "block";
@@ -4233,6 +4299,12 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       strip.classList.toggle("open", open);
       btn.classList.toggle("open", open);
       btn.textContent = open ? "▼ 접기" : "▶ 원리 보기";
+    }));
+    // v13 모양새 칩 — 선택 시 최근 로그에 sub 기록 + 하위 진단 렌더
+    card.querySelectorAll(".subChip").forEach(b => b.addEventListener("click", ()=>{
+      for(let i=LOG.length-1; i>=0; i--){ if(LOG[i].r===r){ LOG[i].sub = b.dataset.sub; break; } }
+      save();
+      renderDiag(r, wasDF, b.dataset.sub);
     }));
   }
 
