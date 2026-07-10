@@ -292,6 +292,11 @@
   .subChip{padding:9px 13px; border-radius:999px; border:1.5px solid var(--line); background:var(--card2);
     color:var(--txt); font-size:12.5px; font-weight:700; cursor:pointer;}
   .subChip.on{background:var(--txt); color:#FFFEF6; border-color:var(--txt);}
+  /* v13.1 코치 영상 링크 */
+  .vidRow{display:flex; flex-wrap:wrap; gap:6px; margin-top:9px;}
+  .vidLink{display:inline-block; padding:7px 12px; border-radius:999px; border:1.5px solid #C0392B;
+    background:rgba(192,57,43,.08); color:#B03A2E; font-size:12px; font-weight:700; text-decoration:none;}
+  .vidLink:active{transform:scale(.97);}
   .dBtns{display:flex; gap:6px; margin-top:11px;}
   .dBtns button{flex:1; padding:10px 8px; border-radius:10px; border:1.5px solid var(--line);
     background:var(--card2); color:var(--txt); font-size:12.5px; font-weight:700; cursor:pointer;}
@@ -413,6 +418,7 @@
           · <b>슬라이스</b>: <b>2~3시</b> — 플랫보다 조금 더 오른쪽·앞 (공 옆을 깎게)<br>
           · <b>킥</b>: <b>11~12시</b> — 머리 살짝 뒤·왼쪽, 위로 쳐올리게<br>
           <span style="color:var(--sub); font-size:11px;">왼손잡이는 좌우 반대. 프로 측정에서 킥 타점은 슬라이스보다 ~30cm 왼쪽(Acta Gymnica 2015) — 종류별 토스는 실제로 달라요. 단, 슬라이스·플랫 차이는 작습니다.</span>
+          <div class="vidRow"><a class="vidLink" href="https://www.youtube.com/watch?v=Ydkr_PVqRuA" target="_blank" rel="noopener">▶ 플랫·킥·슬라이스 이해 — 이레슨</a><a class="vidLink" href="https://www.youtube.com/watch?v=TPd4gdxkVPM" target="_blank" rel="noopener">▶ 종류별 토스 위치 — Intuitive (영어)</a></div>
         </div>
       </details>
     </div>
@@ -3760,11 +3766,16 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
            {t:"타점이 낮았다 — 팔꿈치가 다 안 펴짐", mech:"contact_low"}
          ],
          cue:"타격 순간 <b>고개 들기</b> — 시선이 먼저 떨어지면 몸이 접혀 공을 내려찍어요 <i>(Steps to Success의 교정 큐)</i>.",
+         vids:[
+           {label:"네트 걸림 해결 — 정진화테니스레슨", url:"https://www.youtube.com/watch?v=jM_m_dRak_M"},
+           {label:"반대팔 유지 — Intuitive Tennis (영어)", url:"https://www.youtube.com/watch?v=mYaMbtPUrHs"}
+         ],
          tip:"과녁은 박스가 아니라 <b>네트 위 안전 창</b> — 실험실에서 내 창 크기를 확인해보세요.",
          trust:"모양새 세분화는 교본 단편+물리의 재조합이에요(출판 교본엔 결과당 처방 1개뿐) — 출처는 README."},
         {k:"tape", label:"테이프 근처 아슬",
          physics:"물리 판정: 방향은 맞고 <b>마진만 부족</b> — 몇 cm 싸움. 서브 허용창은 2~6°라 1° 오차로도 테이프예요.",
          causes:["겨냥이 안전 창 <b>아래쪽 끝</b>을 스쳤다 — 기술 결함이 아닐 수 있어요"],
+         vids:[],
          cue:"<b>폼은 그대로.</b> 겨냥만 네트 위로 한 뼘 올리기.",
          tip:"테이프가 3연속이면 '콱' 쪽 원인(고개·반대팔·타점)도 점검하세요.",
          trust:"한두 번의 테이프는 정상 범위 — 반복될 때 신호예요."}
@@ -3776,6 +3787,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
         "토스가 낮거나 몸 뒤로 흘러 면이 아래를 본 채 눌러쳤다"
       ],
       cue:"공을 <b>네트 위 1m '안전 창'으로 통과</b>시키는 것만 생각하고 치기 — 과녁은 박스가 아니라 창.",
+      vids:[{label:"네트 걸림 해결 — 정진화테니스레슨", url:"https://www.youtube.com/watch?v=jM_m_dRak_M"}],
       tip:"체크 하나: 토스 올린 팔을 <b>공 맞는 순간까지</b> 가슴 쪽에 붙잡아 두기. 일찍 떨어지면 몸이 접히며 궤적이 아래로 꽂혀요.",
       trust:"어느 원인인지는 결과만으론 확정 불가 — 네트가 반복되면 반대팔 타이밍부터 영상으로 확인해보세요."
     },
@@ -3790,6 +3802,7 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
            "스핀 없이 플랫 풀파워"
          ],
          cue:"공이 네트 넘고 <b>뚝 떨어지게</b> — 공 뒤를 아래→위(7시→1시)로 쓸어올리기.",
+         vids:[{label:"스핀서브 3가지 포인트 — 민테니스", url:"https://www.youtube.com/watch?v=cnTfYOzDTgU"}],
          tip:"스핀 서브는 네트 위 60~90cm로 통과시키는 게 정석 — 스핀이 곧 오차 마진이에요 <i>(Steps to Success p.45)</i>.",
          trust:"모양새 세분화는 교본 단편+물리의 재조합(출판 선례 없음) — 출처는 README."},
         {k:"loft", label:"붕 떠서 높게",
@@ -3800,11 +3813,16 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
            "면이 하늘을 향한 채 밀어쳤다"
          ],
          cue:"토스를 <b>치려는 방향으로 살짝 앞</b>에 — 그냥 두면 베이스라인 안쪽에 떨어질 위치로.",
+         vids:[
+           {label:"토스 교정 훈련 — 이레슨", url:"https://www.youtube.com/watch?v=1cOBEAU91xE"},
+           {label:"토스 전후·좌우 위치 — 테니스서브아카데미", url:"https://www.youtube.com/watch?v=NQ13UlFK-E0"}
+         ],
          tip:"토스가 뒤면 몸은 필연적으로 젖혀져요 — 토스 위치 하나로 상체까지 고쳐지는 경우가 많아요.",
          trust:"'롱=토스 뒤'는 붕 뜬 롱 얘기예요 — 총알처럼 나갔다면 스핀 쪽을 보세요."},
         {k:"edge", label:"아슬하게 살짝",
          physics:"물리 판정: 기술 결함이 아닐 수 있어요 — 허용창 2~6°에서 1° 오차면 살짝 롱이에요.",
          causes:["같은 스윙의 미세 각도 오차 — 한두 번은 정상 분포"],
+         vids:[],
          cue:"<b>폼은 그대로.</b> 스핀 반 스푼 추가 또는 겨냥만 한 뼘 낮게.",
          tip:"3연속 살짝 롱이면 '총알/붕 뜸' 중 어느 쪽인지 다시 봐주세요.",
          trust:""}
@@ -3816,6 +3834,10 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
         "스핀 없이 플랫 풀파워로 밀어쳤다"
       ],
       cue:"공이 네트 넘고 <b>뚝 떨어지게</b> 만들기 — 공 뒤를 아래에서 위로(7시→1시) 쓸어올리는 느낌 하나만.",
+      vids:[
+        {label:"토스 교정 훈련 — 이레슨", url:"https://www.youtube.com/watch?v=1cOBEAU91xE"},
+        {label:"서브가 길어지는 3가지 이유 — Daily Tennis Lesson (영어)", url:"https://www.youtube.com/watch?v=PifTyzCOfvk"}
+      ],
       tip:"속도를 줄이는 게 아니라 회전을 더하는 게 근거 있는 해법 — 프로가 풀스윙해도 들어가는 이유예요.",
       trust:"어느 원인인지는 결과만으론 확정 불가 — 롱이 반복되면 타점이 몸 앞으로 쏠렸는지 영상으로 확인해보세요."
     },
@@ -3829,6 +3851,10 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
         "프로네이션(전완 회전)이 과했거나 일렀다"
       ],
       cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12~1시</b>(플랫 기준)에 3번 연속 떨어뜨리기.",
+      vids:[
+        {label:"프로네이션(내전) — 하늘쌤", url:"https://www.youtube.com/watch?v=l15NNVcEDI0"},
+        {label:"토스 전후·좌우 위치 — 테니스서브아카데미", url:"https://www.youtube.com/watch?v=NQ13UlFK-E0"}
+      ],
       tip:"(오른손 기준 — 왼손이면 반대로 읽어주세요) 서브별 토스 위치는 위 '토스 가이드' 참고.",
       trust:"⚠️ 좌우는 '면 각도 1°' 문제라 결과만으로 원인 확정이 <b>특히 어려운</b> 유형(연구도 영상 필요 영역). 3회 반복되면 뒤에서 영상 촬영이 가장 정확합니다."
     },
@@ -3842,6 +3868,10 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
         "프로네이션(전완 회전)이 부족했거나 늦었다"
       ],
       cue:"이번엔 토스 위치만 체크: <b>앞발 앞, 시계 12~1시</b>(플랫 기준)에 3번 연속 떨어뜨리기.",
+      vids:[
+        {label:"프로네이션(내전) — 하늘쌤", url:"https://www.youtube.com/watch?v=l15NNVcEDI0"},
+        {label:"토스 전후·좌우 위치 — 테니스서브아카데미", url:"https://www.youtube.com/watch?v=NQ13UlFK-E0"}
+      ],
       tip:"(오른손 기준 — 왼손이면 반대로 읽어주세요) 서브별 토스 위치는 위 '토스 가이드' 참고.",
       trust:"⚠️ 좌우는 '면 각도 1°' 문제라 결과만으로 원인 확정이 <b>특히 어려운</b> 유형(연구도 영상 필요 영역). 3회 반복되면 뒤에서 영상 촬영이 가장 정확합니다."
     },
@@ -3854,6 +3884,11 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
         {t:"그립을 너무 꽉 쥐어 <b>손목 스냅이 잠겼다</b>", mech:"grip_tight"}
       ],
       cue:"더 세게 밀지 말고 <b>팔을 최고점까지 끝까지 던지기</b> — 손목은 억지로 스냅하지 말고 저절로 풀리게 <i>(Bollettieri: 강제 스냅은 연쇄를 늦춤)</i>.",
+      vids:[
+        {label:"구부러진 팔 타점 고치기 — 하늘쌤", url:"https://www.youtube.com/watch?v=mtZYwUBgM88"},
+        {label:"프로네이션(내전) — 하늘쌤", url:"https://www.youtube.com/watch?v=l15NNVcEDI0"},
+        {label:"컨티넨탈 그립 — 하늘쌤", url:"https://www.youtube.com/watch?v=ou_UEguWl6k"}
+      ],
       tip:"얕아도 IN은 IN — 폴트 아닌 게 우선. 깊이는 힘이 아니라 '헤드 스피드 + 타점 높이'에서 나와요.",
       trust:"'얕음'은 원인이 가장 다양한 유형이라 추정 신뢰도가 낮아요. 반복되면 영상 확인 추천."
     },
@@ -4258,7 +4293,9 @@ document.querySelectorAll(".welcomeBtn").forEach(b=>b.addEventListener("click",f
       }).join("");
     }
     html += `<div class="dCue">👉 다음 서브에선 이것 하나만<br>${d.cue}</div>`;
-    if(wasDF) html += `<div class="dDF">🔁 <b>더블폴트.</b> 세컨드에서 '속도만 줄인 플랫'은 궤적이 평평해져 오히려 롱·얕은 공이 되기 쉬워요. 근거 있는 세컨드 = <b>스핀 추가 + 네트 위 여유(안전 창) 겨냥</b>.</div>`;
+    // v13.1 검증된 코치 영상 (실존·주제 확인된 링크만 — 새 탭)
+    if(d.vids && d.vids.length) html += `<div class="vidRow">` + d.vids.map(v=>`<a class="vidLink" href="${v.url}" target="_blank" rel="noopener">▶ ${v.label}</a>`).join("") + `</div>`;
+    if(wasDF) html += `<div class="dDF">🔁 <b>더블폴트.</b> 세컨드에서 '속도만 줄인 플랫'은 궤적이 평평해져 오히려 롱·얕은 공이 되기 쉬워요. 근거 있는 세컨드 = <b>스핀 추가 + 네트 위 여유(안전 창) 겨냥</b>.<div class="vidRow"><a class="vidLink" href="https://www.youtube.com/watch?v=cnTfYOzDTgU" target="_blank" rel="noopener">▶ 스핀서브 3가지 포인트 — 민테니스</a></div></div>`;
     if(d.tip) html += `<div class="dTrust">${d.tip}</div>`;
     if(d.trust) html += `<div class="dTrust${d.group==="lateral"?" strong":""}">${d.trust}</div>`;
     }
